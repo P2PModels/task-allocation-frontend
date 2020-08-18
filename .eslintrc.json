@@ -5,9 +5,9 @@
     },
     "extends": [
         "plugin:react/recommended",
+        "standard",
         "plugin:prettier/recommended",
-        "prettier/react",
-        "standard"
+        "prettier/react"
     ],
     "parserOptions": {
         "ecmaFeatures": {
@@ -18,8 +18,13 @@
     },
     "plugins": [
         "react",
-        "prettier"
+        "prettier",
+        "react-hooks"
     ],
     "rules": {
+        "linebreak-style": ["error", "unix"],
+        "react/prop-types": 0,
+        "react-hooks/rules-of-hooks": "error",
+        "react-hooks/exhaustive-deps": "warn"
     }
 }
