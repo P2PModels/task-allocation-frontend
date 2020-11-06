@@ -47,8 +47,13 @@ const roboto700 = {
 
 const theme = createMuiTheme({
   palette: {
-    primary: {
-      main: '#FF4B63',
+    // primary: {
+    //   main: '#FF4B63',
+    // },
+    chips: {
+      low: '#30957B',
+      medium: '#80BD3E',
+      high: '#F3254D',
     },
   },
   typography: {
@@ -60,6 +65,11 @@ const theme = createMuiTheme({
         '@font-face': [roboto300],
       },
     },
+    /* MuiTooltip: {
+      fontSize: '2em',
+      color: 'yellow',
+      backgroundColor: 'red',
+    }, */
   },
 })
 
