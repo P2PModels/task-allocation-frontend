@@ -7,3 +7,11 @@ export function capitalizeFirstLetter(word) {
 export function getRandomElement(elements) {
   return elements[Math.floor(Math.random() * elements.length)]
 }
+
+export function buildMapById(elements, idField = 'id') {
+  return elements.reduce((map, currElement) => {
+    const id = currElement[idField]
+    map.set(id, currElement)
+    return map
+  }, new Map())
+}
