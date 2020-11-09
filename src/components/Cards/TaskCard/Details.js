@@ -17,19 +17,28 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const Details = ({ task, video }) => {
-  const subLanguages = video.languages
-    .filter(({ published }) => published)
-    .map(({ name }) => name.replace(',', ' -'))
+const Details = ({ task, video = {} }) => {
+  const { due_date } = task
+  const {
+    title,
+    languages,
+    team,
+    primary_audio_language_code: audioLanguageCode,
+  } = video
+  const subLanguages = languages
+    ? languages
+        .filter(({ published }) => published)
+        .map(({ name }) => name.replace(',', ' -'))
+    : null
   const formattedSubLanguages =
-    subLanguages && subLanguages.length === 0
+    !subLanguages || subLanguages.length === 0
       ? `No subtitles published`
       : subLanguages.length === 1
       ? `${subLanguages[0]}`
       : `${subLanguages.slice(0, -1).join(', ')} and ${subLanguages.slice(-1)}`
-  const dueDate = dayjs(task.due_date).isValid()
-    ? `${dayjs(task.due_date).format('YYYY-MM-DD HH:mm')} 
-    (${dayjs().to(task.due_date)})`
+  const dueDate = dayjs(due_date).isValid()
+    ? `${dayjs(due_date).format('YYYY-MM-DD HH:mm')} 
+    (${dayjs().to(due_date)})`
     : `No due date`
 
   return (
@@ -37,12 +46,12 @@ const Details = ({ task, video }) => {
       <Typography variant="body1" color="textSecondary" gutterBottom>
         DETAILS
       </Typography>
-      <Detail name="Team" value={video && video.team} />
-      <Detail name="Source team" value={video && video.team} />
-      <Detail name="Video" value={video && video.title} />
+      <Detail name="Team" value={team} />
+      <Detail name="Source team" value={team} />
+      <Detail name="Video" value={title} />
       <Detail
         name="Video language"
-        value={video && languageCodes[video.primary_audio_language_code]}
+        value={audioLanguageCode && languageCodes[audioLanguageCode]}
       />
       <Detail name="Subtitle language" value={formattedSubLanguages} />
       <Detail name="Request due date" value={dueDate} />
@@ -57,7 +66,7 @@ const Detail = ({ name, value }) => {
     <Box>
       <Typography className={detailWrapper} variant="body2" gutterBottom>
         <strong>{name}: </strong>
-        {value || 'Unknown'}
+        {value || 'No Available'}
       </Typography>
     </Box>
   )

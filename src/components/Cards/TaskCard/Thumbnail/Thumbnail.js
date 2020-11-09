@@ -6,6 +6,7 @@ import { green } from '@material-ui/core/colors'
 
 import VideoTag from './VideoTag'
 import NoThumbnail from '../../../../assets/NoThumbnail.jpg'
+import NoVideo from '../../../../assets/NoVideo.png'
 
 import languageCodes from '../../../../helpers/language-codes'
 
@@ -32,7 +33,7 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const Thumbnail = ({ video, targetLanguage, onClickHandler }) => {
+const Thumbnail = ({ video = {}, targetLanguage, onClickHandler }) => {
   const { media, playButton } = useStyles()
   const { thumbnail, duration, title, all_urls: allUrls } = video
 
@@ -42,22 +43,31 @@ const Thumbnail = ({ video, targetLanguage, onClickHandler }) => {
 
   return (
     <Box position="relative" onClick={onClickHandler}>
-      <VideoTag
-        label={languageCodes[targetLanguage]}
-        boxProps={{ top: 0, left: 0, maxWidth: 1 / 2 }}
-      />
-      <VideoTag label={timeDuration} boxProps={{ top: 0, right: 0 }} />
-      <CardMedia className={media} image={thumbnail || NoThumbnail}>
-        <a
-          href={allUrls ? allUrls[0] : '#'}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <PlayArrow className={playButton} />
-        </a>
-      </CardMedia>
-      {/* maxWidth = 1 so noWrap works */}
-      <VideoTag label={title} boxProps={{ left: 0, bottom: 0, maxWidth: 1 }} />
+      {Object.keys(video).length > 0 ? (
+        <React.Fragment>
+          <VideoTag
+            label={languageCodes[targetLanguage]}
+            boxProps={{ top: 0, left: 0, maxWidth: 1 / 2 }}
+          />
+          <VideoTag label={timeDuration} boxProps={{ top: 0, right: 0 }} />
+          <CardMedia className={media} image={thumbnail || NoThumbnail}>
+            <a
+              href={allUrls ? allUrls[0] : '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <PlayArrow className={playButton} />
+            </a>
+          </CardMedia>
+          {/* maxWidth = 1 so noWrap works */}
+          <VideoTag
+            label={title}
+            boxProps={{ left: 0, bottom: 0, maxWidth: 1 }}
+          />
+        </React.Fragment>
+      ) : (
+        <CardMedia className={media} image={NoVideo} />
+      )}
     </Box>
   )
 }
