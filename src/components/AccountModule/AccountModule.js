@@ -11,7 +11,7 @@ import { Button } from '@material-ui/core'
 import ProvidersModal from './ProvidersModal'
 import IdentityBadge from './IdentityBadge'
 import MessageModal from '../MessageModal'
-import { transformError } from '../../helpers/connectors'
+import { transformError } from '../../helpers/wallet-providers'
 
 const useStyles = makeStyles(theme => ({
   wrapper: {

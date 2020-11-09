@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useWeb3React } from '@web3-react/core'
-import { injected } from '../helpers/connectors'
+import { injected } from '../helpers/wallet-providers'
 
 function useInactiveListener(suppress = false) {
   const { active, error, activate } = useWeb3React()
