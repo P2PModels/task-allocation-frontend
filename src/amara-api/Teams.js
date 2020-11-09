@@ -10,7 +10,7 @@ const RESOURCE = 'teams'
 const Teams = {
   ...createBasicCRUDEndpoints(RESOURCE),
   getTeamTasks: team => instance.get(`/${RESOURCE}/${team}/tasks`),
-  getTeamSubtitleRequest: (team, subReqId, queryParams = {}) => {
+  getTeamSubtitleRequest: (team, subReqId, queryParams) => {
     const path = `/${RESOURCE}/${team}/subtitle-requests/${subReqId}${flatQueryParams(
       queryParams
     )}`
