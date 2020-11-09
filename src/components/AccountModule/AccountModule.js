@@ -8,9 +8,9 @@ import { Button } from '@material-ui/core'
 
 // import ExitToApp from '@material-ui/icons/ExitToApp'
 
-import ProvidersModal from './ProvidersModal'
+import ProvidersModal from '../Modals/ProvidersModal'
 import IdentityBadge from './IdentityBadge'
-import MessageModal from '../MessageModal'
+import MessageModal from '../Modals/MessageModal'
 import { transformError } from '../../helpers/wallet-providers'
 
 const useStyles = makeStyles(theme => ({

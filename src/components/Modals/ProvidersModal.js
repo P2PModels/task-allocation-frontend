@@ -53,7 +53,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Slide direction="down" ref={ref} {...props} />
+  return <Slide {...props} direction="down" timeout={500} ref={ref} />
 })
 
 const ProvidersModal = ({ open, activating, onSelect, onClose }) => {

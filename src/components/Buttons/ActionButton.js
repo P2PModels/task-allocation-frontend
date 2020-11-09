@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   actionButton: {
     background: ({ color }) => color,
     color: 'white',
@@ -13,6 +13,7 @@ const useStyles = makeStyles(theme => ({
 
 function ActionButton({ label, color, fullWidth = false, onClick }) {
   const { actionButton } = useStyles({ color })
+
   return (
     <Button
       variant="contained"
