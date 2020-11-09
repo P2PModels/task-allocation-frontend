@@ -1,4 +1,4 @@
-import { getFieldFromEntityId } from '../helpers/connector-helpers'
+import { getFieldFromEntityId } from './app-connector-helpers'
 import { hexToUtf8 } from '../helpers/web3-utils'
 
 export function transformConfigData(config) {
