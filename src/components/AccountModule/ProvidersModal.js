@@ -12,7 +12,7 @@ import {
 } from '@material-ui/core'
 import CloseIcon from '@material-ui/icons/Close'
 
-import { connectorsByName } from 'helpers/connectors'
+import { connectorsByName } from '../../helpers/connectors'
 
 const useStyles = makeStyles(theme => ({
   root: {

@@ -1,5 +1,5 @@
 import React from 'react'
-import AmaraLogo from 'assets/Logo.svg'
+import AmaraLogo from '../assets/Logo.svg'
 import { makeStyles } from '@material-ui/core/styles'
 import { Typography } from '@material-ui/core'
 

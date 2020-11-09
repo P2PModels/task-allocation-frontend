@@ -3,11 +3,11 @@ import PropTypes from 'prop-types'
 import { Box, Card, Grid, Chip, CardContent } from '@material-ui/core'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 
-import { getPriority } from 'helpers/amara-utils'
+import { getPriority } from '../../../helpers/amara-utils'
 import Thumbnail from './Thumbnail/Thumbnail'
 import Details from './Details'
 import Timer from './Timer'
-import ActionButton from 'components/Buttons/ActionButton'
+import ActionButton from '../../Buttons/ActionButton'
 
 const useStyles = makeStyles(theme => ({
   root: {

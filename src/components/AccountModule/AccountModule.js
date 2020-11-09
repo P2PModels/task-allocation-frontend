@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useWeb3React } from '@web3-react/core'
-import useEagerConnect from 'hooks/useEagerConnect'
-import useInactiveListener from 'hooks/useInactiveListener'
+import useEagerConnect from '../../hooks/useEagerConnect'
+import useInactiveListener from '../../hooks/useInactiveListener'
 import { getNetwork } from '../../networks'
 import { makeStyles } from '@material-ui/core/styles'
 import { Button } from '@material-ui/core'
@@ -11,7 +11,7 @@ import { Button } from '@material-ui/core'
 import ProvidersModal from './ProvidersModal'
 import IdentityBadge from './IdentityBadge'
 import MessageModal from '../MessageModal'
-import { transformError } from 'helpers/connectors'
+import { transformError } from '../../helpers/connectors'
 
 const useStyles = makeStyles(theme => ({
   wrapper: {

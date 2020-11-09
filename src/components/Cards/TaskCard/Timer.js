@@ -4,9 +4,9 @@ import dayjs from 'dayjs'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { QueryBuilder as ClockIcon } from '@material-ui/icons'
 import { Box, Typography, Grid } from '@material-ui/core'
-import useAnimationFrame from 'hooks/useAnimationFrame'
-import { difference, formatHtmlDatetime } from 'helpers/date'
-import { unselectable } from 'helpers/css'
+import useAnimationFrame from '../../../hooks/useAnimationFrame'
+import { difference, formatHtmlDatetime } from '../../../helpers/date'
+import { unselectable } from '../../../helpers/css'
 
 const useStyles = makeStyles(theme => ({
   timer: {

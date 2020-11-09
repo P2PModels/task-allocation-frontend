@@ -4,7 +4,7 @@ import { makeStyles } from '@material-ui/core/styles'
 
 import Logo from './Logo'
 
-import AccountModule from 'components/AccountModule/AccountModule'
+import AccountModule from '../components/AccountModule/AccountModule'
 
 const useStyles = makeStyles(theme => ({
   root: {},

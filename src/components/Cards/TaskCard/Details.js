@@ -4,7 +4,7 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { Box, Typography } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 
-import languageCodes from 'helpers/language-codes'
+import languageCodes from '../../../helpers/language-codes'
 
 dayjs.extend(relativeTime)
 

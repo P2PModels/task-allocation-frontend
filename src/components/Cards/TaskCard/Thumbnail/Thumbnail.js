@@ -5,9 +5,9 @@ import { makeStyles } from '@material-ui/core/styles'
 import { green } from '@material-ui/core/colors'
 
 import VideoTag from './VideoTag'
-import NoThumbnail from 'assets/NoThumbnail.jpg'
+import NoThumbnail from '../../../../assets/NoThumbnail.jpg'
 
-import languageCodes from 'helpers/language-codes'
+import languageCodes from '../../../../helpers/language-codes'
 
 const useStyles = makeStyles(theme => ({
   imageWrapper: {

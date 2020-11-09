@@ -1,13 +1,12 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { shortenAddress } from 'helpers/web3-utils'
+import { shortenAddress } from '../../helpers/web3-utils'
+import { capitalizeFirstLetter } from '../../helpers/utils'
 
 import { Typography } from '@material-ui/core'
 import DoneIcon from '@material-ui/icons/Done'
 
 import Identicon from '../Identicon'
-
-import { capitalizeFirstLetter } from 'helpers/utils'
 
 const RADIUS = 4
 
