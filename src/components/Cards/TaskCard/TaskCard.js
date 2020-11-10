@@ -21,7 +21,8 @@ const useStyles = makeStyles(theme => ({
 
 const TaskCard = ({ task, video, actionButtons = [] }) => {
   // TODO: Need to set a priority field on contract task struct
-  const { endDate, reallocationTime } = task
+  const { endDate, reallocationTime } = task.contractData
+
   const priority = getPriority(reallocationTime)
   const theme = useTheme()
   const { palette } = theme
