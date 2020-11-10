@@ -1,5 +1,5 @@
 export const TaskStatuses = {
-  NonExistent: Symbol('TASK_STATUS_NONEXISTEN'),
+  NonExistent: Symbol('TASK_STATUS_NONEXISTENT'),
   Available: Symbol('TASK_STATUS_AVAILABLE'),
   Assigned: Symbol('TASK_STATUS_ASSIGNED'),
   Accepted: Symbol('TASK_STATUS_ACCEPTED'),
