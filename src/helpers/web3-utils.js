@@ -46,4 +46,8 @@ export function addressesEqual(first, second) {
   return first === second
 }
 
+export function timestampToDate(timestamp) {
+  return new Date(timestamp * 1000)
+}
+
 export { toHex, hexToUtf8 } from 'web3-utils'

@@ -1,5 +1,5 @@
 import { getFieldFromEntityId } from './app-connector-helpers'
-import { hexToUtf8 } from '../helpers/web3-utils'
+import { hexToUtf8, timestampToDate } from '../helpers/web3-utils'
 
 export function transformConfigData(config) {
   return {
@@ -29,10 +29,12 @@ export function transformUserData(contractUser) {
 
 export function transformTaskData(task) {
   const entityId = task.id
+  const endDate = task.endDate
   return {
     ...task,
     entityId,
     id: hexToUtf8(getFieldFromEntityId(entityId, 'taskId')),
+    endDate: timestampToDate(endDate),
   }
 }
 
@@ -50,7 +52,7 @@ export function mergeUserData(contractUser, amaraUser) {
 export function mergeTaskData(contractTasks, amaraTasks) {
   return contractTasks.map(cT => {
     const amaraTask = amaraTasks.find(aT => aT.job_id === cT.id)
-    console.log(amaraTask)
+    console.log(cT)
     return {
       contractData: { ...cT },
       ...amaraTask,
