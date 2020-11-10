@@ -11,6 +11,7 @@ export function AppStateProvider({ appName, children }) {
     errors,
     installedApps,
     loadingAppData,
+    organization,
     roundRobinConnector,
   } = useOrgData(appName)
 
@@ -28,6 +29,7 @@ export function AppStateProvider({ appName, children }) {
         config,
         errors: { orgErrors: errors /* userErrors */ },
         installedApps,
+        organization,
         isLoading: appLoading,
         roundRobinConnector,
         /* user, */
