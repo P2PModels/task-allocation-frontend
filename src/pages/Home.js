@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { getEditorLink } from '../helpers/amara-utils'
-import { TaskStatuses } from '../types'
-import { useAppState } from '../contexts/AppState'
+import { getTxAction, getTxStatus } from '../helpers/transaction-helpers'
+import { Actions, convertToString } from '../actions-types'
 import useUserLogic from '../hooks/useUserLogic'
+import useActions from '../hooks/useActions'
 
 import {
   Grid,
@@ -15,12 +16,14 @@ import {
   CircularProgress,
 } from '@material-ui/core'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
-import TaskSection from '../components/TaskSection'
-import MessageModal from '../components/MessageModal'
-import Homepage from '../assets/Homepage.svg'
 import { Alert } from '@material-ui/lab'
 
-const { Assigned, Accepted } = TaskStatuses
+import TaskSection from '../components/TaskSection'
+import MessageModal from '../components/Modals/MessageModal'
+import Homepage from '../assets/Homepage.svg'
+import TransactionModal from '../components/Modals/TransactionModal'
+
+const { AcceptTask, RejectTask } = Actions
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -43,55 +46,106 @@ const useStyles = makeStyles(theme => ({
     alignItems: 'center',
   },
   circularProgress: {
+    color: 'white',
     marginRight: theme.spacing(1),
+  },
+  disabledModal: {
+    opacity: 0.4,
   },
 }))
 
+const MODAL_ACTIONS = {
+  acceptTask: {
+    title: 'Accept Assignment',
+    message:
+      'You need to create and confirm a transaction in order to accept this assignment.',
+  },
+  rejectTask: {
+    title: 'Reject Assignment',
+    message:
+      'You need to create and confirm a transaction in order to accept this assignment.',
+  },
+}
+
 const SlideUp = props => <Slide {...props} direction="up" />
 
-const Home = () => {
+const Home = ({ userId }) => {
   const theme = useTheme()
-  const { root, taskSection, toastMessage, circularProgress } = useStyles()
-  const userId = 'p2pmodels.user4'
+  const {
+    root,
+    taskSection,
+    toastMessage,
+    circularProgress,
+    disabledModal,
+  } = useStyles()
   const web3React = useWeb3React()
+  const { account } = web3React
   const {
-    library,
-    connector,
-    account,
-    chainId,
-    activate,
-    deactivate,
-  } = web3React
-
-  const [openModal, setOpenModal] = useState(false)
-  const appState = useAppState()
-  console.log('APP STATE')
-  console.log(appState)
-  const {
-    user,
     videosRegistry,
     acceptedTasks,
     allocatedTasks,
     loadingAppLogic,
   } = useUserLogic(userId)
+  const [openMessageModal, setOpenMessageModal] = useState(false)
+  const [modal, setModal] = useState(null)
+  const [openTxModal, setOpenTxModal] = useState(false)
+  const [activatingTxModal, setActivatingTxModal] = useState(false)
+  const [openTxSnackbar, setOpenTxSnackbar] = useState(false)
+  const [txSnackbar, setTxSnackbar] = useState({})
+
+  const handleExecutedTransaction = (type, action) => {
+    const snackbar = { type }
+    const txStatus = getTxStatus(type)
+    const txAction = getTxAction(action)
+
+    snackbar.message = (
+      <span>
+        {txStatus}: <strong>{txAction}</strong>
+      </span>
+    )
+    setActivatingTxModal(false)
+    setOpenTxModal(false)
+
+    setTxSnackbar(snackbar)
+    setOpenTxSnackbar(true)
+  }
+
+  const actions = useActions(handleExecutedTransaction)
+
+  const handleTxSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return
+    }
+
+    setOpenTxSnackbar(false)
+  }
+
+  const handleCreateTransaction = (task, action) => {
+    const actionStr = convertToString(action)
+    actions[actionStr](userId, task.contractData.id)
+    setActivatingTxModal(true)
+  }
 
   const handleAcceptTask = task => {
-    const { job_id: taskId } = task
-    if (!account) setOpenModal(true)
+    if (!account) setOpenMessageModal(true)
     else {
-      console.log('Accept task ...')
-      // acceptTask(userId, taskId)
-      // setFetchTasks(true)
+      const content = { ...MODAL_ACTIONS.acceptTask }
+      content.createTransactionHandler = () =>
+        handleCreateTransaction(task, AcceptTask)
+      setModal(content)
+      setOpenTxModal(true)
     }
   }
 
   const handleRejectTask = task => {
-    const { job_id: taskId } = task
-    if (!account) setOpenModal(true)
+    if (!account) setOpenMessageModal(true)
     else {
-      console.log('Reject task ...')
-      // rejectTask(userId, taskId)
-      // setFetchTasks(true)
+      const content = { ...MODAL_ACTIONS.rejectTask }
+      content.createTransactionHandler = () =>
+        handleCreateTransaction(task, RejectTask)
+
+      setModal(content)
+      setOpenTxModal(true)
     }
   }
 
@@ -138,16 +192,16 @@ const Home = () => {
                 </Box>
                 <Box mb={4}>
                   <Typography variant="h5">
-                    Nice to see you. Welcome to the new allocation asignement
+                    Nice to see you. Welcome to the new allocation assignment
                     system.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item lg={8} xl={8}>
                 <Typography variant="subtitle1">
-                  You have 12 hours to get them assigned. During this time,
-                  they&apos;ll be blocked to you. After those hours, we&apos;ll
-                  release them to someone else in the group.
+                  You have a period of time to accept or reject an assignment.
+                  During this time, they&apos;ll be assigned to you. After that,
+                  we&apos;ll release them to someone else in the group.
                 </Typography>
               </Grid>
             </Grid>
@@ -182,12 +236,20 @@ const Home = () => {
           </Grid>
         </Grid>
       </Grid>
+      <Snackbar
+        open={openTxSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        autoHideDuration={3000}
+        onClose={handleTxSnackbarClose}
+        key={'bottomright'}
+      >
+        <Alert severity={txSnackbar.type || 'info'}>{txSnackbar.message}</Alert>
+      </Snackbar>
       <Snackbar open={loadingAppLogic} TransitionComponent={SlideUp}>
         <Alert icon={false} variant="filled" color="info">
           <div className={toastMessage}>
             <CircularProgress
               className={circularProgress}
-              color="white"
               size={20}
               thickness={5}
             />
@@ -195,12 +257,20 @@ const Home = () => {
           </div>
         </Alert>
       </Snackbar>
+      <TransactionModal
+        className={disabledModal}
+        modalContent={modal}
+        open={openTxModal}
+        activating={activatingTxModal}
+        onClose={() => setOpenTxModal(false)}
+        onCreateTransaction={() => handleCreateTransaction()}
+      />
       <MessageModal
-        open={openModal}
         type="error"
         title="You can't perform this action"
-        message="Check you have an Ethereum provider installed and you're connected to your account."
-        onClose={() => setOpenModal(false)}
+        message="Check you have Metamask installed and you're connected to your account."
+        open={openMessageModal}
+        onClose={() => setOpenMessageModal(false)}
       />
     </div>
   )
