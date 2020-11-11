@@ -3,7 +3,6 @@ import { useUserSubscription } from './useSubscriptions'
 import { mergeTaskData, mergeUserData } from '../helpers/data-transform-helpers'
 import { buildMapById } from '../helpers/utils'
 import AmaraApi from '../amara-api'
-import { videoRegistry } from '../mock-data'
 
 async function getTasks(tasks, user) {
   const { teams, apiKey } = user
@@ -84,7 +83,7 @@ function useUserLogic(userId) {
   }, [amaraUser])
   // Fetch allocated tasks
   useEffect(() => {
-    if (!contractUser) {
+    if (!contractUser || !amaraUser) {
       return
     }
 
@@ -107,7 +106,7 @@ function useUserLogic(userId) {
 
   const loadingData =
     !contractUser ||
-    !videoRegistry ||
+    !videosRegistry ||
     !acceptedTasks ||
     !allocatedTasks ||
     !amaraUser
