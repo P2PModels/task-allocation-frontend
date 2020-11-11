@@ -1,4 +1,5 @@
 import React, { Suspense } from 'react'
+import { HashRouter } from 'react-router-dom'
 import { ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Web3 from 'web3'
@@ -8,6 +9,7 @@ import theme from './theme'
 import { ConnectProvider as Connect } from './contexts/Connect'
 import { AppStateProvider } from './contexts/AppState'
 import MainView from './components/MainView'
+import Routes from './Routes'
 
 const APP_NAME = process.env.REACT_APP_TASK_ALLOCATION_APP_NAME
 
@@ -23,7 +25,11 @@ function App() {
           <AppStateProvider appName={APP_NAME}>
             <ThemeProvider theme={theme}>
               <CssBaseline />
-              <MainView />
+              <HashRouter>
+                <MainView>
+                  <Routes />
+                </MainView>
+              </HashRouter>
             </ThemeProvider>
           </AppStateProvider>
         </Connect>
