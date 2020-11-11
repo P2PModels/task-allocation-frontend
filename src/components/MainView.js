@@ -3,6 +3,7 @@ import { Box, Container } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 
 import NavBar from './NavBar'
+import NoMetamaskDetected from './ErrorPanels/NoMetamaskDetected'
 
 const UPPER_MARGIN = 12
 
@@ -12,12 +13,20 @@ const useStyles = makeStyles(theme => ({
 
 const MainView = ({ children }) => {
   const { root } = useStyles()
+  const hasMetamask = window.ethereum
+
   return (
     <div>
       <NavBar />
       <Container maxWidth="xl">
         <Box my={UPPER_MARGIN} className={root} width="100%">
-          {children}
+          {hasMetamask ? (
+            children
+          ) : (
+            <Box display="flex" flexDirection="row" justifyContent="center">
+              <NoMetamaskDetected />
+            </Box>
+          )}
         </Box>
       </Container>
     </div>
