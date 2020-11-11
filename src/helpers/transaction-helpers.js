@@ -5,11 +5,11 @@ const { AcceptTask, RejectTask } = Actions
 export function getTxStatus(type) {
   switch (type) {
     case 'error':
-      return 'Transaction failed'
+      return 'The transaction failed.'
     case 'success':
-      return 'Transaction succeeded'
+      return 'The transaction succeeded.'
     default:
-      return 'Transaction on execution'
+      return "The transaction was sent. Wait until it's accepted. "
   }
 }
 
