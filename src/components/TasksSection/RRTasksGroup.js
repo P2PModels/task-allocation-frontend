@@ -12,6 +12,7 @@ const RRTasksGroup = ({
   totalPages = 1,
   actionButtons,
   onChangePage,
+  onTimeout,
 }) => {
   const theme = useTheme()
   const [checked, setChecked] = useState(true)
@@ -32,6 +33,7 @@ const RRTasksGroup = ({
                 task={t}
                 video={videoRegistry.get(t.video)}
                 actionButtons={actionButtons}
+                onTimeOut={onTimeout}
               />
             </Grid>
           ))}

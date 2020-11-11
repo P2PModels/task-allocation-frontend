@@ -19,8 +19,14 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const TaskCard = ({ task, video, actionButtons = [] }) => {
+const TaskCard = ({
+  task,
+  video,
+  actionButtons = [],
+  onTimeOut = () => {},
+}) => {
   // TODO: Need to set a priority field on contract task struct
+  const { job_id: taskId } = task
   const { endDate, reallocationTime } = task.contractData
 
   const priority = getPriority(reallocationTime)
@@ -29,6 +35,10 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
   const { root, chip } = useStyles({
     priorityColor: palette.chips[priority],
   })
+
+  const onTimeOutHandler = useCallback(() => {
+    onTimeOut(taskId)
+  }, [taskId, onTimeOut])
 
   return (
     <Card className={root} elevation={5}>
@@ -43,7 +53,7 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
           actionButtons[0].label.toLowerCase() === 'translate' ? null : (
             <React.Fragment>
               <Grid item>
-                <Timer end={endDate} />
+                <Timer end={endDate} onTimeOut={onTimeOutHandler} />
               </Grid>
               <Grid item>
                 <Chip

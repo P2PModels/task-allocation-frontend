@@ -23,6 +23,7 @@ const TaskSection = ({
   title,
   emptyText,
   taskActionButtons = [],
+  onTimeout,
 }) => {
   const anchorRef = useRef(null)
   const [selectedPage, setSelectedPage] = useState(1)
@@ -38,9 +39,8 @@ const TaskSection = ({
   const handleChangePage = selectedPage => {
     // TODO: Take into account navbar height when scrolling to title element. Scroll some additional pixels up.
     anchorRef.current.scrollIntoView({ inline: 'start', behavior: 'smooth' })
-    // const init = (selectedPage - 1) * TASKS_PER_PAGE
-    // const end = init + TASKS_PER_PAGE
-    // console.log(mockTasks.slice(init, end))
+    const init = (selectedPage - 1) * TASKS_PER_PAGE
+    const end = init + TASKS_PER_PAGE
     setSelectedPage(selectedPage)
   }
 
@@ -62,6 +62,7 @@ const TaskSection = ({
               totalTasks={tasks.length}
               tasksPerPage={TASKS_PER_PAGE}
               onChangePage={handleChangePage}
+              onTimeout={onTimeout}
             />
           </Grid>
         </React.Fragment>

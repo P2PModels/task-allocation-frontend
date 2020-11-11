@@ -103,6 +103,7 @@ const Timer = ({
   showEmpty = false,
   maxUnits = -1,
   showIcon = true,
+  onTimeOut = () => {},
 }) => {
   const { timer, clockIconWrapper, timeUnit, separator } = useStyles()
   const theme = useTheme()
@@ -118,8 +119,11 @@ const Timer = ({
 
   const updateTime = useCallback(() => {
     const t = getTime(start, end, computedFormat, showEmpty, maxUnits)
+    if (t.totalInSeconds === 0) {
+      onTimeOut()
+    }
     setTime(t)
-  }, [start, end, computedFormat, showEmpty, maxUnits])
+  }, [start, end, computedFormat, showEmpty, maxUnits, onTimeOut])
 
   useAnimationFrame(RENDER_EVERY, updateTime)
 
