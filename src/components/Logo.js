@@ -7,6 +7,8 @@ const useStyles = makeStyles(theme => ({
   logoWrapper: {
     position: 'relative',
     margin: theme.spacing(1),
+    cursor: 'alias',
+    userSelect: 'none',
   },
   subtitle: {
     position: 'absolute',
@@ -23,7 +25,7 @@ const Logo = () => {
       <div className={logoWrapper}>
         <img src={AmaraLogo} />
         <Typography className={subtitle} variant="body1">
-          assingments
+          assignments
         </Typography>
       </div>
     </div>
