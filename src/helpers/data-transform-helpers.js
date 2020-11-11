@@ -1,5 +1,5 @@
 import { getFieldFromEntityId } from './app-connector-helpers'
-import { hexToUtf8, timestampToDate } from '../helpers/web3-utils'
+import { hexToUtf8, timestampToDate } from './web3-helpers'
 
 export function transformConfigData(config) {
   return {

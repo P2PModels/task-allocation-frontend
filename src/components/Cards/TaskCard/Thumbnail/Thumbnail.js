@@ -8,7 +8,7 @@ import VideoTag from './VideoTag'
 import NoThumbnail from '../../../../assets/NoThumbnail.jpg'
 import NoVideo from '../../../../assets/NoVideo.png'
 
-import languageCodes from '../../../../helpers/language-codes'
+import languageCodes from '../../../../language-codes'
 
 const useStyles = makeStyles(theme => ({
   imageWrapper: {

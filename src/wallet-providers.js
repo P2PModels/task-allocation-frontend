@@ -4,7 +4,7 @@ import {
   NoEthereumProviderError,
   UserRejectedRequestError as UserRejectedRequestErrorInjected,
 } from '@web3-react/injected-connector'
-import MetamaskLogo from '../assets/MetamaskLogo.png'
+import MetamaskLogo from './assets/MetamaskLogo.png'
 
 export const injected = new InjectedConnector({
   supportedChainIds: [1, 3, 4, 5, 42],

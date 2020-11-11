@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { Box, Card, Grid, Chip, CardContent } from '@material-ui/core'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 
-import { getPriority } from '../../../helpers/amara-utils'
+import { getPriority } from '../../../helpers/amara-helpers'
 import Thumbnail from './Thumbnail/Thumbnail'
 import Details from './Details'
 import Timer from './Timer'

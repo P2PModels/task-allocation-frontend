@@ -12,7 +12,7 @@ import {
 } from '@material-ui/core'
 import CloseIcon from '@material-ui/icons/Close'
 
-import { connectorsByName } from '../../helpers/wallet-providers'
+import { connectorsByName } from '../../wallet-providers'
 
 const useStyles = makeStyles(theme => ({
   root: {

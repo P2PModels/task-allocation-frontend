@@ -5,8 +5,9 @@ import {
   useOrganization,
   usePermissions,
 } from '@aragon/connect-react'
-import connectRoundRobin from '@p2pmodels/connect-round-robin'
-import { addressesEqual } from '../helpers/web3-utils'
+// import connectRoundRobin from '@p2pmodels/connect-round-robin'
+import connectRoundRobin from '../dist/cjs/index'
+import { addressesEqual } from '../helpers/web3-helpers'
 import { useConfigSubscription } from './useSubscriptions'
 
 function useOrgData(appName) {

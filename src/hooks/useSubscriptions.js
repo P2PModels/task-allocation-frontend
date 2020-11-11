@@ -5,7 +5,7 @@ import {
   transformUserData,
 } from '../helpers/data-transform-helpers'
 import { useAppState } from '../contexts/AppState'
-import { toBytes32 } from '../helpers/web3-utils'
+import { toBytes32 } from '../helpers/web3-helpers'
 import { convertToInt } from '../types'
 
 export function useConfigSubscription(roundRobinConnector) {
@@ -49,6 +49,8 @@ export function useUserSubscription(userId) {
   const userSubscription = useRef(null)
 
   const onUserHandler = useCallback((err, user) => {
+    console.log('New call detected')
+    console.log(user)
     if (err || !user) {
       return
     }

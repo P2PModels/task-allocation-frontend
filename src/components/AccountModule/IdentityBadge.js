@@ -1,7 +1,7 @@
 import React from 'react'
 import { makeStyles } from '@material-ui/core/styles'
-import { shortenAddress } from '../../helpers/web3-utils'
-import { capitalizeFirstLetter } from '../../helpers/utils'
+import { shortenAddress } from '../../helpers/web3-helpers'
+import { capitalizeFirstLetter } from '../../helpers/general-helpers'
 
 import { Typography } from '@material-ui/core'
 import DoneIcon from '@material-ui/icons/Done'

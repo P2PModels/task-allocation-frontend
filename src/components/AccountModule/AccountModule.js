@@ -3,6 +3,7 @@ import { useWeb3React } from '@web3-react/core'
 import useEagerConnect from '../../hooks/useEagerConnect'
 import useInactiveListener from '../../hooks/useInactiveListener'
 import { getNetwork } from '../../networks'
+import { transformError } from '../../wallet-providers'
 import { makeStyles } from '@material-ui/core/styles'
 import { Button } from '@material-ui/core'
 
@@ -11,7 +12,7 @@ import { Button } from '@material-ui/core'
 import ProvidersModal from '../Modals/ProvidersModal'
 import IdentityBadge from './IdentityBadge'
 import MessageModal from '../Modals/MessageModal'
-import { transformError } from '../../helpers/wallet-providers'
+
 
 const useStyles = makeStyles(theme => ({
   wrapper: {
@@ -43,12 +44,6 @@ const AccountModule = () => {
   // handle logic to connect in reaction to certain events on the injected ethereum provider, if it exists
   useInactiveListener(!triedEager || !!activatingConnector)
 
-  console.log('[AccountModule component]')
-  console.log('Library: ' + library)
-  console.log('Connector: ')
-  console.log(connector)
-  console.log('Error: ')
-  console.log(error)
   const handleSelectProvider = currentConnector => {
     if (!activatingConnector) {
       setActivatingConnector(currentConnector)

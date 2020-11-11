@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useUserSubscription } from './useSubscriptions'
 import { mergeTaskData, mergeUserData } from '../helpers/data-transform-helpers'
-import { buildMapById } from '../helpers/utils'
+import { buildMapById } from '../helpers/general-helpers'
 import AmaraApi from '../amara-api'
 
 async function getTasks(tasks, user) {
