@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import { Box, Card, Grid, Chip, CardContent } from '@material-ui/core'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
@@ -19,26 +19,16 @@ const useStyles = makeStyles(theme => ({
   },
 }))
 
-const TaskCard = ({
-  task,
-  video,
-  actionButtons = [],
-  onTimeOut = () => {},
-}) => {
+const TaskCard = ({ task, video, actionButtons = [] }) => {
+  const [disabled, setDisabled] = useState(false)
   // TODO: Need to set a priority field on contract task struct
-  const { job_id: taskId } = task
   const { endDate, reallocationTime } = task.contractData
-
   const priority = getPriority(reallocationTime)
   const theme = useTheme()
   const { palette } = theme
   const { root, chip } = useStyles({
     priorityColor: palette.chips[priority],
   })
-
-  const onTimeOutHandler = useCallback(() => {
-    onTimeOut(taskId)
-  }, [taskId, onTimeOut])
 
   return (
     <Card className={root} elevation={5}>
@@ -53,7 +43,7 @@ const TaskCard = ({
           actionButtons[0].label.toLowerCase() === 'translate' ? null : (
             <React.Fragment>
               <Grid item>
-                <Timer end={endDate} onTimeOut={onTimeOutHandler} />
+                <Timer end={endDate} onTimeOut={() => setDisabled(true)} />
               </Grid>
               <Grid item>
                 <Chip
@@ -82,6 +72,7 @@ const TaskCard = ({
               label={label}
               color={color}
               fullWidth={arr.length === 1}
+              disabled={disabled}
               onClick={() => actionHandler(task)}
             />
           ))}

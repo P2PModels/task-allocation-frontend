@@ -15,7 +15,13 @@ const useStyles = makeStyles(() => ({
   },
 }))
 
-function ActionButton({ label, color, fullWidth = false, onClick }) {
+function ActionButton({
+  label,
+  color,
+  fullWidth = false,
+  disabled = false,
+  onClick,
+}) {
   const { actionButton } = useStyles({
     color: color,
     hoverColor: lightenDarkenColor(color, -20),
@@ -27,6 +33,7 @@ function ActionButton({ label, color, fullWidth = false, onClick }) {
       className={actionButton}
       onClick={onClick}
       fullWidth={fullWidth}
+      disabled={disabled}
     >
       {label}
     </Button>

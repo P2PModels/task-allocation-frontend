@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PropTypes from 'prop-types'
-import { Grid, useTheme, Box } from '@material-ui/core'
+import { Grid, Box } from '@material-ui/core'
 import { Pagination } from '@material-ui/lab'
 
 import TaskCard from '../Cards/TaskCard/TaskCard'
@@ -12,11 +12,7 @@ const RRTasksGroup = ({
   totalPages = 1,
   actionButtons,
   onChangePage,
-  onTimeout,
 }) => {
-  const theme = useTheme()
-  const [checked, setChecked] = useState(true)
-
   return (
     <Grid container direction="column" justify="center" alignItems="center">
       <Grid item>
@@ -33,7 +29,6 @@ const RRTasksGroup = ({
                 task={t}
                 video={videoRegistry.get(t.video)}
                 actionButtons={actionButtons}
-                onTimeOut={onTimeout}
               />
             </Grid>
           ))}

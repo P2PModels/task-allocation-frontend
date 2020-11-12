@@ -23,7 +23,6 @@ const TaskSection = ({
   title,
   emptyText,
   taskActionButtons = [],
-  onTimeout,
 }) => {
   const anchorRef = useRef(null)
   const [selectedPage, setSelectedPage] = useState(1)
@@ -62,7 +61,6 @@ const TaskSection = ({
               totalTasks={tasks.length}
               tasksPerPage={TASKS_PER_PAGE}
               onChangePage={handleChangePage}
-              onTimeout={onTimeout}
             />
           </Grid>
         </React.Fragment>

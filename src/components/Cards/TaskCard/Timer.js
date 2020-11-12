@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react'
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
@@ -107,6 +107,8 @@ const Timer = ({
 }) => {
   const { timer, clockIconWrapper, timeUnit, separator } = useStyles()
   const theme = useTheme()
+  // Need to check if component is mounted to update timer
+  const isMountedRef = useRef(false)
   const computedFormat = useMemo(() => getFormat(format), [format])
   const [time, setTime] = useState(
     getTime(start, end, computedFormat, showEmpty, maxUnits)
@@ -117,12 +119,21 @@ const Timer = ({
     0
   )
 
+  useEffect(() => {
+    isMountedRef.current = true
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
   const updateTime = useCallback(() => {
     const t = getTime(start, end, computedFormat, showEmpty, maxUnits)
     if (t.totalInSeconds === 0) {
       onTimeOut()
     }
-    setTime(t)
+    if (isMountedRef.current) {
+      setTime(t)
+    }
   }, [start, end, computedFormat, showEmpty, maxUnits, onTimeOut])
 
   useAnimationFrame(RENDER_EVERY, updateTime)
