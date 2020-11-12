@@ -3,9 +3,10 @@ import { useWeb3React } from '@web3-react/core'
 import { useAppState } from '../contexts/AppState'
 import { getAppByName } from '../helpers/app-connector-helpers'
 import { Actions } from '../actions-types'
-import { toBytes32 } from '../helpers/web3-utils'
+import { toBytes32 } from '../helpers/web3-helpers'
 
 const APP_NAME = process.env.REACT_APP_TASK_ALLOCATION_APP_NAME
+const PRIVATE_KEY = process.env.REACT_APP_SERVER_ACCOUNT_PRIVATE_KEY
 const GAS_LIMIT = 450000
 const { AcceptTask, RejectTask } = Actions
 
@@ -14,6 +15,26 @@ function useActions(onReportStatus) {
   const { installedApps, organization } = useAppState()
   const app = getAppByName(installedApps, APP_NAME)
 
+  const reallocateTask = useCallback(
+    taskId => {
+      const hexTaskId = toBytes32(taskId)
+      sendIntent(
+        organization,
+        app.address,
+        'reallocateTask',
+        [hexTaskId],
+        {
+          web3,
+          from: account,
+        },
+        type => {
+          console.log(`reallocateTask Tx status: ${type}`)
+        },
+        true
+      )
+    },
+    [organization, app, web3, account]
+  )
   const acceptTask = useCallback(
     (userId, taskId) => {
       const hexUserId = toBytes32(userId)
@@ -55,6 +76,7 @@ function useActions(onReportStatus) {
   )
 
   return {
+    reallocateTask,
     acceptTask,
     rejectTask,
   }
@@ -66,14 +88,13 @@ async function sendIntent(
   fn,
   params,
   { web3, from },
-  onReportStatus
+  onReportStatus,
+  usePrivateKey = false
 ) {
   try {
     const intent = org.appIntent(appAddress, fn, params)
-    console.log(intent)
     const [tx] = await intent.transactions(from)
     const { data, to } = tx
-    console.log(from)
 
     processTransaction(
       web3,
@@ -83,36 +104,40 @@ async function sendIntent(
       err => {
         console.error(err)
         onReportStatus('error')
-      }
+      },
+      usePrivateKey
     )
-    // web3.eth
-    //   .sendTransaction({
-    //     from,
-    //     to,
-    //     data,
-    //     gas: GAS_LIMIT,
-    //   })
-    //   .then(res => {
-    //     console.log('Tx received: ')
-    //     console.log(res)
-    //     onReportStatus('success')
-    //   })
-    //   .catch(err => {
-    //     console.error('Could not create tx:', err)
-    //     onReportStatus('error')
-    //   })
   } catch (err) {
     console.error('Could not create tx:', err)
     onReportStatus('error')
   }
 }
 
-function processTransaction(web3, tx, onSigned, onConfirmed, onError) {
-  web3.eth
-    .sendTransaction(tx)
-    .on('transactionHash', txHash => onSigned(txHash))
-    .on('receipt', receipt => onConfirmed(receipt))
-    .on('error', err => onError(err))
+async function processTransaction(
+  web3,
+  tx,
+  onSigned,
+  onConfirmed,
+  onError,
+  usePrivateKey
+) {
+  if (usePrivateKey) {
+    const { rawTransaction } = await web3.eth.accounts.signTransaction(
+      tx,
+      PRIVATE_KEY
+    )
+    web3.eth
+      .sendSignedTransaction(rawTransaction)
+      .on('transactionHash', txHash => onSigned(txHash))
+      .on('receipt', receipt => onConfirmed(receipt))
+      .on('error', err => onError(err))
+  } else {
+    web3.eth
+      .sendTransaction(tx)
+      .on('transactionHash', txHash => onSigned(txHash))
+      .on('receipt', receipt => onConfirmed(receipt))
+      .on('error', err => onError(err))
+  }
 }
 
 export default useActions

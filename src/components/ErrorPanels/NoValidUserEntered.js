@@ -4,7 +4,7 @@ import ErrorPanel from './ErrorPanel'
 
 const NoValidUserEntered = () => {
   return (
-    <ErrorPanel title="Couldn't find demo user">
+    <ErrorPanel title="Demo user not found">
       <Grid item>
         <Box mt={3} ml={1}>
           <Typography variant="body1">

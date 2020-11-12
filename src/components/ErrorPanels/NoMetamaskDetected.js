@@ -6,8 +6,8 @@ import DownloadMetamask from '../../assets/DownloadMetamask.png'
 
 const useStyles = makeStyles(theme => ({
   imageWrapper: {
-    width: '35%',
-    height: '35%',
+    width: '25%',
+    height: '25%',
   },
   downloadImage: {
     width: '100%',

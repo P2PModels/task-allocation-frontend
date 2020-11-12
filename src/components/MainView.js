@@ -20,13 +20,7 @@ const MainView = ({ children }) => {
       <NavBar />
       <Container maxWidth="xl">
         <Box my={UPPER_MARGIN} className={root} width="100%">
-          {hasMetamask ? (
-            children
-          ) : (
-            <Box display="flex" flexDirection="row" justifyContent="center">
-              <NoMetamaskDetected />
-            </Box>
-          )}
+          {hasMetamask ? children : <NoMetamaskDetected />}
         </Box>
       </Container>
     </div>
