@@ -1,14 +1,7 @@
 import axios from 'axios'
 
-const {
-  REACT_APP_AMARA_STAGING_API,
-  REACT_APP_AMARA_API_LOCAL_PORT,
-} = process.env
+const { REACT_APP_AMARA_STAGING_API } = process.env
 
-// const baseURL =
-//   NODE_ENV === 'development'
-//     ? `http://localhost:${REACT_APP_AMARA_API_LOCAL_PORT}/api`
-//     : REACT_APP_AMARA_STAGING_API
 const headers = { 'X-api-key': '' }
 const ROOT = 'api'
 const baseURL = `${REACT_APP_AMARA_STAGING_API}${ROOT}`
