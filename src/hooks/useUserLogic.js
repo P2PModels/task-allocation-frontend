@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useUserSubscription } from './useSubscriptions'
+import { useAppState } from '../contexts/AppState'
+import { useTasksForUserSubscription } from './useSubscriptions'
 import { mergeTaskData, mergeUserData } from '../helpers/data-transform-helpers'
 import { buildMapById } from '../helpers/general-helpers'
 import AmaraApi from '../amara-api'
+import { TaskStatuses } from '../types'
+import { toBytes32 } from '../helpers/web3-helpers'
 
+const { Assigned, Accepted } = TaskStatuses
 async function getTasks(tasks, user) {
   const { teams, apiKey } = user
 
@@ -30,33 +34,53 @@ async function getTasks(tasks, user) {
 }
 
 function useUserLogic(userId) {
-  const contractUser = useUserSubscription(userId)
-
-  const [amaraUser, setAmaraUser] = useState(null)
+  const { roundRobinConnector } = useAppState()
+  const contractUserAllocatedTasks = useTasksForUserSubscription(
+    userId,
+    Assigned
+  )
+  const contractUserAcceptedTasks = useTasksForUserSubscription(
+    userId,
+    Accepted
+  )
+  const [user, setUser] = useState(null)
   const [videosRegistry, setVideosRegistry] = useState(null)
   const [allocatedTasks, setAllocatedTasks] = useState(null)
   const [acceptedTasks, setAcceptedTasks] = useState(null)
 
   // Fetch Amara user data
   useEffect(() => {
-    async function getAmaraUser() {
-      // Get Amara user data
-      const t0 = performance.now()
-      const { data: user } = await AmaraApi.users.getOne(userId)
+    async function buildUser(userId) {
+      try {
+        const hexUserId = toBytes32(userId)
 
-      const t1 = performance.now()
+        const t0 = performance.now()
 
-      console.log(`[useEffect] get Amara user: ${(t1 - t0) / 1000}`)
-      setAmaraUser(user)
+        const [rrUser, amaraUserRes] = await Promise.all([
+          roundRobinConnector.user(hexUserId),
+          AmaraApi.users.getOne(userId),
+        ])
+
+        const { data: amaraUser } = amaraUserRes
+        console.log(rrUser)
+        const user = mergeUserData(rrUser, amaraUser)
+
+        const t1 = performance.now()
+        console.log(`[useEffect] get Amara user: ${(t1 - t0) / 1000}`)
+
+        setUser(user)
+      } catch (err) {
+        setUser({})
+      }
     }
 
-    if (!userId) {
+    if (!roundRobinConnector || !userId) {
       return
     }
 
-    getAmaraUser()
+    buildUser(userId)
     return () => {}
-  }, [userId])
+  }, [userId, roundRobinConnector])
 
   // Fetch team videos
   useEffect(() => {
@@ -73,103 +97,51 @@ function useUserLogic(userId) {
 
       setVideosRegistry(videosMap)
     }
-    if (!amaraUser || !amaraUser.teams || !amaraUser.teams.length) {
+    if (!user || !user.teams || !user.teams.length) {
       return
     }
 
-    getTeamVideos(amaraUser)
+    getTeamVideos(user)
 
     return () => {}
-  }, [amaraUser])
+  }, [user])
+
   // Fetch allocated tasks
   useEffect(() => {
-    if (!contractUser || !amaraUser) {
+    if (!contractUserAllocatedTasks || !user) {
       return
     }
-
-    getTasks(contractUser.allocatedTasks, amaraUser).then(allocatedTasks =>
+    console.log(`[useEffect] fetch allocated tasks`)
+    getTasks(contractUserAllocatedTasks, user).then(allocatedTasks => {
       setAllocatedTasks(allocatedTasks)
-    )
+    })
+
     return () => {}
-  }, [contractUser, amaraUser])
+  }, [contractUserAllocatedTasks, user])
 
   // Fetch accepted tasks
   useEffect(() => {
-    if (!contractUser || !amaraUser) {
+    if (!contractUserAcceptedTasks || !user) {
       return
     }
-    getTasks(contractUser.acceptedTasks, amaraUser).then(acceptedTasks =>
+
+    getTasks(contractUserAcceptedTasks, user).then(acceptedTasks =>
       setAcceptedTasks(acceptedTasks)
     )
+
     return () => {}
-  }, [contractUser, amaraUser])
+  }, [contractUserAcceptedTasks, user])
 
   const loadingData =
-    !contractUser ||
-    !videosRegistry ||
-    !acceptedTasks ||
-    !allocatedTasks ||
-    !amaraUser
+    !user || !videosRegistry || !acceptedTasks || !allocatedTasks || !user
 
   return {
     allocatedTasks,
     acceptedTasks,
     videosRegistry,
-    user:
-      contractUser && amaraUser ? mergeUserData(contractUser, amaraUser) : null,
+    user,
     loadingAppLogic: loadingData,
   }
 }
 
 export default useUserLogic
-
-// useEffect(() => {
-//   async function getTeamVideos()
-// }, [amaraUser])
-
-// useEffect(() => {
-//   async function getTasks({ allocatedTasks = [], acceptedTasks = [] }, user) {
-//     const { teams, apiKey } = user
-//     const t0 = performance.now()
-
-//     if (teams && teams.length) {
-//       const { name: teamName } = teams[0]
-
-//       AmaraApi.setApiKeyHeader(apiKey)
-
-//       const allocatedTasksRequests = allocatedTasks.map(({ id }) => {
-//         return AmaraApi.teams.getTeamSubtitleRequest(teamName, id)
-//       })
-//       const acceptedTasksRequests = acceptedTasks.map(({ id }) => {
-//         return AmaraApi.teams.getTeamSubtitleRequest(teamName, id)
-//       })
-
-//       const responses = await Promise.all([
-//         ...allocatedTasksRequests,
-//         ...acceptedTasksRequests,
-//       ])
-//       const amaraTasks = responses.map(({ data }) => data)
-//       const transformedAllocatedTasks = mergeTaskData(
-//         contractUser.allocatedTasks,
-//         amaraTasks
-//       )
-//       const transformedAcceptedTasks = mergeTaskData(
-//         contractUser.acceptedTasks,
-//         amaraTasks
-//       )
-//       const t1 = performance.now()
-//       console.log(`[useEffect] getTasks: ${(t1 - t0) / 1000}`)
-//       setUserTasks({
-//         allocatedTasks: transformedAllocatedTasks,
-//         acceptedTasks: transformedAcceptedTasks,
-//       })
-//     }
-//   }
-
-//   if (!contractUser || !amaraUser) {
-//     return
-//   }
-
-//   getTasks(contractUser, amaraUser)
-//   return () => {}
-// }, [contractUser, amaraUser])
