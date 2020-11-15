@@ -6,7 +6,7 @@ import {
 } from '../helpers/data-transform-helpers'
 import { useAppState } from '../contexts/AppState'
 import { toBytes32 } from '../helpers/web3-helpers'
-import { convertToInt } from '../types'
+import { convertToInt, convertToString } from '../types'
 
 export function useConfigSubscription(roundRobinConnector) {
   const [config, setConfig] = useState(null)
@@ -49,8 +49,6 @@ export function useUserSubscription(userId) {
   const userSubscription = useRef(null)
 
   const onUserHandler = useCallback((err, user) => {
-    console.log('New call detected')
-    console.log(user)
     if (err || !user) {
       return
     }
@@ -66,7 +64,7 @@ export function useUserSubscription(userId) {
   }, [])
 
   useEffect(() => {
-    if (!roundRobinConnector) {
+    if (!roundRobinConnector || !userId) {
       return
     }
     const userIdHex = toBytes32(userId)
@@ -89,16 +87,25 @@ export function useTasksForUserSubscription(
   const [userTasks, setUserTasks] = useState([])
   const tasksSubscription = useRef(null)
 
-  const onTasksForUserHandler = useCallback((err, tasks = []) => {
-    console.log('suscription')
-    console.log(tasks)
-    if (err || !tasks) {
-      return
-    }
-
-    const transformedTasks = tasks.map(t => transformTaskData(t))
-    setUserTasks(transformedTasks)
-  }, [])
+  const onTasksForUserHandler = useCallback(
+    (err, tasks = []) => {
+      if (err || !tasks) {
+        if (err) console.error(err)
+        return
+      }
+      const transformedTasks = tasks.map(t => transformTaskData(t))
+      // Filter timeout tasks
+      const currentDate = new Date()
+      console.log(tasks)
+      const availableTasks = transformedTasks.filter(
+        t => t.endDate > currentDate
+      )
+      console.log(`${convertToString(status)} tasks subscription`)
+      console.log(availableTasks)
+      setUserTasks(availableTasks)
+    },
+    [status]
+  )
 
   useEffect(() => {
     if (!roundRobinConnector) {
@@ -107,17 +114,7 @@ export function useTasksForUserSubscription(
 
     const hexUserId = toBytes32(userId)
     const convertedStatus = [convertToInt(status)]
-    console.log(hexUserId)
-    console.log(convertedStatus)
-    // roundRobinConnector
-    //   .tasksForUser(hexUserId, convertedStatus, {
-    //     first: 1000,
-    //     skip: 0,
-    //   })
-    //   .then(res => {
-    //     console.log('resss')
-    //     console.log(res)
-    //   })
+
     tasksSubscription.current = roundRobinConnector.onTasksForUser(
       hexUserId,
       convertedStatus,
