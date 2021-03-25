@@ -52,7 +52,7 @@ export function mergeUserData(contractUser, amaraUser) {
 export function mergeTaskData(contractTasks, amaraTasks) {
   return contractTasks.map(cT => {
     const amaraTask = amaraTasks.find(aT => aT.job_id === cT.id)
-    console.log(cT)
+
     return {
       contractData: { ...cT },
       ...amaraTask,

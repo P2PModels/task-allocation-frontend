@@ -26,7 +26,6 @@ const useAnimationFrame = (interval = 1000, callback) => {
   )
 
   useEffect(() => {
-    console.log('[useEffect useAnimationFrame]')
     requestRef.current = requestAnimationFrame(animate)
     return () => cancelAnimationFrame(requestRef.current)
   }, [animate]) // Make sure the effect runs only once
