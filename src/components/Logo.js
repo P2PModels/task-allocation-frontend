@@ -7,7 +7,7 @@ const useStyles = makeStyles(theme => ({
   logoWrapper: {
     position: 'relative',
     margin: theme.spacing(1),
-    cursor: 'alias',
+    cursor: 'default',
     userSelect: 'none',
   },
   subtitle: {
