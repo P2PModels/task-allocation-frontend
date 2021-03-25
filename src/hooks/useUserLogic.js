@@ -62,7 +62,6 @@ function useUserLogic(userId) {
         ])
 
         const { data: amaraUser } = amaraUserRes
-        console.log(rrUser)
         const user = mergeUserData(rrUser, amaraUser)
 
         const t1 = performance.now()
@@ -74,8 +73,12 @@ function useUserLogic(userId) {
       }
     }
 
-    if (!roundRobinConnector || !userId) {
+    if (!roundRobinConnector) {
       return
+    }
+
+    if (!userId) {
+      setUser({})
     }
 
     buildUser(userId)

@@ -6,7 +6,7 @@ import {
 } from '../helpers/data-transform-helpers'
 import { useAppState } from '../contexts/AppState'
 import { toBytes32 } from '../helpers/web3-helpers'
-import { convertToInt, convertToString } from '../types'
+import { TaskStatuses, convertToInt, convertToString } from '../types'
 
 export function useConfigSubscription(roundRobinConnector) {
   const [config, setConfig] = useState(null)
@@ -93,22 +93,29 @@ export function useTasksForUserSubscription(
         if (err) console.error(err)
         return
       }
-      const transformedTasks = tasks.map(t => transformTaskData(t))
-      // Filter timeout tasks
       const currentDate = new Date()
-      console.log(tasks)
-      const availableTasks = transformedTasks.filter(
-        t => t.endDate > currentDate
+
+      const transformedTasks = tasks.map(t => transformTaskData(t))
+      const filteredTasks = transformedTasks.filter(
+        t =>
+          t.status !== convertToString(TaskStatuses.Rejected) &&
+          t.endDate > currentDate
       )
-      console.log(`${convertToString(status)} tasks subscription`)
-      console.log(availableTasks)
-      setUserTasks(availableTasks)
+
+      if (status === TaskStatuses.Available) {
+        const availableTasks = filteredTasks.filter(
+          t => t.endDate > currentDate
+        )
+        setUserTasks(availableTasks)
+      } else {
+        setUserTasks(filteredTasks)
+      }
     },
     [status]
   )
 
   useEffect(() => {
-    if (!roundRobinConnector) {
+    if (!roundRobinConnector || !userId) {
       return
     }
 
