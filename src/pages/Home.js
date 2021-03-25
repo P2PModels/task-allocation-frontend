@@ -7,6 +7,7 @@ import { getResourceFromPathname } from '../helpers/route-helpers'
 import { Actions, convertToString } from '../actions-types'
 import useUserLogic from '../hooks/useUserLogic'
 import useActions from '../hooks/useActions'
+import AmaraApi from '../amara-api'
 
 import {
   Grid,
@@ -169,7 +170,18 @@ const Home = () => {
 
   const handleTranslateTask = task => {
     console.log('Translating task...')
-    window.open(getEditorLink(task), '_blank')
+    AmaraApi.teams
+      .updateSubtitleRequest(user.teams[0].name, task.job_id, userId)
+      .then(
+        () => {
+          window.open(getEditorLink(task), '_blank')
+        },
+        err =>
+          console.error(
+            'A problem has ocurred trying to update assignment using Amara API',
+            err
+          )
+      )
   }
 
   const availableTaskActionButtons = [
@@ -250,7 +262,7 @@ const Home = () => {
                 {/* acceptedTasks.length */}
                 <Box mt={!acceptedTasks ? 0 : 15} width="100">
                   <TaskSection
-                    tasks={allocatedTasks}
+                    tasks={acceptedTasks.length ? [] : allocatedTasks}
                     videoRegistry={videosRegistry}
                     title="These assignments are currently free: "
                     emptyText="You don't have any available assignments."
@@ -266,7 +278,7 @@ const Home = () => {
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           TransitionComponent={SlideLeft}
           transitionDuration={500}
-          autoHideDuration={6000}
+          autoHideDuration={3000}
           onClose={handleTxSnackbarClose}
           key={'bottomright'}
         >
