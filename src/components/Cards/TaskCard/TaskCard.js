@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Box, Card, Grid, Chip, CardContent } from '@material-ui/core'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
@@ -36,7 +36,7 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
         <Grid
           container
           direction="row"
-          justify="space-between"
+          justify={actionButtons.length === 1 ? "flex-end" : "space-between"}
           alignItems="center"
         >
           {actionButtons.length === 1 &&
@@ -45,15 +45,15 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
               <Grid item>
                 <Timer end={endDate} onTimeOut={() => setDisabled(true)} />
               </Grid>
-              <Grid item>
-                <Chip
-                  className={chip}
-                  color="secondary"
-                  label={<strong>{priority} priority</strong>}
-                />
-              </Grid>
             </React.Fragment>
           )}
+          <Grid item>
+            <Chip
+              className={chip}
+              color="secondary"
+              label={<strong>{priority} priority</strong>}
+            />
+          </Grid>
         </Grid>
       </Box>
       <Thumbnail video={video} targetLanguage={task.language} />
