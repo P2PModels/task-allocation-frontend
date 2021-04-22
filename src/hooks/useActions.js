@@ -35,11 +35,15 @@ function useActions(onReportStatus) {
     },
     [organization, app, web3, account]
   )
+  /**
+   * Function that is triggered when a user
+   * confirms a transaction to acept a task
+   */
   const acceptTask = useCallback(
     (userId, taskId) => {
       const hexUserId = toBytes32(userId)
       const hexTaskId = toBytes32(taskId)
-
+      // Send transaction
       sendIntent(
         organization,
         app.address,
