@@ -5,7 +5,9 @@ React-based frontend application for [Task Allocation](https://github.com/P2PMod
 0. Install Node.js and npm, see here
 1. Clone the repository `git clone https://github.com/P2PModels/task-allocation-frontend.git`
 2. Get into the directory `task-allocation-frontend`
-3. Install dependencies running `npm install`
+3. Rename `.env.example` to `.env`
+4. Set in `.env` the variable `REACT_APP_SERVER_ACCOUNT_PRIVATE_KEY`
+5. Install dependencies by running `npm install`
 
 Visit [http://localhost:3000](http://localhost:3000) to view the application 
 in the browser.
