@@ -139,15 +139,28 @@ const Home = () => {
     setOpenTxSnackbar(false)
   }
 
+  /**
+   * Handle that is executed when user accepts to
+   * create a transaction.
+   * @param task: contain information about the task
+   * @param action: contain the action to be executed
+   */
   const handleCreateTransaction = (task, action) => {
     const actionStr = convertToString(action)
     actions[actionStr](userId, task.contractData.id)
     setActivatingTxModal(true)
   }
 
+  /**
+   * Handle that manages task acceptance
+   */
   const handleAcceptTask = task => {
+    // If the user is not connected with metamaks, a modal is displayed
+    // asking the user to check her metamaks installation
     if (!account) setOpenMessageModal(true)
     else {
+      // If the user is connected to metamask, a modal is displayed
+      // to notify that a transaction is going to be created
       const content = { ...MODAL_ACTIONS.acceptTask }
       content.createTransactionHandler = () =>
         handleCreateTransaction(task, AcceptTask)
@@ -156,6 +169,9 @@ const Home = () => {
     }
   }
 
+  /**
+   * Handle that manages task rejection
+   */
   const handleRejectTask = task => {
     if (!account) setOpenMessageModal(true)
     else {
