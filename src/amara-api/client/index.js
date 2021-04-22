@@ -1,3 +1,7 @@
+/**
+ * HTTP client
+ */
+
 import axios from 'axios'
 
 const { REACT_APP_AMARA_STAGING_API } = process.env
