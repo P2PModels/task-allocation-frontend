@@ -251,8 +251,8 @@ const Home = () => {
                 <Grid item lg={8} xl={8}>
                   <Typography variant="subtitle1">
                     You have a period of time to accept or reject an assignment.
-                    During this time, they&apos;ll be assigned to you. After
-                    that, we&apos;ll release them to someone else in the group.
+                    During this time, they are assigned to you. After
+                    that, we&apos;ll release them to someone else.
                   </Typography>
                 </Grid>
               </Grid>
