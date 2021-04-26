@@ -8,6 +8,7 @@ import { TaskStatuses } from '../types'
 import { toBytes32 } from '../helpers/web3-helpers'
 
 const { Assigned, Accepted } = TaskStatuses
+
 async function getTasks(tasks, user) {
   const { teams, apiKey } = user
 
@@ -127,7 +128,7 @@ function useUserLogic(userId) {
     if (!contractUserAcceptedTasks || !user) {
       return
     }
-
+    console.log(`[useEffect] fetch accepted tasks`)
     getTasks(contractUserAcceptedTasks, user).then(acceptedTasks =>
       setAcceptedTasks(acceptedTasks)
     )
