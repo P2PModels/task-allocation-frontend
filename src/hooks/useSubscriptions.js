@@ -93,16 +93,16 @@ export function useTasksForUserSubscription(
         if (err) console.error(err)
         return
       }
+      // Get current date and time
       const currentDate = new Date()
-
+      // Adjust structure of obtained tasks
       const transformedTasks = tasks.map(t => transformTaskData(t))
+      // Filter out tasks with rejected status
       const filteredTasks = transformedTasks.filter(
-        t =>
-          t.status !== convertToString(TaskStatuses.Rejected) &&
-          t.endDate > currentDate
+        t => t.status !== convertToString(TaskStatuses.Rejected)
       )
-
       if (status === TaskStatuses.Available) {
+        // Filter out tasks whose end data has expired
         const availableTasks = filteredTasks.filter(
           t => t.endDate > currentDate
         )
