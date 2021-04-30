@@ -86,6 +86,16 @@ function useActions(onReportStatus) {
   }
 }
 
+/**
+ * In Aragon Connect we need to send an
+ * intent which returns all transactions
+ * that need to be executed to acomplish
+ * current transaction.
+ * 
+ * It might be the case that a transaction
+ * needs to execute an additional transaction
+ * (voting) to complete its execution 
+ */
 async function sendIntent(
   org,
   appAddress,
@@ -96,8 +106,13 @@ async function sendIntent(
   usePrivateKey = false
 ) {
   try {
+    // Create intent for the application appAddress of the
+    // dao org
     const intent = org.appIntent(appAddress, fn, params)
+    // Get transactions from intent
     const [tx] = await intent.transactions(from)
+    // Data contains the function to be call in the contract
+    // To contains the address of the contract
     const { data, to } = tx
 
     processTransaction(
