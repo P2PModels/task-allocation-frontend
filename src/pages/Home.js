@@ -106,6 +106,8 @@ const Home = () => {
   const [openLoadingSnackbar, setOpenLoadingSnackbar] = useState(true)
   const [openTxSnackbar, setOpenTxSnackbar] = useState(false)
   const [txSnackbar, setTxSnackbar] = useState({})
+  const [allocatedTasksBeforeTx, setAllocatedTasksBeforeTx] = useState(0)
+  const [statusTaskButtons, setStatusTaskButtons] = useState(true)
 
   // Wait half second before hiding loading snackbar. Only for aesthetic purposes
   useEffect(() => {
@@ -116,9 +118,19 @@ const Home = () => {
     return () => {}
   }, [loadingAppLogic])
 
+  /**
+   * Handle that is executed every time snakbars need to be open
+   */
   const handleExecutedTransaction = (type, action) => {
+    if (type === 'info') {
+      setAllocatedTasksBeforeTx(allocatedTasks.length)
+    }
+    if (type === 'success' || type === 'error') {
+      setStatusTaskButtons(true)
+    }
+
     const snackbar = { type }
-    const txStatus = getTxStatus(type)
+    const txStatus = getTxStatus(type, allocatedTasksBeforeTx)
     // const txAction = getTxAction(action)
 
     snackbar.message = <span>{txStatus}</span>
@@ -147,6 +159,7 @@ const Home = () => {
    */
   const handleCreateTransaction = (task, action) => {
     const actionStr = convertToString(action)
+    setStatusTaskButtons(false)
     actions[actionStr](userId, task.contractData.id)
     setActivatingTxModal(true)
   }
@@ -155,8 +168,8 @@ const Home = () => {
    * Handle that manages task acceptance
    */
   const handleAcceptTask = task => {
-    // If the user is not connected with metamaks, a modal is displayed
-    // asking the user to check her metamaks installation
+    // If the user is not connected with metamask, a modal is displayed
+    // asking the user to check her metamask installation
     if (!account) setOpenMessageModal(true)
     else {
       // If the user is connected to metamask, a modal is displayed
@@ -212,6 +225,15 @@ const Home = () => {
       actionHandler: handleRejectTask,
     },
   ]
+
+  const disabledTaskActionButtons = availableTaskActionButtons.map(
+    taskButton => {
+      return {
+        ...taskButton,
+        disabled: true,
+      }
+    }
+  )
 
   const assignedTaskActionButtons = [
     {
@@ -282,7 +304,11 @@ const Home = () => {
                     videoRegistry={videosRegistry}
                     title="These assignments are currently free: "
                     emptyText="You don't have any available assignments."
-                    taskActionButtons={availableTaskActionButtons}
+                    taskActionButtons={
+                      statusTaskButtons
+                        ? availableTaskActionButtons
+                        : disabledTaskActionButtons
+                    }
                   />
                 </Box>
               </Grid>

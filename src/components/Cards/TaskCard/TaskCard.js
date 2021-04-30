@@ -66,16 +66,18 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
           alignItems="center"
           mt={2}
         >
-          {actionButtons.map(({ label, color, actionHandler }, index, arr) => (
-            <ActionButton
-              key={label}
-              label={label}
-              color={color}
-              fullWidth={arr.length === 1}
-              disabled={disabled}
-              onClick={() => actionHandler(task)}
-            />
-          ))}
+          {actionButtons.map(
+            ({ label, color, actionHandler, disabled }, index, arr) => (
+              <ActionButton
+                key={label}
+                label={label}
+                color={color}
+                fullWidth={arr.length === 1}
+                disabled={disabled}
+                onClick={() => actionHandler(task)}
+              />
+            )
+          )}
         </Box>
       </CardContent>
     </Card>

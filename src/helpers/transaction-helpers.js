@@ -2,12 +2,16 @@ import { Actions } from '../actions-types'
 
 const { AcceptTask, RejectTask } = Actions
 
-export function getTxStatus(type) {
+export function getTxStatus(type, allocatedTasks) {
   switch (type) {
     case 'error':
       return 'The transaction failed.'
     case 'success':
-      return 'The transaction succeeded.'
+      if (allocatedTasks > 0) {
+        return 'The transaction succeeded. Tasks assigned to you were reassigned to other users during the transaction.'
+      } else {
+        return 'The transaction succeeded.'
+      }
     default:
       return "The transaction was sent. Wait until it's accepted. "
   }
