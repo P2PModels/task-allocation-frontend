@@ -48,7 +48,9 @@ export default function TasksTable() {
   return (
     <TableContainer component={Paper}>
       <Table stickyHeader className={classes.table} aria-label="Tasks Table">
-        <caption><b>Information about tasks currently allocated</b></caption>
+        <caption>
+          <b>Information about tasks currently allocated</b>
+        </caption>
         <TableHead>
           <TableRow>
             <StyledTableCell>Task Id</StyledTableCell>
@@ -65,7 +67,9 @@ export default function TasksTable() {
               </StyledTableCell>
               <StyledTableCell align="right">{row.status}</StyledTableCell>
               <StyledTableCell align="right">{row.user}</StyledTableCell>
-              <StyledTableCell align="right">{row.reassignedBy}</StyledTableCell>
+              <StyledTableCell align="right">
+                {row.reassignedBy}
+              </StyledTableCell>
             </StyledTableRow>
           ))}
         </TableBody>
