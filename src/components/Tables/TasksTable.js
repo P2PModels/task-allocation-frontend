@@ -1,5 +1,5 @@
 import React from 'react'
-import { makeStyles } from '@material-ui/core/styles'
+import { withStyles, makeStyles } from '@material-ui/core/styles'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
 import TableCell from '@material-ui/core/TableCell'
@@ -13,6 +13,24 @@ const useStyles = makeStyles({
     minWidth: 650,
   },
 })
+
+const StyledTableCell = withStyles(theme => ({
+  head: {
+    backgroundColor: theme.palette.secondary.dark,
+    color: theme.palette.common.white,
+  },
+  body: {
+    fontSize: 14,
+  },
+}))(TableCell)
+
+const StyledTableRow = withStyles(theme => ({
+  root: {
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.action.hover,
+    },
+  },
+}))(TableRow)
 
 function createData(id, status, user, reassignedBy) {
   return { id, status, user, reassignedBy }
@@ -29,25 +47,26 @@ export default function TasksTable() {
 
   return (
     <TableContainer component={Paper}>
-      <Table className={classes.table} aria-label="simple table">
+      <Table stickyHeader className={classes.table} aria-label="Tasks Table">
+        <caption><b>Information about tasks currently allocated</b></caption>
         <TableHead>
           <TableRow>
-            <TableCell>Task Id</TableCell>
-            <TableCell align="right">Status</TableCell>
-            <TableCell align="right">Assigned to</TableCell>
-            <TableCell align="right">Reassigned by</TableCell>
+            <StyledTableCell>Task Id</StyledTableCell>
+            <StyledTableCell align="right">Status</StyledTableCell>
+            <StyledTableCell align="right">Assigned to</StyledTableCell>
+            <StyledTableCell align="right">Reassigned by</StyledTableCell>
           </TableRow>
         </TableHead>
         <TableBody>
           {rows.map(row => (
-            <TableRow key={row.name}>
-              <TableCell component="th" scope="row">
+            <StyledTableRow key={row.name}>
+              <StyledTableCell component="th" scope="row">
                 {row.id}
-              </TableCell>
-              <TableCell align="right">{row.status}</TableCell>
-              <TableCell align="right">{row.user}</TableCell>
-              <TableCell align="right">{row.reassignedBy}</TableCell>
-            </TableRow>
+              </StyledTableCell>
+              <StyledTableCell align="right">{row.status}</StyledTableCell>
+              <StyledTableCell align="right">{row.user}</StyledTableCell>
+              <StyledTableCell align="right">{row.reassignedBy}</StyledTableCell>
+            </StyledTableRow>
           ))}
         </TableBody>
       </Table>
