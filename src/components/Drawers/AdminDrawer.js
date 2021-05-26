@@ -187,8 +187,8 @@ export default function AdminDrawer() {
       </Drawer>
       <main className={classes.content}>
         <div className={classes.toolbar} />
-          <Typography variant="h6">Allocated Tasks</Typography>
-          <TasksTable />
+        <Typography variant="h6">Allocated Tasks</Typography>
+        <TasksTable />
       </main>
     </div>
   )
