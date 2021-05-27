@@ -1,8 +1,8 @@
-import React from 'react'
 import clsx from 'clsx'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import Drawer from '@material-ui/core/Drawer'
 import AppBar from '@material-ui/core/AppBar'
+import React from 'react'
 import Toolbar from '@material-ui/core/Toolbar'
 import List from '@material-ui/core/List'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -20,7 +20,18 @@ import StopIcon from '@material-ui/icons/Stop'
 import ReplayIcon from '@material-ui/icons/Replay'
 import RefreshIcon from '@material-ui/icons/Refresh'
 import LowPriorityIcon from '@material-ui/icons/LowPriority'
+import Chip from '@material-ui/core/Chip'
+import Avatar from '@material-ui/core/Avatar'
+import CheckCircleRounded from '@material-ui/icons/CheckCircleRounded'
+import CancelRounded from '@material-ui/icons/CancelRounded'
 import TasksTable from '../Tables/TasksTable'
+
+import {
+  startManager as startEthManager,
+  stopManager as stopEthManager,
+  restartContract as restartRRContact,
+  getContractStatus,
+} from 'eth-manager'
 
 const drawerWidth = 240
 const heightAmaraBar = 9
@@ -94,6 +105,8 @@ export default function AdminDrawer() {
   const classes = useStyles()
   const theme = useTheme()
   const [open, setOpen] = React.useState(false)
+  const [managerStatus, setManagerStatus] = React.useState(false)
+  const [signer, setSigner] = React.useState(null)
 
   const handleDrawerOpen = () => {
     setOpen(true)
@@ -101,6 +114,32 @@ export default function AdminDrawer() {
 
   const handleDrawerClose = () => {
     setOpen(false)
+  }
+
+  const startManager = () => {
+    console.log('In Admin Drawer, starting manager...')
+    startEthManager()
+    setManagerStatus(true)
+  }
+
+  const stopManager = () => {
+    console.log('In Admin Drawer, stoping manager...')
+    stopEthManager()
+    setManagerStatus(false)
+  }
+
+  const restartContract = () => {
+    console.log('In Admin Drawer, restarting contract...')
+    restartRRContact()
+  }
+
+  const updateTaskInfo = () => {
+    console.log('In Admin Drawer, updating task info...')
+    getContractStatus()
+  }
+
+  const reallocateTasks = () => {
+    console.log('Reallocating tasks...')
   }
 
   return (
@@ -154,31 +193,31 @@ export default function AdminDrawer() {
         <Divider />
         <List>
           <ListItem button key="StartManager">
-            <ListItemIcon>
+            <ListItemIcon onClick={startManager}>
               <PlayArrowIcon />
             </ListItemIcon>
             <ListItemText primary="Start Manager" />
           </ListItem>
           <ListItem button key="StopManager">
-            <ListItemIcon>
+            <ListItemIcon onClick={stopManager}>
               <StopIcon />
             </ListItemIcon>
             <ListItemText primary="Stop Manager" />
           </ListItem>
           <ListItem button key="RestartContract">
-            <ListItemIcon>
+            <ListItemIcon onClick={restartContract}>
               <ReplayIcon />
             </ListItemIcon>
             <ListItemText primary="Restart Contract" />
           </ListItem>
           <ListItem button key="UpdateTaskInfo">
-            <ListItemIcon>
+            <ListItemIcon onClick={updateTaskInfo}>
               <RefreshIcon />
             </ListItemIcon>
             <ListItemText primary="Update Task Info" />
           </ListItem>
           <ListItem button key="ReallocateTasks">
-            <ListItemIcon>
+            <ListItemIcon onClick={reallocateTasks}>
               <LowPriorityIcon />
             </ListItemIcon>
             <ListItemText primary="Reallocate Tasks" />
@@ -186,6 +225,11 @@ export default function AdminDrawer() {
         </List>
       </Drawer>
       <main className={classes.content}>
+        {managerStatus ? (
+          <Chip icon={<CheckCircleRounded />} label="On" color="primary" />
+        ) : (
+          <Chip icon={<CancelRounded />} label="Off" color="secondary" />
+        )}
         <div className={classes.toolbar} />
         <Typography variant="h6">Allocated Tasks</Typography>
         <TasksTable />
