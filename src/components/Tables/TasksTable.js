@@ -61,7 +61,7 @@ export default function TasksTable() {
         </TableHead>
         <TableBody>
           {rows.map(row => (
-            <StyledTableRow key={row.name}>
+            <StyledTableRow key={row.id}>
               <StyledTableCell component="th" scope="row">
                 {row.id}
               </StyledTableCell>
