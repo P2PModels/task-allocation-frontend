@@ -21,20 +21,26 @@ import ReplayIcon from '@material-ui/icons/Replay'
 import RefreshIcon from '@material-ui/icons/Refresh'
 import LowPriorityIcon from '@material-ui/icons/LowPriority'
 import Chip from '@material-ui/core/Chip'
-import Avatar from '@material-ui/core/Avatar'
 import CheckCircleRounded from '@material-ui/icons/CheckCircleRounded'
 import CancelRounded from '@material-ui/icons/CancelRounded'
+import MuiAlert from '@material-ui/lab/Alert'
+import Snackbar from '@material-ui/core/Snackbar'
+
 import TasksTable from '../Tables/TasksTable'
 
-import {
-  startManager as startEthManager,
-  stopManager as stopEthManager,
-  restartContract as restartRRContact,
+const {
+  startManager: startEthManager,
+  stopManager: stopEthManager,
+  restartContract: restartRRContract,
   getContractStatus,
-} from 'eth-manager'
+} = require('eth-manager')
 
 const drawerWidth = 240
 const heightAmaraBar = 9
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />
+}
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -105,8 +111,19 @@ export default function AdminDrawer() {
   const classes = useStyles()
   const theme = useTheme()
   const [open, setOpen] = React.useState(false)
+  const [openSnackbar, setOpenSnackbar] = React.useState(false)
   const [managerStatus, setManagerStatus] = React.useState(false)
-  const [signer, setSigner] = React.useState(null)
+  const [signer, setSigner] = React.useState(undefined)
+  const [snackbarMsg, setSnackbarMsg] = React.useState('')
+
+  React.useEffect(() => {
+    if (open) {
+      setOpenSnackbar(false)
+    }
+    if (snackbarMsg !== '') {
+      setOpenSnackbar(true)
+    }
+  }, [snackbarMsg])
 
   const handleDrawerOpen = () => {
     setOpen(true)
@@ -116,21 +133,37 @@ export default function AdminDrawer() {
     setOpen(false)
   }
 
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return
+    }
+    setOpenSnackbar(false)
+  }
+
+  const handleSnackbarExited = () => {
+    setSnackbarMsg('')
+  }
+
   const startManager = () => {
-    console.log('In Admin Drawer, starting manager...')
-    startEthManager()
+    setSnackbarMsg('Starting manager...')
+    const currentSigner = startEthManager()
+    console.log(currentSigner)
+    setSigner(currentSigner)
+    setSnackbarMsg('Manager started successfully...')
     setManagerStatus(true)
   }
 
   const stopManager = () => {
-    console.log('In Admin Drawer, stoping manager...')
-    stopEthManager()
+    setSnackbarMsg('Stopping manager...')
+    console.log(signer)
+    stopEthManager(signer)
+    setSnackbarMsg('Manager stopped successfully...')
     setManagerStatus(false)
   }
 
   const restartContract = () => {
     console.log('In Admin Drawer, restarting contract...')
-    restartRRContact()
+    restartRRContract()
   }
 
   const updateTaskInfo = () => {
@@ -234,6 +267,20 @@ export default function AdminDrawer() {
         <Typography variant="h6">Allocated Tasks</Typography>
         <TasksTable />
       </main>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        onExited={handleSnackbarExited}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success">
+          {snackbarMsg}
+        </Alert>
+      </Snackbar>
     </div>
   )
 }
