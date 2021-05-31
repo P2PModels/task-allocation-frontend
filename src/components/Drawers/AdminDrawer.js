@@ -33,6 +33,7 @@ const {
   stopManager: stopEthManager,
   restartContract: restartRRContract,
   getContractStatus,
+  reallocateTasks: reallocateContractTasks,
 } = require('eth-manager')
 
 const drawerWidth = 240
@@ -147,7 +148,6 @@ export default function AdminDrawer() {
   const startManager = () => {
     setSnackbarMsg('Starting manager...')
     const currentSigner = startEthManager()
-    console.log(currentSigner)
     setSigner(currentSigner)
     setSnackbarMsg('Manager started successfully...')
     setManagerStatus(true)
@@ -155,7 +155,6 @@ export default function AdminDrawer() {
 
   const stopManager = () => {
     setSnackbarMsg('Stopping manager...')
-    console.log(signer)
     stopEthManager(signer)
     setSnackbarMsg('Manager stopped successfully...')
     setManagerStatus(false)
@@ -163,16 +162,17 @@ export default function AdminDrawer() {
 
   const restartContract = () => {
     console.log('In Admin Drawer, restarting contract...')
-    restartRRContract()
+    restartRRContract(signer)
   }
 
   const updateTaskInfo = () => {
     console.log('In Admin Drawer, updating task info...')
-    getContractStatus()
+    getContractStatus(signer)
   }
 
   const reallocateTasks = () => {
     console.log('Reallocating tasks...')
+    reallocateContractTasks(signer)
   }
 
   return (
@@ -225,13 +225,13 @@ export default function AdminDrawer() {
         </div>
         <Divider />
         <List>
-          <ListItem button key="StartManager">
+          <ListItem button key="StartManager" disabled={managerStatus}>
             <ListItemIcon onClick={startManager}>
               <PlayArrowIcon />
             </ListItemIcon>
             <ListItemText primary="Start Manager" />
           </ListItem>
-          <ListItem button key="StopManager">
+          <ListItem button key="StopManager" disabled={!managerStatus}>
             <ListItemIcon onClick={stopManager}>
               <StopIcon />
             </ListItemIcon>
