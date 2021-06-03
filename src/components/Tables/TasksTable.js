@@ -7,6 +7,9 @@ import TableContainer from '@material-ui/core/TableContainer'
 import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
+import IconButton from '@material-ui/core/IconButton'
+import RefreshIcon from '@material-ui/icons/Refresh'
+const { getContractStatus } = require('eth-manager')
 
 const useStyles = makeStyles({
   table: {
@@ -32,24 +35,56 @@ const StyledTableRow = withStyles(theme => ({
   },
 }))(TableRow)
 
-function createData(id, status, user, reassignedBy) {
-  return { id, status, user, reassignedBy }
-}
-const rows = [
-  createData('JS4TMAF', 'Assigned', 'p2pmodels.user2', '29/04/2021 17:27:45'),
-  createData('0UTJG1S', 'Assigned', 'p2pmodels.user5', '29/04/2021 17:27:45'),
-  createData('9AR30EW', 'Assigned', 'p2pmodels.user3', '29/04/2021 17:33:00'),
-  createData('TNEYKA0', 'Assigned', 'p2pmodels.user5', '16/04/2021 10:01:33'),
-]
-
-export default function TasksTable() {
+const TasksTable = ({ refreshTable = false }) => {
   const classes = useStyles()
+  const [tasks, setTasks] = React.useState([])
+  const doUpdateTable = React.useRef(false)
+
+  const getTasks = async () => {
+    const tData = await getContractStatus()
+    setTasks(JSON.parse(tData))
+  }
+
+  function updateTable() {
+    setTasks([])
+    getTasks()
+  }
+
+  React.useEffect(() => {
+    if (!tasks.length) {
+      updateTable()
+    }
+  }, [])
+
+  function parseDate(dateToParse) {
+    const dates = dateToParse.split('T')
+    const day = dates[0].split('-')[2]
+    const month = dates[0].split('-')[1]
+    const year = dates[0].split('-')[0]
+    // needed to add 2 hours to ajust to GMT+2 since
+    // the time received is in GTM
+    const hour = parseInt(dates[1].split(':')[0]) + 2
+    const mins = dates[1].split(':')[1]
+    return `${day}/${month}/${year} ${hour}:${mins}`
+  }
+
+  if (refreshTable) {
+    if (!doUpdateTable.current) {
+      updateTable()
+      doUpdateTable.current = true
+    }
+  } else {
+    doUpdateTable.current = false
+  }
 
   return (
     <TableContainer component={Paper}>
       <Table stickyHeader className={classes.table} aria-label="Tasks Table">
         <caption>
-          <b>Information about tasks currently allocated</b>
+          <IconButton aria-label="Update Table" onClick={updateTable}>
+            <RefreshIcon />
+          </IconButton>
+          Update Table
         </caption>
         <TableHead>
           <TableRow>
@@ -60,20 +95,30 @@ export default function TasksTable() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(row => (
-            <StyledTableRow key={row.id}>
-              <StyledTableCell component="th" scope="row">
-                {row.id}
-              </StyledTableCell>
-              <StyledTableCell align="right">{row.status}</StyledTableCell>
-              <StyledTableCell align="right">{row.user}</StyledTableCell>
-              <StyledTableCell align="right">
-                {row.reassignedBy}
+          {!tasks.length ? (
+            <StyledTableRow>
+              <StyledTableCell componenet="th" scope="row" colSpan="4">
+                Loading data...
               </StyledTableCell>
             </StyledTableRow>
-          ))}
+          ) : (
+            tasks.map(task => (
+              <StyledTableRow key={task.id}>
+                <StyledTableCell component="th" scope="row">
+                  {task.id}
+                </StyledTableCell>
+                <StyledTableCell align="right">{task.status}</StyledTableCell>
+                <StyledTableCell align="right">{task.user}</StyledTableCell>
+                <StyledTableCell align="right">
+                  {parseDate(task.reassignedBy)}
+                </StyledTableCell>
+              </StyledTableRow>
+            ))
+          )}
         </TableBody>
       </Table>
     </TableContainer>
   )
 }
+
+export default TasksTable
