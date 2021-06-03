@@ -18,7 +18,6 @@ import ListItemText from '@material-ui/core/ListItemText'
 import PlayArrowIcon from '@material-ui/icons/PlayArrow'
 import StopIcon from '@material-ui/icons/Stop'
 import ReplayIcon from '@material-ui/icons/Replay'
-import RefreshIcon from '@material-ui/icons/Refresh'
 import LowPriorityIcon from '@material-ui/icons/LowPriority'
 import Chip from '@material-ui/core/Chip'
 import CheckCircleRounded from '@material-ui/icons/CheckCircleRounded'
@@ -32,7 +31,6 @@ const {
   startManager: startEthManager,
   stopManager: stopEthManager,
   restartContract: restartRRContract,
-  getContractStatus,
   reallocateTasks: reallocateContractTasks,
 } = require('eth-manager')
 
@@ -113,18 +111,26 @@ export default function AdminDrawer() {
   const theme = useTheme()
   const [open, setOpen] = React.useState(false)
   const [openSnackbar, setOpenSnackbar] = React.useState(false)
-  const [managerStatus, setManagerStatus] = React.useState(false)
-  const [signer, setSigner] = React.useState(undefined)
   const [snackbarMsg, setSnackbarMsg] = React.useState('')
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState('success')
+  const [snackbarAutoHide, setSnackbarAutoHide] = React.useState(null)
+  const [managerStatus, setManagerStatus] = React.useState(false)
+  const newData = React.useRef(false)
+  const signer = React.useRef(undefined)
+  const cronJobs = React.useRef(undefined)
 
   React.useEffect(() => {
-    if (open) {
+    if (openSnackbar) {
       setOpenSnackbar(false)
     }
     if (snackbarMsg !== '') {
       setOpenSnackbar(true)
     }
   }, [snackbarMsg])
+
+  React.useEffect(() => {
+    newData.current = false
+  })
 
   const handleDrawerOpen = () => {
     setOpen(true)
@@ -143,36 +149,132 @@ export default function AdminDrawer() {
 
   const handleSnackbarExited = () => {
     setSnackbarMsg('')
+    setOpenSnackbar(false)
   }
 
-  const startManager = () => {
-    setSnackbarMsg('Starting manager...')
-    const currentSigner = startEthManager()
-    setSigner(currentSigner)
-    setSnackbarMsg('Manager started successfully...')
-    setManagerStatus(true)
+  function processMgrRes(
+    msg,
+    severity,
+    autoHide,
+    nData = true,
+    mgtStatus = false
+  ) {
+    setSnackbarSeverity(severity)
+    setSnackbarMsg(msg)
+    setManagerStatus(mgtStatus)
+    newData.current = nData
+    setSnackbarAutoHide(autoHide)
+  }
+
+  function initMgr(msg) {
+    setSnackbarMsg(msg)
+    setSnackbarSeverity('info')
+    setSnackbarAutoHide(null)
+  }
+
+  const startManager = async () => {
+    initMgr(
+      'Starting manager, this takes some minutes to complete. Please wait...'
+    )
+    try {
+      setManagerStatus(true)
+      const { mgrSigner, mgrCronJobs } = await startEthManager()
+      console.log('In AdminDrawer')
+      console.log(mgrSigner)
+      console.log(mgrCronJobs)
+      signer.current = mgrSigner
+      cronJobs.current = mgrCronJobs
+      processMgrRes(
+        'Manager started successfully!',
+        'success',
+        6000,
+        true,
+        true
+      )
+    } catch (err) {
+      processMgrRes(
+        `Error when starting manager: ${err.message}`,
+        'error',
+        null,
+        false,
+        false
+      )
+    }
   }
 
   const stopManager = () => {
-    setSnackbarMsg('Stopping manager...')
-    stopEthManager(signer)
-    setSnackbarMsg('Manager stopped successfully...')
-    setManagerStatus(false)
+    initMgr('Stopping manager...')
+    try {
+      console.log('To stop with')
+      console.log(signer.current)
+      console.log(cronJobs.current)
+      stopEthManager(signer.current, cronJobs.current)
+      signer.current = undefined
+      cronJobs.current = undefined
+      processMgrRes(
+        'Manager stopped successfully!',
+        'success',
+        6000,
+        false,
+        false
+      )
+    } catch (err) {
+      processMgrRes(
+        `Error when stopping manager: ${err.message}`,
+        'error',
+        null,
+        false,
+        true
+      )
+    }
   }
 
-  const restartContract = () => {
-    console.log('In Admin Drawer, restarting contract...')
-    restartRRContract(signer)
+  const restartContract = async () => {
+    initMgr(
+      'Restarting contract, this takes several minutes to complete. Please wait...'
+    )
+    try {
+      await restartRRContract()
+      processMgrRes(
+        'Contract restarted successfully!',
+        'success',
+        6000,
+        true,
+        false
+      )
+    } catch (err) {
+      processMgrRes(
+        `Error when restarting contract: ${err.message}`,
+        'error',
+        null,
+        false,
+        false
+      )
+    }
   }
 
-  const updateTaskInfo = () => {
-    console.log('In Admin Drawer, updating task info...')
-    getContractStatus(signer)
-  }
-
-  const reallocateTasks = () => {
-    console.log('Reallocating tasks...')
-    reallocateContractTasks(signer)
+  const reallocateTasks = async () => {
+    initMgr(
+      'Reallocating tasks, this takes some minutes to complete. Please wait...'
+    )
+    try {
+      await reallocateContractTasks()
+      processMgrRes(
+        'Tasks were reallocated successfully!',
+        'success',
+        6000,
+        true,
+        false
+      )
+    } catch (err) {
+      processMgrRes(
+        `Error when reallocating tasks: ${err.message}`,
+        'error',
+        null,
+        false,
+        false
+      )
+    }
   }
 
   return (
@@ -237,19 +339,13 @@ export default function AdminDrawer() {
             </ListItemIcon>
             <ListItemText primary="Stop Manager" />
           </ListItem>
-          <ListItem button key="RestartContract">
+          <ListItem button key="RestartContract" disabled={managerStatus}>
             <ListItemIcon onClick={restartContract}>
               <ReplayIcon />
             </ListItemIcon>
             <ListItemText primary="Restart Contract" />
           </ListItem>
-          <ListItem button key="UpdateTaskInfo">
-            <ListItemIcon onClick={updateTaskInfo}>
-              <RefreshIcon />
-            </ListItemIcon>
-            <ListItemText primary="Update Task Info" />
-          </ListItem>
-          <ListItem button key="ReallocateTasks">
+          <ListItem button key="ReallocateTasks" disabled={managerStatus}>
             <ListItemIcon onClick={reallocateTasks}>
               <LowPriorityIcon />
             </ListItemIcon>
@@ -265,7 +361,7 @@ export default function AdminDrawer() {
         )}
         <div className={classes.toolbar} />
         <Typography variant="h6">Allocated Tasks</Typography>
-        <TasksTable />
+        <TasksTable refreshTable={newData.current} />
       </main>
       <Snackbar
         anchorOrigin={{
@@ -273,11 +369,11 @@ export default function AdminDrawer() {
           horizontal: 'right',
         }}
         open={openSnackbar}
-        autoHideDuration={6000}
         onClose={handleSnackbarClose}
         onExited={handleSnackbarExited}
+        autoHideDuration={snackbarAutoHide}
       >
-        <Alert onClose={handleSnackbarClose} severity="success">
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity}>
           {snackbarMsg}
         </Alert>
       </Snackbar>
