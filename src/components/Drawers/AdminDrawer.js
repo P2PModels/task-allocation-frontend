@@ -32,7 +32,7 @@ const {
   stopManager: stopEthManager,
   restartContract: restartRRContract,
   reallocateTasks: reallocateContractTasks,
-} = require('eth-manager')
+} = require('@p2pmodels/eth-manager')
 
 const drawerWidth = 240
 const heightAmaraBar = 9

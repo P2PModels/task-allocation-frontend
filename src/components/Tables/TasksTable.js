@@ -9,7 +9,7 @@ import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
 import IconButton from '@material-ui/core/IconButton'
 import RefreshIcon from '@material-ui/icons/Refresh'
-const { getContractStatus } = require('eth-manager')
+const { getContractStatus } = require('@p2pmodels/eth-manager')
 
 const useStyles = makeStyles({
   table: {
