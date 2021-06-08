@@ -205,9 +205,6 @@ export default function AdminDrawer() {
   const stopManager = () => {
     initMgr('Stopping manager...')
     try {
-      console.log('To stop with')
-      console.log(signer.current)
-      console.log(cronJobs.current)
       stopEthManager(signer.current, cronJobs.current)
       signer.current = undefined
       cronJobs.current = undefined
