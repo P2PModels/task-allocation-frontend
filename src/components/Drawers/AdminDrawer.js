@@ -179,9 +179,6 @@ export default function AdminDrawer() {
     try {
       setManagerStatus(true)
       const { mgrSigner, mgrCronJobs } = await startEthManager()
-      console.log('In AdminDrawer')
-      console.log(mgrSigner)
-      console.log(mgrCronJobs)
       signer.current = mgrSigner
       cronJobs.current = mgrCronJobs
       processMgrRes(
