@@ -4,16 +4,30 @@ import { useAppState } from '../contexts/AppState'
 import { getAppByName } from '../helpers/app-connector-helpers'
 import { Actions } from '../actions-types'
 import { toBytes32 } from '../helpers/web3-helpers'
+import rrContractAbi from '../assets/abis/RoundRobinApp'
 
 const APP_NAME = process.env.REACT_APP_TASK_ALLOCATION_APP_NAME
+const APP_ADDRESS = process.env.REACT_APP_RINKEBY_ROUND_ROBIN_CONTRACT_ADDRESS
 const PRIVATE_KEY = process.env.REACT_APP_SERVER_ACCOUNT_PRIVATE_KEY
 const GAS_LIMIT = 450000
 const { AcceptTask, RejectTask } = Actions
 
 function useActions(onReportStatus) {
   const { account, library: web3 } = useWeb3React()
+  // installedApps is used to get the app object used to get contract address
   const { installedApps, organization } = useAppState()
+  // Gets app object from installedApps array filtering by name
   const app = getAppByName(installedApps, APP_NAME)
+
+  const getContractInstance = useCallback(
+    (web3, abi) => {
+      console.log(web3)
+      if(web3){
+        return new web3.eth.Contract(abi)
+      }
+    },
+    []
+  )
 
   const reallocateTask = useCallback(
     taskId => {
@@ -44,19 +58,41 @@ function useActions(onReportStatus) {
       const hexUserId = toBytes32(userId)
       const hexTaskId = toBytes32(taskId)
       // Send transaction
-      sendIntent(
-        organization,
-        app.address,
-        'acceptTask',
-        [hexUserId, hexTaskId],
-        {
+      // sendIntent(
+      //   organization, // organization object
+      //   app.address, // Contract adress
+      //   'acceptTask', // fn
+      //   [hexUserId, hexTaskId], // params
+      //   {
+      //     web3,
+      //     from: account,
+      //   },
+      //   type => onReportStatus(type, AcceptTask)
+      // )
+      try {
+        const rrContract = getContractInstance(web3, rrContractAbi)
+        processTransaction(
           web3,
-          from: account,
-        },
-        type => onReportStatus(type, AcceptTask)
-      )
+          { 
+            from: account,
+            to: APP_ADDRESS,
+            data: rrContract.methods['acceptTask'](hexUserId, hexTaskId).encodeABI(), 
+            gas: GAS_LIMIT 
+          },
+          txHash => onReportStatus('info', AcceptTask),
+          receipt => onReportStatus('success', AcceptTask),
+          err => {
+            console.error(err)
+            onReportStatus('error', AcceptTask)
+          }
+        )
+      } catch (err) {
+        console.error('Could not create tx:', err)
+        onReportStatus('error', AcceptTask)
+      }
     },
-    [organization, app, web3, account, onReportStatus]
+    [app, web3, account, onReportStatus]
+    // [organization, app, web3, account, onReportStatus]
   )
 
   const rejectTask = useCallback(
@@ -138,7 +174,7 @@ async function processTransaction(
   onSigned,
   onConfirmed,
   onError,
-  usePrivateKey
+  usePrivateKey = false
 ) {
   if (usePrivateKey) {
     const { rawTransaction } = await web3.eth.accounts.signTransaction(
