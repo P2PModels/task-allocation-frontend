@@ -6,7 +6,8 @@ import Web3 from 'web3'
 import { Web3ReactProvider } from '@web3-react/core'
 import theme from './theme'
 
-import { ConnectProvider as Connect } from './contexts/Connect'
+// import { ConnectProvider as Connect } from './contexts/Connect'
+import { BackendProvider as Backend } from './contexts/BackendProvider'
 import { AppStateProvider } from './contexts/AppState'
 import MainView from './components/MainView'
 import Routes from './Routes'
@@ -21,7 +22,8 @@ function App() {
   return (
     <Suspense fallback="loading">
       <Web3ReactProvider getLibrary={getLibrary}>
-        <Connect>
+        {/* <Connect> */}
+        <Backend>
           <AppStateProvider appName={APP_NAME}>
             <ThemeProvider theme={theme}>
               <CssBaseline />
@@ -32,7 +34,8 @@ function App() {
               </HashRouter>
             </ThemeProvider>
           </AppStateProvider>
-        </Connect>
+        </Backend>
+        {/* </Connect> */}
       </Web3ReactProvider>
     </Suspense>
   )

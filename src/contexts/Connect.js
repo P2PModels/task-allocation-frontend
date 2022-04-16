@@ -5,7 +5,7 @@ import { getNetwork } from '../networks'
 const ConnectProvider = ({ children }) => {
   const {
     chainId,
-    org: { address: orgAddress, connectorType },
+    // org: { address: orgAddress, connectorType },
   } = getNetwork()
 
   return (

@@ -51,7 +51,7 @@ const networks = {
     ens: {
       registry: '0xe7410170f87102df0055eb195163a03b7f2bff4a',
     },
-    org: getRinkebyOrgData(INSTANCE),
+    // org: getRinkebyOrgData(INSTANCE),
   },
 }
 
@@ -59,13 +59,13 @@ function getDefaultChainId(instance) {
   if (instance === 'staging') return STAGING_CHAIN_ID
 }
 
-function getRinkebyOrgData(instance) {
-  if (instance === 'staging')
-    return {
-      address: STAGING_ROUND_ROBIN,
-      connectorType: STAGING_CONNECTOR_TYPE,
-    }
-}
+// function getRinkebyOrgData(instance) {
+//   if (instance === 'staging')
+//     return {
+//       address: STAGING_ROUND_ROBIN,
+//       connectorType: STAGING_CONNECTOR_TYPE,
+//     }
+// }
 
 export function getNetwork(chainId = getDefaultChainId(INSTANCE)) {
   return networks[chainId]
