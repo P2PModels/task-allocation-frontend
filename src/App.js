@@ -13,6 +13,7 @@ import MainView from './components/MainView'
 import Routes from './Routes'
 
 const APP_NAME = process.env.REACT_APP_TASK_ALLOCATION_APP_NAME
+const APP_ADDRESS = process.env.REACT_APP_RINKEBY_ROUND_ROBIN_CONTRACT_ADDRESS
 
 function getLibrary(provider, connector) {
   return new Web3(provider)
@@ -24,7 +25,7 @@ function App() {
       <Web3ReactProvider getLibrary={getLibrary}>
         {/* <Connect> */}
         <Backend>
-          <AppStateProvider appName={APP_NAME}>
+          <AppStateProvider appName={APP_NAME} appAddress={APP_ADDRESS}>
             <ThemeProvider theme={theme}>
               <CssBaseline />
               <HashRouter>

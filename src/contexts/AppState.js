@@ -5,33 +5,37 @@ import useOrgData from '../hooks/useOrgData'
 
 const AppStateContext = createContext()
 
-export function AppStateProvider({ appName, children }) {
-  const {
-    config,
-    errors,
-    installedApps,
-    loadingAppData,
-    organization,
-    roundRobinConnector,
-  } = useOrgData(appName)
+export function AppStateProvider({ appName, appAddress, children }) {
+  // const {
+  //   config,
+  //   errors,
+  //   installedApps,
+  //   loadingAppData,
+  //   organization,
+  //   roundRobinConnector,
+  // } = useOrgData(appName)
 
   // const { userErrors, user, loadingUserData } = useUser(
   //   userId,
   //   roundRobinConnector
   // )
 
-  const appLoading =
-    !errors && /* !userErrors */ loadingAppData /*  && loadingUserData */
+  // const appLoading =
+  //   !errors && /* !userErrors */ loadingAppData /*  && loadingUserData */
 
   return (
     <AppStateContext.Provider
       value={{
-        config,
-        errors: { orgErrors: errors /* userErrors */ },
-        installedApps,
-        organization,
-        isLoading: appLoading,
-        roundRobinConnector,
+        config: {
+          appName,
+          appAddress
+        }
+        // config,
+        // errors: { orgErrors: errors /* userErrors */ },
+        // installedApps,
+        // organization,
+        // isLoading: appLoading,
+        // roundRobinConnector,
         /* user, */
       }}
     >

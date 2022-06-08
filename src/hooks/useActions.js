@@ -15,9 +15,9 @@ const { AcceptTask, RejectTask } = Actions
 function useActions(onReportStatus) {
   const { account, library: web3 } = useWeb3React()
   // installedApps is used to get the app object used to get contract address
-  const { installedApps, organization } = useAppState()
+  // const { installedApps, organization } = useAppState()
   // Gets app object from installedApps array filtering by name
-  const app = getAppByName(installedApps, APP_NAME)
+  // const app = getAppByName(installedApps, APP_NAME)
 
   const getContractInstance = useCallback(
     (web3, abi) => {
@@ -32,22 +32,48 @@ function useActions(onReportStatus) {
   const reallocateTask = useCallback(
     taskId => {
       const hexTaskId = toBytes32(taskId)
-      sendIntent(
-        organization,
-        app.address,
-        'reallocateTask',
-        [hexTaskId],
-        {
+      // sendIntent(
+      //   organization,
+      //   app.address,
+      //   'reallocateTask',
+      //   [hexTaskId],
+      //   {
+      //     web3,
+      //     from: account,
+      //   },
+      //   type => {
+      //     console.log(`reallocateTask Tx status: ${type}`)
+      //   },
+      //   true
+      // )
+      try {
+        const rrContract = getContractInstance(web3, rrContractAbi)
+        processTransaction(
           web3,
-          from: account,
-        },
-        type => {
-          console.log(`reallocateTask Tx status: ${type}`)
-        },
-        true
-      )
+          { 
+            from: account,
+            to: APP_ADDRESS,
+            data: rrContract.methods['reallocateTask'](hexTaskId).encodeABI(), 
+            gas: GAS_LIMIT 
+          },
+          _ => {
+            console.log(`reallocateTask Tx status: info`)
+          },
+          _ => {
+            console.log(`reallocateTask Tx status: success`)
+          },
+          err => {
+            console.error(err)
+            console.log(`reallocateTask Tx status: error`)
+          }
+        )
+      } catch (err) {
+        console.error('Could not create tx:', err)
+        onReportStatus('error', AcceptTask)
+      }
     },
-    [organization, app, web3, account]
+    [web3, account]
+    // [organization, app, web3, account]
   )
   /**
    * Function that is triggered when a user
@@ -91,7 +117,7 @@ function useActions(onReportStatus) {
         onReportStatus('error', AcceptTask)
       }
     },
-    [app, web3, account, onReportStatus]
+    [web3, account, onReportStatus]
     // [organization, app, web3, account, onReportStatus]
   )
 
@@ -100,19 +126,42 @@ function useActions(onReportStatus) {
       const hexUserId = toBytes32(userId)
       const hexTaskId = toBytes32(taskId)
 
-      sendIntent(
-        organization,
-        app.address,
-        'rejectTask',
-        [hexUserId, hexTaskId],
-        {
+      // sendIntent(
+      //   organization,
+      //   app.address,
+      //   'rejectTask',
+      //   [hexUserId, hexTaskId],
+      //   {
+      //     web3,
+      //     from: account,
+      //   },
+      //   type => onReportStatus(type, RejectTask)
+      // )
+
+      try {
+        const rrContract = getContractInstance(web3, rrContractAbi)
+        processTransaction(
           web3,
-          from: account,
-        },
-        type => onReportStatus(type, RejectTask)
-      )
+          { 
+            from: account,
+            to: APP_ADDRESS,
+            data: rrContract.methods['rejectTask'](hexUserId, hexTaskId).encodeABI(), 
+            gas: GAS_LIMIT 
+          },
+          txHash => onReportStatus('info', RejectTask),
+          receipt => onReportStatus('success', RejectTask),
+          err => {
+            console.error(err)
+            onReportStatus('error', RejectTask)
+          }
+        )
+      } catch (err) {
+        console.error('Could not create tx:', err)
+        onReportStatus('error', RejectTask)
+      }
     },
-    [organization, app, web3, account, onReportStatus]
+    [web3, account, onReportStatus]
+    // [organization, app, web3, account, onReportStatus]
   )
 
   return {

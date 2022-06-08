@@ -30,6 +30,9 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
     priorityColor: palette.chips[priority],
   })
 
+  console.log("[TaskCard] End date: ")
+  console.log(endDate)
+
   return (
     <Card className={root} elevation={5}>
       <Box mb={1} pt={1} pl={2} pr={2}>

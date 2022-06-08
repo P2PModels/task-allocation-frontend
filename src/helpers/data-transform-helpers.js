@@ -7,6 +7,10 @@ export function transformConfigData(config) {
   }
 }
 
+export function generateUserId(hexUserId,appAddress) {
+  return `appAddress:${appAddress}-userId:${hexUserId}`
+}
+
 export function transformUserData(contractUser) {
   if (contractUser.allocatedTasks && contractUser.acceptedTasks) {
     const transformedAllocatedTasks = contractUser.allocatedTasks.map(t =>

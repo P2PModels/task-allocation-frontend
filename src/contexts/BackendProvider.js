@@ -1,3 +1,4 @@
+import React from 'react'
 import {
     ApolloClient,
     createHttpLink,
@@ -5,7 +6,7 @@ import {
     ApolloProvider,
 } from '@apollo/client'
 
-function BackendProvider(props) {
+export function BackendProvider(props) {
     const { children } = props
 
     const httpLink = createHttpLink({
@@ -19,5 +20,3 @@ function BackendProvider(props) {
 
     return <ApolloProvider client={client}>{children}</ApolloProvider>
 }
-
-export default BackendProvider

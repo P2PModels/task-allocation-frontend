@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react'
-import { useAppState } from '../contexts/AppState'
-import { useTasksForUserSubscription } from './useSubscriptions'
+import { useUserQuery, useTasksForUserQueryPolling } from './useRequests'
 import { mergeTaskData, mergeUserData } from '../helpers/data-transform-helpers'
 import { buildMapById } from '../helpers/general-helpers'
 import AmaraApi from '../amara-api'
 import { TaskStatuses } from '../types'
-import { toBytes32 } from '../helpers/web3-helpers'
 
 const { Assigned, Accepted } = TaskStatuses
 
@@ -35,12 +33,13 @@ async function getTasks(tasks, user) {
 }
 
 function useUserLogic(userId) {
-  const { roundRobinConnector } = useAppState()
-  const contractUserAllocatedTasks = useTasksForUserSubscription(
+  // const { roundRobinConnector } = useAppState()
+  const contractUser = useUserQuery(userId)
+  const contractUserAllocatedTasks = useTasksForUserQueryPolling(
     userId,
     Assigned
   )
-  const contractUserAcceptedTasks = useTasksForUserSubscription(
+  const contractUserAcceptedTasks = useTasksForUserQueryPolling(
     userId,
     Accepted
   )
@@ -49,16 +48,18 @@ function useUserLogic(userId) {
   const [allocatedTasks, setAllocatedTasks] = useState(null)
   const [acceptedTasks, setAcceptedTasks] = useState(null)
 
-  // Fetch Amara user data
+  // Fetch Amara & Ethereum user data
   useEffect(() => {
     async function buildUser(userId) {
       try {
-        const hexUserId = toBytes32(userId)
+        // const hexUserId = toBytes32(userId)
 
         const t0 = performance.now()
 
         const [rrUser, amaraUserRes] = await Promise.all([
-          roundRobinConnector.user(hexUserId),
+          // Query subgraph user
+          // roundRobinConnector.user(hexUserId),
+          contractUser,
           AmaraApi.users.getOne(userId),
         ])
 
@@ -74,9 +75,9 @@ function useUserLogic(userId) {
       }
     }
 
-    if (!roundRobinConnector) {
-      return
-    }
+    // if (!roundRobinConnector) {
+    //   return
+    // }
 
     if (!userId) {
       setUser({})
@@ -84,7 +85,9 @@ function useUserLogic(userId) {
 
     buildUser(userId)
     return () => {}
-  }, [userId, roundRobinConnector])
+  }, [userId, contractUser])
+  // }, [userId, roundRobinConnector])
+
 
   // Fetch team videos
   useEffect(() => {
