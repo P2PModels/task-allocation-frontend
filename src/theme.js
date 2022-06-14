@@ -45,11 +45,29 @@ const roboto700 = {
   `,
 }
 
+const white = {
+  0: '#fff',
+  100: '#FBF6F6'
+}
+
+const grey = {
+  300: '#d8d8d8',
+  400: '#ACB0B3',
+  500: '#333333',
+  900: '#474955',
+}
+
 const theme = createMuiTheme({
   palette: {
-    // primary: {
-    //   main: '#FF4B63',
-    // },
+    secondary: {
+      main: grey[500],
+    },
+    text: {
+      dark: grey[900],
+      main: grey[500],
+      light: white[100],
+      secondary: grey[400],
+    },
     chips: {
       low: '#30957B',
       medium: '#80BD3E',
@@ -59,17 +77,18 @@ const theme = createMuiTheme({
   typography: {
     fontFamily: ['Roboto', 'Arial', 'serif'],
   },
+  spacing: 16,
+    mixins: {
+        toolbar: {
+            minHeight: '116px',
+        },
+    },
   overrides: {
     MuiCssBaseline: {
       '@global': {
         '@font-face': [roboto300],
       },
     },
-    /* MuiTooltip: {
-      fontSize: '2em',
-      color: 'yellow',
-      backgroundColor: 'red',
-    }, */
   },
 })
 

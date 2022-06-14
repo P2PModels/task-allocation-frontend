@@ -6,14 +6,14 @@ import { Typography } from '@material-ui/core'
 const useStyles = makeStyles(theme => ({
   logoWrapper: {
     position: 'relative',
-    margin: theme.spacing(1),
+    margin: `${theme.spacing(1)}px 0`,
     cursor: 'default',
     userSelect: 'none',
   },
   subtitle: {
     position: 'absolute',
-    top: theme.spacing(4.5),
-    left: theme.spacing(10),
+    top: theme.spacing(2.5),
+    left: theme.spacing(5.25),
     color: theme.palette.secondary.light,
   },
 }))

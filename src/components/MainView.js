@@ -3,6 +3,7 @@ import { Box, Container } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 
 import NavBar from './NavBar'
+import Footer from './Footer'
 import NoMetamaskDetected from './ErrorPanels/NoMetamaskDetected'
 
 const UPPER_MARGIN = 12
@@ -23,6 +24,7 @@ const MainView = ({ children }) => {
           {hasMetamask ? children : <NoMetamaskDetected />}
         </Box>
       </Container>
+      <Footer />
     </div>
   )
 }
