@@ -4,16 +4,14 @@ import { useAppState } from '../contexts/AppState'
 import { getAppByName } from '../helpers/app-connector-helpers'
 import { Actions } from '../actions-types'
 import { toBytes32 } from '../helpers/web3-helpers'
-import rrContractAbi from '../assets/abis/RoundRobinApp'
 
-const APP_NAME = process.env.REACT_APP_TASK_ALLOCATION_APP_NAME
-const APP_ADDRESS = process.env.REACT_APP_RINKEBY_ROUND_ROBIN_CONTRACT_ADDRESS
 const PRIVATE_KEY = process.env.REACT_APP_SERVER_ACCOUNT_PRIVATE_KEY
 const GAS_LIMIT = 450000
 const { AcceptTask, RejectTask } = Actions
 
 function useActions(onReportStatus) {
   const { account, library: web3 } = useWeb3React()
+  const { appName, contractAddress, contractABI } = useAppState()
   // installedApps is used to get the app object used to get contract address
   // const { installedApps, organization } = useAppState()
   // Gets app object from installedApps array filtering by name
@@ -47,13 +45,13 @@ function useActions(onReportStatus) {
       //   true
       // )
       try {
-        const rrContract = getContractInstance(web3, rrContractAbi)
+        const modelContract = getContractInstance(web3, contractABI)
         processTransaction(
           web3,
           { 
             from: account,
-            to: APP_ADDRESS,
-            data: rrContract.methods['reallocateTask'](hexTaskId).encodeABI(), 
+            to: contractAddress,
+            data: modelContract.methods['reallocateTask'](hexTaskId).encodeABI(), 
             gas: GAS_LIMIT 
           },
           _ => {
@@ -96,13 +94,13 @@ function useActions(onReportStatus) {
       //   type => onReportStatus(type, AcceptTask)
       // )
       try {
-        const rrContract = getContractInstance(web3, rrContractAbi)
+        const modelContract = getContractInstance(web3, contractABI)
         processTransaction(
           web3,
           { 
             from: account,
-            to: APP_ADDRESS,
-            data: rrContract.methods['acceptTask'](hexUserId, hexTaskId).encodeABI(), 
+            to: contractAddress,
+            data: modelContract.methods['acceptTask'](hexUserId, hexTaskId).encodeABI(), 
             gas: GAS_LIMIT 
           },
           txHash => onReportStatus('info', AcceptTask),
@@ -139,13 +137,13 @@ function useActions(onReportStatus) {
       // )
 
       try {
-        const rrContract = getContractInstance(web3, rrContractAbi)
+        const modelContract = getContractInstance(web3, contractABI)
         processTransaction(
           web3,
           { 
             from: account,
-            to: APP_ADDRESS,
-            data: rrContract.methods['rejectTask'](hexUserId, hexTaskId).encodeABI(), 
+            to: contractAddress,
+            data: modelContract.methods['rejectTask'](hexUserId, hexTaskId).encodeABI(), 
             gas: GAS_LIMIT 
           },
           txHash => onReportStatus('info', RejectTask),

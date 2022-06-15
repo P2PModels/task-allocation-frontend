@@ -49,7 +49,7 @@ export function useConfigSubscription(roundRobinConnector) {
 }
 
 export function useUserQuery(userId) {
-  const { config } = useAppState()
+  const { contractAddress } = useAppState()
   const [user, setUser] = useState(null)
   const hexUserId = toBytes32(userId)
   const rawUserRef = useRef(null)
@@ -77,7 +77,7 @@ export function useUserQuery(userId) {
   const userQuery = useRef(
     useQuery(USER, {
       variables: {
-        id: generateUserId(hexUserId,config.appAddress),
+        id: generateUserId(hexUserId,contractAddress),
       },
       onCompleted: onUserHandler,
       onError: onUserErrorHanlder
@@ -96,7 +96,7 @@ export function useTasksForUserQueryPolling(
   // We had to change the logic from a fake subscription (aragon does this)
   // to a query that uses polling
 
-  const { config } = useAppState()
+  const { contractAddress } = useAppState()
   const [userTasks, setUserTasks] = useState([])
   const hexUserId = toBytes32(userId)
   const convertedStatus = [convertToInt(status)]
@@ -136,7 +136,7 @@ export function useTasksForUserQueryPolling(
     useQuery(USER_TASKS_BY_STATUS, {
       variables: {
         statuses: convertedStatus,
-        userId: generateUserId(hexUserId,config.appAddress),
+        userId: generateUserId(hexUserId,contractAddress),
         first,
         skip
       },
