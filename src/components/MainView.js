@@ -9,7 +9,10 @@ import NoMetamaskDetected from './ErrorPanels/NoMetamaskDetected'
 const UPPER_MARGIN = 12
 
 const useStyles = makeStyles(theme => ({
-  root: { border: '', padding: theme.spacing(2), marginTop: theme.spacing(30) },
+  root: { 
+    border: '', 
+    marginTop: theme.mixins.toolbar.minHeight 
+  },
 }))
 
 const MainView = ({ children }) => {

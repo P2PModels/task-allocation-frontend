@@ -1,10 +1,24 @@
 import React, { useState, useRef, useMemo } from 'react'
+import { makeStyles } from '@material-ui/core/styles'
 import PropTypes from 'prop-types'
 
 import { Grid, Typography, Box } from '@material-ui/core'
 import RRTasksGroup from './TasksSection/RRTasksGroup'
 
 const TASKS_PER_PAGE = 4
+
+const useStyles = makeStyles(theme => ({
+  title: {
+      fontSize: '50px',
+      lineHeight: '50px',
+      fontWeight: 300
+  },
+  description: {
+      fontSize: '14px',
+      lineHeight: '1.25rem',
+      fontWeight: 400
+  },
+}))
 
 function computePageTasks(tasks, selectedPage) {
   if (!tasks) {
@@ -21,9 +35,11 @@ const TaskSection = ({
   tasks = [],
   videoRegistry = new Map(),
   title,
+  description = '',
   emptyText,
   taskActionButtons = [],
 }) => {
+  const classes = useStyles()
   const anchorRef = useRef(null)
   const [selectedPage, setSelectedPage] = useState(1)
   const currentTasks = useMemo(() => computePageTasks(tasks, selectedPage), [
@@ -48,8 +64,11 @@ const TaskSection = ({
       {tasks && tasks.length ? (
         <React.Fragment>
           <Grid item>
-            <Box mb={10} ref={anchorRef}>
-              <Typography variant="h3">{title}</Typography>
+            <Box mb={1} ref={anchorRef}>
+              <Typography variant="h3" className={classes.title}>{title}</Typography>
+            </Box>
+            <Box>
+              <Typography variant="h5" className={classes.description}>{description}</Typography>
             </Box>
           </Grid>
           <Grid item>

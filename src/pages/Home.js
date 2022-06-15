@@ -17,16 +17,20 @@ import {
   Snackbar,
   Slide,
   CircularProgress,
+  Button,
 } from '@material-ui/core'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { Alert } from '@material-ui/lab'
 import CheckIcon from '@material-ui/icons/Check'
 
+import Banner from '../components/Banner'
 import TaskSection from '../components/TaskSection'
 import MessageModal from '../components/Modals/MessageModal'
-import Homepage from '../assets/Homepage.svg'
 import TransactionModal from '../components/Modals/TransactionModal'
 import NoValidUserEntered from '../components/ErrorPanels/NoValidUserEntered'
+import { useAppState } from '../contexts/AppState'
+import Homepage from '../assets/Homepage.svg'
+
 
 const { AcceptTask, RejectTask } = Actions
 const SNACKBAR_FIXED_TIME = 700
@@ -88,6 +92,7 @@ const Home = () => {
   const web3React = useWeb3React()
   const { account } = web3React
   const { pathname } = useLocation()
+  const { modelName } = useAppState()
   const userId = getResourceFromPathname(pathname, 'user')
   const {
     user,
@@ -250,45 +255,24 @@ const Home = () => {
 
     return (
       <div className={root}>
+
+
         <Grid
           container
           direction="column"
           justify="space-evenly"
           alignItems="center"
         >
-          <Grid container direction="row" justify="space-evenly">
-            <Fade in={true} style={{ transitionDelay: '300ms' }}>
-              <Grid item lg={4} xl={4}>
-                <Grid item>
-                  <Box mb={1}>
-                    <Typography variant="h2">Hi {userId}!</Typography>
-                  </Box>
-                  <Box mb={4}>
-                    <Typography variant="h5">
-                      Nice to see you. Welcome to the new allocation assignment
-                      system.
-                    </Typography>
-                  </Box>
-                </Grid>
-                <Grid item lg={8} xl={8}>
-                  <Typography variant="subtitle1">
-                    You have a period of time to accept or reject an assignment.
-                    During this time, they are assigned to you. After
-                    that, we&apos;ll release them to someone else.
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Fade>
-            <Fade in={true} style={{ transitionDelay: '500ms' }}>
-              <Grid item lg={6} xl={6}>
-                <img src={Homepage} alt="Homepage image" />
-              </Grid>
-            </Fade>
-          </Grid>
+          <Banner 
+            title="Título del modelo" 
+            description="Descrición del modelo seleccionado"
+            img={Homepage}
+            cta={(<Button>Botón</Button>)}
+          />
           {!loadingAppLogic && (
             <Grid container className={taskSection}>
               <Grid item>
-                <Box mt={8} width="100">
+                {/* <Box mt={2} width="100">
                   <TaskSection
                     tasks={acceptedTasks}
                     videoRegistry={videosRegistry}
@@ -296,13 +280,14 @@ const Home = () => {
                     emptyText="You don't have any accepted assignments."
                     taskActionButtons={assignedTaskActionButtons}
                   />
-                </Box>
+                </Box> */}
                 {/* acceptedTasks.length */}
-                <Box mt={!acceptedTasks ? 0 : 15} width="100">
+                <Box mt={!acceptedTasks ? 0 : 2} width="100">
                   <TaskSection
                     tasks={acceptedTasks.length ? [] : allocatedTasks}
                     videoRegistry={videosRegistry}
-                    title="These assignments are currently free: "
+                    title="Tasks assigned to you"
+                    description=""
                     emptyText="You don't have any available assignments."
                     taskActionButtons={
                       statusTaskButtons
@@ -315,6 +300,9 @@ const Home = () => {
             </Grid>
           )}
         </Grid>
+
+
+
         <Snackbar
           open={openTxSnackbar}
           anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}

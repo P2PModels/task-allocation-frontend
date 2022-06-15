@@ -21,7 +21,9 @@ const useStyles = makeStyles(theme => ({
     footer: {
         padding: theme.spacing(1),
         backgroundColor: theme.palette.secondary.main,
-        color: theme.palette.text.light
+        color: theme.palette.text.light,
+        position: 'relative',
+        zIndex: 1200
     },
     footerContent: {
         justifyContent: 'space-between',
