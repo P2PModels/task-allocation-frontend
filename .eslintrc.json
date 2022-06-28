@@ -17,15 +17,12 @@
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
-    "plugins": [
-        "react",
-        "prettier",
-        "react-hooks"
-    ],
+    "plugins": ["react", "prettier", "react-hooks", "only-warn"],
     "rules": {
         "linebreak-style": ["error", "unix"],
         "react/prop-types": 0,
         "react-hooks/rules-of-hooks": "error",
-        "react-hooks/exhaustive-deps": "warn"
+        "react-hooks/exhaustive-deps": "warn",
+        "prettier/prettier": "warn"
     }
 }
