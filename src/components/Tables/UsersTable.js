@@ -34,25 +34,25 @@ const StyledTableRow = withStyles(theme => ({
     },
 }))(TableRow)
 
-const TasksTable = ({ tasks }) => {
+const UsersTable = ({ users }) => {
     const classes = useStyles()
 
-    return tasks ? (
+    return (
         <TableContainer component={Paper}>
-            <Table stickyHeader aria-label="Tasks Table">
+            <Table stickyHeader aria-label="Transactions Table">
                 <TableHead>
                     <TableRow>
+                        <StyledTableCell align="center">Id</StyledTableCell>
                         <StyledTableCell align="center">
-                            Task Id
+                            Has task
                         </StyledTableCell>
-                        <StyledTableCell align="center">Status</StyledTableCell>
                         <StyledTableCell align="center">
-                            Assigned to
+                            Task id
                         </StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {tasks == null ? (
+                    {users == null ? (
                         <StyledTableRow>
                             <StyledTableCell
                                 componenet="th"
@@ -63,7 +63,7 @@ const TasksTable = ({ tasks }) => {
                                 Loading data...
                             </StyledTableCell>
                         </StyledTableRow>
-                    ) : !tasks.length ? (
+                    ) : !users.length ? (
                         <StyledTableRow>
                             <StyledTableCell
                                 componenet="th"
@@ -71,24 +71,24 @@ const TasksTable = ({ tasks }) => {
                                 colSpan="4"
                                 align="center"
                             >
-                                No tasks
+                                No users
                             </StyledTableCell>
                         </StyledTableRow>
                     ) : (
-                        tasks.map(task => (
-                            <StyledTableRow key={task.id}>
+                        users.map(user => (
+                            <StyledTableRow key={user.id}>
                                 <StyledTableCell
+                                    align="center"
                                     component="th"
                                     scope="row"
-                                    align="center"
                                 >
-                                    {task.id}
+                                    {user.id}
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
-                                    {task.status}
+                                    {user.hasTask ? '✔️' : '❌'}
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
-                                    {task.userId}
+                                    {user.id}
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))
@@ -96,9 +96,7 @@ const TasksTable = ({ tasks }) => {
                 </TableBody>
             </Table>
         </TableContainer>
-    ) : (
-        <></>
     )
 }
 
-export default TasksTable
+export default UsersTable
