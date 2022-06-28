@@ -10,12 +10,6 @@ import Paper from '@material-ui/core/Paper'
 import IconButton from '@material-ui/core/IconButton'
 import RefreshIcon from '@material-ui/icons/Refresh'
 
-const useStyles = makeStyles({
-    table: {
-        minWidth: 650,
-    },
-})
-
 const StyledTableCell = withStyles(theme => ({
     head: {
         backgroundColor: theme.palette.secondary.dark,
@@ -34,25 +28,21 @@ const StyledTableRow = withStyles(theme => ({
     },
 }))(TableRow)
 
-const TasksTable = ({ tasks }) => {
-    const classes = useStyles()
-
-    return tasks ? (
+const TxsTable = ({ txs }) => {
+    return txs ? (
         <TableContainer component={Paper}>
-            <Table stickyHeader aria-label="Tasks Table">
+            <Table stickyHeader aria-label="Transactions Table">
                 <TableHead>
                     <TableRow>
                         <StyledTableCell align="center">
-                            Task Id
+                            Block number
                         </StyledTableCell>
-                        <StyledTableCell align="center">Status</StyledTableCell>
-                        <StyledTableCell align="center">
-                            Assigned to
-                        </StyledTableCell>
+                        <StyledTableCell align="center">To</StyledTableCell>
+                        <StyledTableCell align="center">From</StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {tasks == null ? (
+                    {txs == null ? (
                         <StyledTableRow>
                             <StyledTableCell
                                 componenet="th"
@@ -63,7 +53,7 @@ const TasksTable = ({ tasks }) => {
                                 Loading data...
                             </StyledTableCell>
                         </StyledTableRow>
-                    ) : !tasks.length ? (
+                    ) : !txs.length ? (
                         <StyledTableRow>
                             <StyledTableCell
                                 componenet="th"
@@ -71,24 +61,24 @@ const TasksTable = ({ tasks }) => {
                                 colSpan="4"
                                 align="center"
                             >
-                                No tasks
+                                No transactions
                             </StyledTableCell>
                         </StyledTableRow>
                     ) : (
-                        tasks.map(task => (
-                            <StyledTableRow key={task.id}>
+                        txs.map(tx => (
+                            <StyledTableRow key={tx.transactionHash}>
                                 <StyledTableCell
                                     component="th"
                                     scope="row"
                                     align="center"
                                 >
-                                    {task.id}
+                                    {tx.blockNumber}
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
-                                    {task.status}
+                                    {tx.to}
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
-                                    {task.userId}
+                                    {tx.from}
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))
@@ -101,4 +91,4 @@ const TasksTable = ({ tasks }) => {
     )
 }
 
-export default TasksTable
+export default TxsTable

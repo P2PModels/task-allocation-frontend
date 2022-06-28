@@ -3,12 +3,12 @@ import { toChecksumAddress, toHex } from 'web3-utils'
 // Every byte consists of two hex values hence 32 * 2 = 64.
 // And 0x + 64 = 66 values
 export function toBytes32(text, totalLength = 66) {
-  const hexText = toHex(text)
-  const paddingSize = totalLength - hexText.length
+    const hexText = toHex(text)
+    const paddingSize = totalLength - hexText.length
 
-  if (paddingSize <= 0) return hexText
+    if (paddingSize <= 0) return hexText
 
-  return hexText + Array(paddingSize).fill(0).join('')
+    return hexText + Array(paddingSize).fill(0).join('')
 }
 
 /**
@@ -25,29 +25,29 @@ export function toBytes32(text, totalLength = 66) {
  * @returns {string} The shortened address
  */
 export function shortenAddress(address, charsLength = 4) {
-  const prefixLength = 2 // "0x"
-  if (!address) {
-    return ''
-  }
-  if (address.length < charsLength * 2 + prefixLength) {
-    return address
-  }
-  return (
-    address.slice(0, charsLength + prefixLength) +
-    '…' +
-    address.slice(-charsLength)
-  )
+    const prefixLength = 2 // "0x"
+    if (!address) {
+        return ''
+    }
+    if (address.length < charsLength * 2 + prefixLength) {
+        return address
+    }
+    return (
+        address.slice(0, charsLength + prefixLength) +
+        '…' +
+        address.slice(-charsLength)
+    )
 }
 
 // Check address equality with checksums
 export function addressesEqual(first, second) {
-  first = first && toChecksumAddress(first)
-  second = second && toChecksumAddress(second)
-  return first === second
+    first = first && toChecksumAddress(first)
+    second = second && toChecksumAddress(second)
+    return first === second
 }
 
 export function timestampToDate(timestamp) {
-  return new Date(timestamp * 1000)
+    return new Date(timestamp * 1000)
 }
 
 export { toHex, hexToUtf8 } from 'web3-utils'

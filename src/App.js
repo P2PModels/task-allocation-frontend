@@ -3,43 +3,46 @@ import { HashRouter } from 'react-router-dom'
 import { ThemeProvider } from '@material-ui/core/styles'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import Web3 from 'web3'
-import { Web3ReactProvider } from '@web3-react/core'
+import { Web3ReactProvider, createWeb3ReactRoot } from '@web3-react/core'
 import theme from './theme'
 
-// import { ConnectProvider as Connect } from './contexts/Connect'
+import { ConnectProvider as Connect } from './contexts/Connect'
 import { BackendProvider as Backend } from './contexts/BackendProvider'
 import { AppStateProvider } from './contexts/AppState'
 import MainView from './components/MainView'
 import Routes from './Routes'
 
-const APP_NAME = process.env.REACT_APP_TASK_ALLOCATION_APP_NAME
-const APP_ADDRESS = process.env.REACT_APP_RINKEBY_ROUND_ROBIN_CONTRACT_ADDRESS
-
-function getLibrary(provider, connector) {
-  return new Web3(provider)
+function getLibrary(provider) {
+    return new Web3(provider)
 }
 
+// const AdminWeb3ReactProvider = createWeb3ReactRoot('adminProvider')
+
 function App() {
-  return (
-    <Suspense fallback="loading">
-      <Web3ReactProvider getLibrary={getLibrary}>
-        {/* <Connect> */}
-        <Backend>
-          <AppStateProvider appName={APP_NAME} appAddress={APP_ADDRESS}>
-            <ThemeProvider theme={theme}>
-              <CssBaseline />
-              <HashRouter>
-                <MainView>
-                  <Routes />
-                </MainView>
-              </HashRouter>
-            </ThemeProvider>
-          </AppStateProvider>
-        </Backend>
-        {/* </Connect> */}
-      </Web3ReactProvider>
-    </Suspense>
-  )
+    return (
+        <Suspense fallback="loading">
+            <AppStateProvider>
+                <Web3ReactProvider getLibrary={getLibrary}>
+                    <Connect>
+                        {/* <AdminWeb3ReactProvider getLibrary={getLibrary}>
+                            <Connect networkOnlyConnector> */}
+                        <Backend>
+                            <ThemeProvider theme={theme}>
+                                <CssBaseline />
+                                <HashRouter>
+                                    <MainView>
+                                        <Routes />
+                                    </MainView>
+                                </HashRouter>
+                            </ThemeProvider>
+                        </Backend>
+                        {/* </Connect>
+                        </AdminWeb3ReactProvider> */}
+                    </Connect>
+                </Web3ReactProvider>
+            </AppStateProvider>
+        </Suspense>
+    )
 }
 
 export default App

@@ -5,12 +5,14 @@ import {
     InMemoryCache,
     ApolloProvider,
 } from '@apollo/client'
+import { useAppState } from './AppState'
 
 export function BackendProvider(props) {
     const { children } = props
+    const { endpoint } = useAppState()
 
     const httpLink = createHttpLink({
-        uri: process.env.REACT_APP_SUBGRAPH_ENDPOINT,
+        uri: endpoint,
     })
 
     const client = new ApolloClient({

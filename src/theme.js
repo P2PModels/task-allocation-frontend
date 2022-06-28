@@ -1,6 +1,7 @@
 import { createMuiTheme } from '@material-ui/core/styles'
 
 import {
+  roboto100ttf,
   roboto300Woff,
   roboto300Woff2,
   roboto500Woff,
@@ -8,6 +9,17 @@ import {
   roboto700Woff,
   roboto700Woff2,
 } from './assets/fonts'
+
+const roboto100 = {
+  fontFamily: 'Roboto',
+  fontStyle: 'normal',
+  fontWeight: 100,
+  src: `
+    local('Roboto Thin'),
+    local('Roboto-Thin'),
+    url(${roboto100ttf}) format('ttf')
+  `,
+}
 
 const roboto300 = {
   fontFamily: 'Roboto',
@@ -47,11 +59,12 @@ const roboto700 = {
 
 const white = {
   0: '#fff',
-  100: '#FBF6F6'
+  100: '#FBF6F6',
+  300: '#f3f4f6'
 }
 
 const grey = {
-  300: '#d8d8d8',
+  300: '#D8DBE4',
   400: '#ACB0B3',
   500: '#333333',
   900: '#474955',
@@ -73,19 +86,24 @@ const theme = createMuiTheme({
       medium: '#80BD3E',
       high: '#F3254D',
     },
+    background: {
+      primary: white[100],
+      secondary: white[300]
+    }
   },
   typography: {
-    fontFamily: ['Roboto', 'Arial', 'serif'],
+    fontFamily: ['Roboto', 'Arial', 'serif'], 
   },
   spacing: 16,
-    mixins: {
-        toolbar: {
-            minHeight: '116px',
-        },
-    },
+  mixins: {
+      toolbar: {
+          minHeight: '90px',
+      },
+  },
   overrides: {
     MuiCssBaseline: {
       '@global': {
+        '@font-face': [roboto100],
         '@font-face': [roboto300],
       },
     },
