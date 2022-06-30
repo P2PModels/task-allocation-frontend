@@ -7,7 +7,7 @@ const models = [
         name: 'fcfs',
         displayName: 'First come first serve',
         description:
-            'This model allocates the task to the firs person to claim for it. Is the current model used in the oficial platform.',
+            'We are currently piloting a new way of distributing the tasks and therefore the value within our platform. Thank you for your collaboration! This model allocates the task to the first person to claim for it. Is the current model used in the oficial platform so it should be familiar. We use it as the reference to see the performance of the other models.',
         contractAddress: process.env.REACT_APP_RINKEBY_FCFS_CONTRACT_ADDRESS,
         contractAbi: FCFS_CONTRACT.abi,
         endpoint: process.env.REACT_APP_FCFS_SUBGRAPH_ENDPOINT,
