@@ -11,7 +11,7 @@ import {
 const useStyles = makeStyles(theme => ({
     root: {
         backgroundColor: theme.palette.background.secondary,
-        padding: theme.spacing(1,0),
+        padding: theme.spacing(2,0),
         position: 'relative',
         '&:before': {
             content: "''",
@@ -25,11 +25,6 @@ const useStyles = makeStyles(theme => ({
             zIndex: '-1'
         }
     },
-    img: {
-        height: '100%',
-        width: '100%',
-        objectFit: 'cover',
-    },
     title: {
         fontSize: '24px',
         lineHeight: '1.75rem',
@@ -39,6 +34,19 @@ const useStyles = makeStyles(theme => ({
         fontSize: '14px',
         lineHeight: '1.25rem',
         fontWeight: 400
+    },
+    textImgWrapper:  {
+        position: 'relative',
+        height: '100%',
+        overflow: 'visible',
+        '& img':  {
+            height: '140px',
+            width: 'auto',
+            // objectFit: 'cover',
+            position: 'absolute',
+            bottom: theme.spacing(-2),
+            left: '75%',
+        },
     },
     h100: {
         height: '100%'
@@ -53,13 +61,10 @@ export default function Banner({title, description, img, cta}) {
     return (
         <Grid container direction="row" justify="space-between" className={classes.root}>
             <Fade in={true} style={{ transitionDelay: '300ms' }}>
-                <Grid item lg={8} xl={6}>
+                <Grid item lg={8} xl={6} className={classes.textImgWrapper}>
                     <Grid container direction="row" spacing={2}>
-                        <Grid item lg={4} xl={3}>
-                            <img src={img} alt="Model description image" className={classes.img} />
-                        </Grid>
                         <Grid item lg={8} xl={9}>
-                            <Grid container direction='column' justify='center' className={classes.h100}>
+                            <Grid container direction='column' justify='flex-start' className={classes.h100}>
                                 <Grid item mb={1}>
                                     <Typography variant="h2" className={classes.title}>{title}</Typography>
                                 </Grid>
@@ -67,6 +72,9 @@ export default function Banner({title, description, img, cta}) {
                                     <Typography variant="h5" className={classes.description}>{description}</Typography>
                                 </Grid>
                             </Grid>
+                        </Grid>
+                        <Grid item lg={4} xl={3}>
+                            <img src={img} alt="Model description image"/>
                         </Grid>
                     </Grid>
                 </Grid>
