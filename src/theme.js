@@ -15,10 +15,8 @@ const roboto100 = {
   fontStyle: 'normal',
   fontWeight: 100,
   src: `
-    local('Roboto Thin'),
-    local('Roboto-Thin'),
-    url(${roboto100ttf}) format('ttf')
-  `,
+    url(https://fonts.gstatic.com/s/roboto/v30/KFOkCnqEu92Fr1MmgVxIIzI.woff2) format('woff2'),
+    url(${roboto100ttf}) format('ttf')`,
 }
 
 const roboto300 = {
@@ -30,6 +28,15 @@ const roboto300 = {
     local('Roboto-Light'),
     url(${roboto300Woff2}) format('woff2'),
     url(${roboto300Woff}) format('woff')
+  `,
+}
+
+const roboto400 = {
+  fontFamily: 'Roboto',
+  fontStyle: 'normal',
+  fontWeight: 400,
+  src: `
+    url(https://fonts.gstatic.com/s/roboto/v30/KFOmCnqEu92Fr1Mu4mxK.woff2) format('woff2')
   `,
 }
 
@@ -103,8 +110,8 @@ const theme = createMuiTheme({
   overrides: {
     MuiCssBaseline: {
       '@global': {
-        '@font-face': [roboto100],
-        '@font-face': [roboto300],
+          '@font-face': [roboto100, roboto300, roboto400, roboto500, roboto700],
+          'body': {'backgroundColor': white[0]},
       },
     },
   },
