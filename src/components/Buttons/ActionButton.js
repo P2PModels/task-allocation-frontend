@@ -9,6 +9,7 @@ const useStyles = makeStyles(() => ({
     background: ({ color }) => color,
     color: 'white',
     fontWeight: 'bold',
+    borderRadius: 0,
     '&:hover': {
       backgroundColor: ({ hoverColor }) => hoverColor,
     },

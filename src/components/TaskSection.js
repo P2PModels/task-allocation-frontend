@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import PropTypes from 'prop-types'
 
 import { Grid, Typography, Box } from '@material-ui/core'
-import RRTasksGroup from './TasksSection/RRTasksGroup'
+import FCFSTasksGroup from './TasksSection/FCFSTasksGroup'
 
 const TASKS_PER_PAGE = 4
 
@@ -11,7 +11,7 @@ const useStyles = makeStyles(theme => ({
   title: {
       fontSize: '50px',
       lineHeight: '50px',
-      fontWeight: 300
+      fontWeight: 100
   },
   description: {
       fontSize: '14px',
@@ -72,7 +72,7 @@ const TaskSection = ({
             </Box>
           </Grid>
           <Grid item>
-            <RRTasksGroup
+            <FCFSTasksGroup
               tasks={currentTasks}
               videoRegistry={videoRegistry}
               actionButtons={taskActionButtons}

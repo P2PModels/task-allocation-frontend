@@ -11,12 +11,16 @@ import ActionButton from '../../Buttons/ActionButton'
 
 const useStyles = makeStyles(theme => ({
   root: {
-    width: 330,
+    minWidth: 280,
     // padding: theme.spacing(2),
   },
   chip: {
     backgroundColor: ({ priorityColor }) => priorityColor,
   },
+  cardContent: {
+    padding: 0,
+    paddingTop: theme.spacing(2)
+  }
 }))
 
 const TaskCard = ({ task, video, actionButtons = [] }) => {
@@ -26,29 +30,28 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
   const priority = getPriority(reallocationTime)
   const theme = useTheme()
   const { palette } = theme
-  const { root, chip } = useStyles({
+  const { root, chip, cardContent, timer } = useStyles({
     priorityColor: palette.chips[priority],
   })
 
-  console.log("[TaskCard] End date: ")
-  console.log(endDate)
+  // console.log("[TaskCard] End date: ")
+  // console.log(endDate)
 
   return (
-    <Card className={root} elevation={5}>
-      <Box mb={1} pt={1} pl={2} pr={2}>
+    <Card className={root} elevation={0}>
+      <Box mb={.5} pt={1}>
         <Grid
           container
           direction="row"
-          justify={actionButtons.length === 1 ? "flex-end" : "space-between"}
+          justify="space-between"
+          // justify={actionButtons.length === 1 ? "flex-end" : "space-between"}
           alignItems="center"
         >
           {actionButtons.length === 1 &&
           actionButtons[0].label.toLowerCase() === 'translate' ? null : (
-            <React.Fragment>
               <Grid item>
                 <Timer end={endDate} onTimeOut={() => setDisabled(true)} />
               </Grid>
-            </React.Fragment>
           )}
           <Grid item>
             <Chip
@@ -60,7 +63,7 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
         </Grid>
       </Box>
       <Thumbnail video={video} targetLanguage={task.language} />
-      <CardContent>
+      <CardContent className={cardContent}>
         <Details task={task} video={video} />
         <Box
           display="flex"

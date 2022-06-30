@@ -9,7 +9,12 @@ import languageCodes from '../../../language-codes'
 dayjs.extend(relativeTime)
 
 const useStyles = makeStyles(theme => ({
+  detailText: {
+    fontSize: 12,
+    marginBottom: theme.spacing(.5)
+  },
   detailWrapper: {
+    fontSize: 13,
     display: '-webkit-box',
     WebkitLineClamp: 2,
     WebkitBoxOrient: 'vertical',
@@ -18,6 +23,7 @@ const useStyles = makeStyles(theme => ({
 }))
 
 const Details = ({ task, video = {} }) => {
+  const { detailText } = useStyles()
   const { due_date } = task
   const {
     title,
@@ -43,7 +49,7 @@ const Details = ({ task, video = {} }) => {
 
   return (
     <Box>
-      <Typography variant="body1" color="textSecondary" gutterBottom>
+      <Typography className={detailText} variant="body1" color="textSecondary" gutterBottom>
         DETAILS
       </Typography>
       <Detail name="Team" value={team} />

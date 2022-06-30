@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
+import clsx from 'clsx'
 import PropTypes from 'prop-types'
 import dayjs from 'dayjs'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
@@ -17,6 +18,12 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
     marginTop: theme.spacing(0.1),
+  },
+  timeTextWrapper: {
+    padding: '0 0 0 .25rem'
+  },
+  timeText: {
+    fontSize: 12
   },
   timeUnit: {
     display: 'inline-flex',
@@ -105,7 +112,7 @@ const Timer = ({
   showIcon = true,
   onTimeOut = () => {},
 }) => {
-  const { timer, clockIconWrapper, timeUnit, separator } = useStyles()
+  const { timer, clockIconWrapper, timeUnit, separator, timeTextWrapper, timeText } = useStyles()
   const theme = useTheme()
   // Need to check if component is mounted to update timer
   const isMountedRef = useRef(false)
@@ -153,16 +160,15 @@ const Timer = ({
         direction="row"
         alignItems="center"
         justify="center"
-        spacing={1}
       >
         <Grid item>
           {showIcon && (
             <span className={clockIconWrapper}>
-              <ClockIcon style={{ color: theme.palette.text.secondary }} />
+              <ClockIcon style={{ color: theme.palette.text.secondary, fontSize: 20 }} />
             </span>
           )}
         </Grid>
-        <Grid item>
+        <Grid item className={timeTextWrapper}>
           <Typography variant="subtitle1" color="textSecondary">
             {units.map((unit, index) => {
               const isLast = index === lastUnitIndex
@@ -178,7 +184,7 @@ const Timer = ({
 
               return (
                 <React.Fragment key={index}>
-                  <span className={isSeconds ? timeUnit : {}}>
+                  <span className={isSeconds ? clsx(timeText,timeUnit) : timeText}>
                     {formatUnit(unit[1])}
                     <Box component="span" ml={0.2}>
                       {unit[0]}
