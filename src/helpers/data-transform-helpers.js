@@ -1,4 +1,3 @@
-import { getFieldFromEntityId } from './app-connector-helpers'
 import { hexToUtf8, timestampToDate } from './web3-helpers'
 
 export function transformConfigData(config) {
@@ -32,13 +31,15 @@ export function transformUserData(contractUser) {
 }
 
 export function transformTaskData(task) {
-    const entityId = task.id
-    const endDate = task.endDate
+    if (task.endDate) {
+        return {
+            ...task,
+            endDate: timestampToDate(task.endDate),
+        }
+    }
+
     return {
         ...task,
-        entityId,
-        id: hexToUtf8(getFieldFromEntityId(entityId, 'taskId')),
-        endDate: timestampToDate(endDate),
     }
 }
 
