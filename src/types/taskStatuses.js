@@ -1,27 +1,27 @@
 export const TaskStatuses = {
-  NonExistent: Symbol('TASK_STATUS_NONEXISTENT'),
-  Available: Symbol('TASK_STATUS_AVAILABLE'),
-  Assigned: Symbol('TASK_STATUS_ASSIGNED'),
-  Accepted: Symbol('TASK_STATUS_ACCEPTED'),
-  Rejected: Symbol('TASK_STATUS_REJECTED'),
-  Completed: Symbol('TASK_STATUS_COMPLETED'),
+  NonExistent: Symbol('NON_EXISTENT'),
+  Available: Symbol('AVAILABLE'),
+  // Assigned: Symbol('ASSIGNED'),
+  Accepted: Symbol('ACCEPTED'),
+  // Rejected: Symbol('REJECTED'),
+  Completed: Symbol('COMPLETED'),
 }
 
 const symbolMapping = {
   NonExistent: TaskStatuses.NonExistent,
   Available: TaskStatuses.Available,
-  Assigned: TaskStatuses.Assigned,
+  // Assigned: TaskStatuses.Assigned,
   Accepted: TaskStatuses.Accepted,
-  Rejected: TaskStatuses.Rejected,
+  // Rejected: TaskStatuses.Rejected,
   Completed: TaskStatuses.Completed,
 }
 
 const stringMapping = {
   [TaskStatuses.NonExistent]: 'NonExistent',
   [TaskStatuses.Available]: 'Available',
-  [TaskStatuses.Assigned]: 'Assigned',
+  // [TaskStatuses.Assigned]: 'Assigned',
   [TaskStatuses.Accepted]: 'Accepted',
-  [TaskStatuses.Rejected]: 'Rejected',
+  // [TaskStatuses.Rejected]: 'Rejected',
   [TaskStatuses.Completed]: 'Completed',
 }
 
@@ -29,10 +29,10 @@ const stringMapping = {
 const intMapping = {
   [TaskStatuses.NonExistent]: 0,
   [TaskStatuses.Available]: 1,
-  [TaskStatuses.Assigned]: 2,
-  [TaskStatuses.Accepted]: 3,
-  [TaskStatuses.Rejected]: 4,
-  [TaskStatuses.Completed]: 5,
+  // [TaskStatuses.Assigned]: 2,
+  [TaskStatuses.Accepted]: 2,
+  // [TaskStatuses.Rejected]: 4,
+  [TaskStatuses.Completed]: 3,
 }
 
 export function convertFromString(str) {
