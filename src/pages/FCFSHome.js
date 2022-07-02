@@ -2,10 +2,10 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useWeb3React } from '@web3-react/core'
 import { getEditorLink } from '../helpers/amara-helpers'
-import { getTxStatus } from '../helpers/transaction-helpers'
+import { getTxStatus, getTxAction } from '../helpers/transaction-helpers'
 import { getResourceFromPathname } from '../helpers/route-helpers'
 import { Actions, convertToString } from '../types/actions'
-import useUserLogic from '../hooks/useUserLogic'
+import useUserLogicFCFS from '../hooks/useUserLogicFCFS'
 import useActions from '../hooks/useActions'
 import AmaraApi from '../amara-api'
 
@@ -30,23 +30,17 @@ import TransactionModal from '../components/Modals/TransactionModal'
 import NoValidUserEntered from '../components/ErrorPanels/NoValidUserEntered'
 import { useAppState } from '../contexts/AppState'
 import Homepage from '../assets/Homepage.svg'
+import models from '../types/models'
 
-const { AcceptTask, RejectTask } = Actions
+const { AcceptTask } = Actions
 const SNACKBAR_FIXED_TIME = 700
 
 const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
     },
-    welcomeContainer: {
-        border: '1px solid black',
-    },
-    welcomContainer: {
-        border: '1px solid blue',
-        // maxWidth: '30%',
-    },
     taskSection: {
-        width: '90%',
+        // width: '90%',
         // border: '1px solid black',
     },
     toastMessage: {
@@ -69,17 +63,12 @@ const MODAL_ACTIONS = {
         message:
             'You need to create and confirm a transaction in order to accept this assignment.',
     },
-    rejectTask: {
-        title: 'Reject Assignment',
-        message:
-            'You need to create and confirm a transaction in order to reject this assignment.',
-    },
 }
 
 const SlideUp = props => <Slide {...props} direction="up" />
 const SlideLeft = props => <Slide {...props} direction="left" />
 
-const Home = () => {
+const FCFSHome = () => {
     const theme = useTheme()
     const {
         root,
@@ -88,6 +77,7 @@ const Home = () => {
         iconLoadingState,
         disabledModal,
     } = useStyles()
+    const model = models.find(m => m.name == 'fcfs')
     const web3React = useWeb3React()
     const { account } = web3React
     const { pathname } = useLocation()
@@ -95,11 +85,11 @@ const Home = () => {
     const userId = getResourceFromPathname(pathname, 'user')
     const {
         user,
+        tasks,
+        allocatedTask,
         videosRegistry,
-        acceptedTasks,
-        allocatedTasks,
-        loadingAppLogic,
-    } = useUserLogic(userId)
+        loading,
+    } = useUserLogicFCFS(userId)
     /* ref to avoid updating component when setting to true.
    Need it to execute useEffect only once at some point in time */
     const loadingHandlerExecutedRef = useRef(false)
@@ -110,32 +100,28 @@ const Home = () => {
     const [openLoadingSnackbar, setOpenLoadingSnackbar] = useState(true)
     const [openTxSnackbar, setOpenTxSnackbar] = useState(false)
     const [txSnackbar, setTxSnackbar] = useState({})
-    const [allocatedTasksBeforeTx, setAllocatedTasksBeforeTx] = useState(0)
-    const [statusTaskButtons, setStatusTaskButtons] = useState(true)
+    const [processingTx, setProcessingTx] = useState(false)
 
     // Wait half second before hiding loading snackbar. Only for aesthetic purposes
     useEffect(() => {
-        if (!loadingHandlerExecutedRef.current && !loadingAppLogic) {
+        if (!loadingHandlerExecutedRef.current && !loading) {
             setTimeout(() => setOpenLoadingSnackbar(false), SNACKBAR_FIXED_TIME)
             loadingHandlerExecutedRef.current = true
         }
         return () => {}
-    }, [loadingAppLogic])
+    }, [loading])
 
     /**
      * Handle that is executed every time snakbars need to be open
      */
     const handleExecutedTransaction = (type, action) => {
-        if (type === 'info') {
-            setAllocatedTasksBeforeTx(allocatedTasks.length)
-        }
         if (type === 'success' || type === 'error') {
-            setStatusTaskButtons(true)
+            setProcessingTx(false)
         }
 
         const snackbar = { type }
-        const txStatus = getTxStatus(type, allocatedTasksBeforeTx)
-        // const txAction = getTxAction(action)
+        const txStatus = getTxStatus(type)
+        const txAction = getTxAction(action)
 
         snackbar.message = <span>{txStatus}</span>
         setActivatingTxModal(false)
@@ -163,7 +149,7 @@ const Home = () => {
      */
     const handleCreateTransaction = (task, action) => {
         const actionStr = convertToString(action)
-        setStatusTaskButtons(false)
+        setProcessingTx(true)
         actions[actionStr](userId, task.contractData.id)
         setActivatingTxModal(true)
     }
@@ -181,21 +167,6 @@ const Home = () => {
             const content = { ...MODAL_ACTIONS.acceptTask }
             content.createTransactionHandler = () =>
                 handleCreateTransaction(task, AcceptTask)
-            setModal(content)
-            setOpenTxModal(true)
-        }
-    }
-
-    /**
-     * Handle that manages task rejection
-     */
-    const handleRejectTask = task => {
-        if (!account) setOpenMessageModal(true)
-        else {
-            const content = { ...MODAL_ACTIONS.rejectTask }
-            content.createTransactionHandler = () =>
-                handleCreateTransaction(task, RejectTask)
-
             setModal(content)
             setOpenTxModal(true)
         }
@@ -223,11 +194,6 @@ const Home = () => {
             color: theme.palette.success.main,
             actionHandler: handleAcceptTask,
         },
-        {
-            label: 'Reject',
-            color: theme.palette.error.main,
-            actionHandler: handleRejectTask,
-        },
     ]
 
     const disabledTaskActionButtons = availableTaskActionButtons.map(
@@ -242,7 +208,7 @@ const Home = () => {
     const assignedTaskActionButtons = [
         {
             label: 'Translate',
-            color: theme.palette.success.light,
+            color: theme.palette.translateButton,
             actionHandler: handleTranslateTask,
         },
     ]
@@ -261,44 +227,65 @@ const Home = () => {
                     alignItems="center"
                 >
                     <Banner
-                        title="Título del modelo"
-                        description="Descrición del modelo seleccionado"
+                        title={model.displayName}
+                        description={model.description}
                         img={Homepage}
-                        cta={<Button>Botón</Button>}
+                        // cta={<Button>Botón</Button>}
                     />
-                    {!loadingAppLogic && (
+                    {allocatedTask ? (
                         <Grid container className={taskSection}>
                             <Grid item>
-                                {/* <Box mt={2} width="100">
-                  <TaskSection
-                    tasks={acceptedTasks}
-                    videoRegistry={videosRegistry}
-                    title="Your assignments: "
-                    emptyText="You don't have any accepted assignments."
-                    taskActionButtons={assignedTaskActionButtons}
-                  />
-                </Box> */}
-                                {/* acceptedTasks.length */}
-                                <Box mt={!acceptedTasks ? 0 : 2} width="100">
+                                <Box mt={!tasks ? 0 : 2} width="100">
                                     <TaskSection
-                                        tasks={
-                                            acceptedTasks.length
-                                                ? []
-                                                : allocatedTasks
+                                        tasks={[allocatedTask]}
+                                        videoRegistry={
+                                            videosRegistry === []
+                                                ? null
+                                                : videosRegistry
                                         }
-                                        videoRegistry={videosRegistry}
-                                        title="Tasks assigned to you"
+                                        title="You have this task selected"
                                         description=""
-                                        emptyText="You don't have any available assignments."
+                                        emptyText="No tasks available"
                                         taskActionButtons={
-                                            statusTaskButtons
-                                                ? availableTaskActionButtons
-                                                : disabledTaskActionButtons
+                                            assignedTaskActionButtons
                                         }
                                     />
                                 </Box>
                             </Grid>
                         </Grid>
+                    ) : (
+                        !loading && (
+                            <Grid container className={taskSection}>
+                                <Grid item>
+                                    <Box mt={!tasks ? 0 : 2} width="100">
+                                        <TaskSection
+                                            tasks={
+                                                tasks.length == 0 ? [] : tasks
+                                            }
+                                            videoRegistry={
+                                                videosRegistry === []
+                                                    ? null
+                                                    : videosRegistry
+                                            }
+                                            title={
+                                                processingTx
+                                                    ? 'Processing your request...'
+                                                    : tasks.length == 1
+                                                    ? 'This assignement is currently free'
+                                                    : 'These assignements are currently free'
+                                            }
+                                            description=""
+                                            emptyText="No tasks available"
+                                            taskActionButtons={
+                                                processingTx
+                                                    ? disabledTaskActionButtons
+                                                    : availableTaskActionButtons
+                                            }
+                                        />
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        )
                     )}
                 </Grid>
 
@@ -319,15 +306,11 @@ const Home = () => {
                     open={openLoadingSnackbar}
                     TransitionComponent={SlideUp}
                     transitionDuration={500}
-                    onClose={() =>
-                        setTimeout(() => {
-                            console.log('hello')
-                        }, 1000)
-                    }
+                    onClose={() => setTimeout(() => {}, 1000)}
                 >
                     <Alert icon={false} variant="filled" color="info">
                         <div className={toastMessage}>
-                            {loadingAppLogic ? (
+                            {loading ? (
                                 <CircularProgress
                                     className={iconLoadingState}
                                     size={20}
@@ -361,4 +344,4 @@ const Home = () => {
     return null
 }
 
-export default Home
+export default FCFSHome
