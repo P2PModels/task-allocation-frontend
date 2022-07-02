@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useWeb3React } from '@web3-react/core'
 import { getEditorLink } from '../helpers/amara-helpers'
-import { getTxStatus } from '../helpers/transaction-helpers'
+import { getTxStatus, getTxAction } from '../helpers/transaction-helpers'
 import { getResourceFromPathname } from '../helpers/route-helpers'
 import { Actions, convertToString } from '../types/actions'
 import useUserLogicFCFS from '../hooks/useUserLogicFCFS'
@@ -39,13 +39,6 @@ const useStyles = makeStyles(theme => ({
     root: {
         flexGrow: 1,
     },
-    welcomeContainer: {
-        border: '1px solid black',
-    },
-    welcomContainer: {
-        border: '1px solid blue',
-        // maxWidth: '30%',
-    },
     taskSection: {
         // width: '90%',
         // border: '1px solid black',
@@ -75,7 +68,7 @@ const MODAL_ACTIONS = {
 const SlideUp = props => <Slide {...props} direction="up" />
 const SlideLeft = props => <Slide {...props} direction="left" />
 
-const Home = () => {
+const FCFSHome = () => {
     const theme = useTheme()
     const {
         root,
@@ -90,7 +83,13 @@ const Home = () => {
     const { pathname } = useLocation()
     const { modelName } = useAppState()
     const userId = getResourceFromPathname(pathname, 'user')
-    const { user, videosRegistry, tasks, loading } = useUserLogicFCFS(userId)
+    const {
+        user,
+        tasks,
+        allocatedTask,
+        videosRegistry,
+        loading,
+    } = useUserLogicFCFS(userId)
     /* ref to avoid updating component when setting to true.
    Need it to execute useEffect only once at some point in time */
     const loadingHandlerExecutedRef = useRef(false)
@@ -101,8 +100,7 @@ const Home = () => {
     const [openLoadingSnackbar, setOpenLoadingSnackbar] = useState(true)
     const [openTxSnackbar, setOpenTxSnackbar] = useState(false)
     const [txSnackbar, setTxSnackbar] = useState({})
-    const [allocatedTasksBeforeTx, setAllocatedTasksBeforeTx] = useState(0)
-    const [statusTaskButtons, setStatusTaskButtons] = useState(true)
+    const [processingTx, setProcessingTx] = useState(false)
 
     // Wait half second before hiding loading snackbar. Only for aesthetic purposes
     useEffect(() => {
@@ -117,16 +115,13 @@ const Home = () => {
      * Handle that is executed every time snakbars need to be open
      */
     const handleExecutedTransaction = (type, action) => {
-        if (type === 'info') {
-            setAllocatedTasksBeforeTx(allocatedTasks.length)
-        }
         if (type === 'success' || type === 'error') {
-            setStatusTaskButtons(true)
+            setProcessingTx(false)
         }
 
         const snackbar = { type }
-        const txStatus = getTxStatus(type, allocatedTasksBeforeTx)
-        // const txAction = getTxAction(action)
+        const txStatus = getTxStatus(type)
+        const txAction = getTxAction(action)
 
         snackbar.message = <span>{txStatus}</span>
         setActivatingTxModal(false)
@@ -154,7 +149,7 @@ const Home = () => {
      */
     const handleCreateTransaction = (task, action) => {
         const actionStr = convertToString(action)
-        setStatusTaskButtons(false)
+        setProcessingTx(true)
         actions[actionStr](userId, task.contractData.id)
         setActivatingTxModal(true)
     }
@@ -213,7 +208,7 @@ const Home = () => {
     const assignedTaskActionButtons = [
         {
             label: 'Translate',
-            color: theme.palette.success.light,
+            color: theme.palette.translateButton,
             actionHandler: handleTranslateTask,
         },
     ]
@@ -223,8 +218,6 @@ const Home = () => {
             return <NoValidUserEntered />
         }
 
-        console.log('FCFSHome Tasks:')
-        console.log(tasks)
         return (
             <div className={root}>
                 <Grid
@@ -239,29 +232,64 @@ const Home = () => {
                         img={Homepage}
                         // cta={<Button>Botón</Button>}
                     />
-                    {!loading && (
+                    {allocatedTask ? (
                         <Grid container className={taskSection}>
                             <Grid item>
                                 <Box mt={!tasks ? 0 : 2} width="100">
                                     <TaskSection
-                                        tasks={tasks.length == 0 ? [] : tasks}
-                                        videoRegistry={videosRegistry}
-                                        title={tasks.length == 1 ? "This assignement is currently free" : "These assignements are currently free"}
+                                        tasks={[allocatedTask]}
+                                        videoRegistry={
+                                            videosRegistry === []
+                                                ? null
+                                                : videosRegistry
+                                        }
+                                        title="You have this task selected"
                                         description=""
                                         emptyText="No tasks available"
                                         taskActionButtons={
-                                            statusTaskButtons
-                                                ? availableTaskActionButtons
-                                                : disabledTaskActionButtons
+                                            assignedTaskActionButtons
                                         }
                                     />
                                 </Box>
                             </Grid>
                         </Grid>
+                    ) : (
+                        !loading && (
+                            <Grid container className={taskSection}>
+                                <Grid item>
+                                    <Box mt={!tasks ? 0 : 2} width="100">
+                                        <TaskSection
+                                            tasks={
+                                                tasks.length == 0 ? [] : tasks
+                                            }
+                                            videoRegistry={
+                                                videosRegistry === []
+                                                    ? null
+                                                    : videosRegistry
+                                            }
+                                            title={
+                                                processingTx
+                                                    ? 'Processing your request...'
+                                                    : tasks.length == 1
+                                                    ? 'This assignement is currently free'
+                                                    : 'These assignements are currently free'
+                                            }
+                                            description=""
+                                            emptyText="No tasks available"
+                                            taskActionButtons={
+                                                processingTx
+                                                    ? disabledTaskActionButtons
+                                                    : availableTaskActionButtons
+                                            }
+                                        />
+                                    </Box>
+                                </Grid>
+                            </Grid>
+                        )
                     )}
                 </Grid>
 
-                {/* <Snackbar
+                <Snackbar
                     open={openTxSnackbar}
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                     TransitionComponent={SlideLeft}
@@ -273,16 +301,12 @@ const Home = () => {
                     <Alert severity={txSnackbar.type || 'info'}>
                         {txSnackbar.message}
                     </Alert>
-                </Snackbar> */}
+                </Snackbar>
                 <Snackbar
                     open={openLoadingSnackbar}
                     TransitionComponent={SlideUp}
                     transitionDuration={500}
-                    onClose={() =>
-                        setTimeout(() => {
-                            console.log('hello')
-                        }, 1000)
-                    }
+                    onClose={() => setTimeout(() => {}, 1000)}
                 >
                     <Alert icon={false} variant="filled" color="info">
                         <div className={toastMessage}>
@@ -299,7 +323,7 @@ const Home = () => {
                         </div>
                     </Alert>
                 </Snackbar>
-                {/* <TransactionModal
+                <TransactionModal
                     className={disabledModal}
                     modalContent={modal}
                     open={openTxModal}
@@ -313,11 +337,11 @@ const Home = () => {
                     message="Check you have Metamask installed and you're connected to your account."
                     open={openMessageModal}
                     onClose={() => setOpenMessageModal(false)}
-                /> */}
+                />
             </div>
         )
     }
     return null
 }
 
-export default Home
+export default FCFSHome
