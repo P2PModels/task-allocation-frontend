@@ -3,7 +3,7 @@ import { useUserQuery, useTasksForUserQueryPolling } from './useRequests'
 import { mergeTaskData, mergeUserData } from '../helpers/data-transform-helpers'
 import { buildMapById } from '../helpers/general-helpers'
 import AmaraApi from '../amara-api'
-import { TaskStatuses } from '../types'
+import { TaskStatuses } from '../types/taskStatuses'
 
 const { Assigned, Accepted } = TaskStatuses
 

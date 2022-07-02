@@ -1,79 +1,47 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useWeb3React } from '@web3-react/core'
 import { useAppState } from '../contexts/AppState'
-// import { getAppByName } from '../helpers/app-connector-helpers'
 import { Actions } from '../types/actions'
 import { toBytes32 } from '../helpers/web3-helpers'
 import useTransaction from './useTransaction'
 
-const GAS_LIMIT = 450000
-const { AcceptTask, RejectTask } = Actions
+// const GAS_LIMIT = 450000
+const GAS_PRICE = 2000000000
+const { AcceptTask } = Actions
 
 function useActions(onReportStatus) {
     const { account, library: web3 } = useWeb3React()
-    const { appName, contractAddress, contractABI } = useAppState()
-    const { processTransaction } = useTransaction()
-
-    // installedApps is used to get the app object used to get contract address
-    // const { installedApps, organization } = useAppState()
-    // Gets app object from installedApps array filtering by name
-    // const app = getAppByName(installedApps, APP_NAME)
+    const { contractAddress, contractABI } = useAppState()
+    const [
+        processTransaction,
+        {
+            data: { txHash, receipt: txReceipt },
+            loading: txLoading,
+            error: txError,
+        },
+    ] = useTransaction()
+    const [currentAction, setCurrentAction] = useState()
 
     const getContractInstance = useCallback((web3, abi) => {
-        console.log(web3)
+        // console.log(web3)
         if (web3) {
             return new web3.eth.Contract(abi)
         }
     }, [])
 
-    const reallocateTask = useCallback(
-        taskId => {
-            const hexTaskId = toBytes32(taskId)
-            // sendIntent(
-            //   organization,
-            //   app.address,
-            //   'reallocateTask',
-            //   [hexTaskId],
-            //   {
-            //     web3,
-            //     from: account,
-            //   },
-            //   type => {
-            //     console.log(`reallocateTask Tx status: ${type}`)
-            //   },
-            //   true
-            // )
-            try {
-                const modelContract = getContractInstance(web3, contractABI)
-                processTransaction(
-                    web3,
-                    {
-                        from: account,
-                        to: contractAddress,
-                        data: modelContract.methods['reallocateTask'](
-                            hexTaskId
-                        ).encodeABI(),
-                        gas: GAS_LIMIT,
-                    },
-                    _ => {
-                        console.log(`reallocateTask Tx status: info`)
-                    },
-                    _ => {
-                        console.log(`reallocateTask Tx status: success`)
-                    },
-                    err => {
-                        console.error(err)
-                        console.log(`reallocateTask Tx status: error`)
-                    }
-                )
-            } catch (err) {
-                console.error('Could not create tx:', err)
-                onReportStatus('error', AcceptTask)
-            }
-        },
-        [web3, account]
-        // [organization, app, web3, account]
-    )
+    useEffect(() => {
+        if (txHash && !txLoading && !txReceipt && !txError) {
+            onReportStatus('info', currentAction)
+        } else if (txHash && txLoading && !txError) {
+        } else if (txHash && !txLoading && txReceipt && !txError) {
+            onReportStatus('success', currentAction)
+            setCurrentAction(null)
+        } else if (txError) {
+            console.error(txError)
+            onReportStatus('error', currentAction)
+        }
+    }, [txHash, txReceipt, txLoading, txError])
+
     /**
      * Function that is triggered when a user
      * confirms a transaction to acept a task
@@ -82,144 +50,37 @@ function useActions(onReportStatus) {
         (userId, taskId) => {
             const hexUserId = toBytes32(userId)
             const hexTaskId = toBytes32(taskId)
-            // Send transaction
-            // sendIntent(
-            //   organization, // organization object
-            //   app.address, // Contract adress
-            //   'acceptTask', // fn
-            //   [hexUserId, hexTaskId], // params
-            //   {
-            //     web3,
-            //     from: account,
-            //   },
-            //   type => onReportStatus(type, AcceptTask)
-            // )
+            const modelContract = getContractInstance(web3, contractABI)
+
+            // console.log('[AcceptTask] params:')
+            // console.log(hexUserId)
+            // console.log(hexTaskId)
+
+            const acceptTaskTxParams = {
+                from: account,
+                to: contractAddress,
+                data: modelContract.methods['acceptTask'](
+                    hexUserId,
+                    hexTaskId
+                ).encodeABI(),
+                // gas: GAS_LIMIT,
+                gasPrice: GAS_PRICE,
+            }
+
             try {
-                const modelContract = getContractInstance(web3, contractABI)
-                processTransaction(
-                    web3,
-                    {
-                        from: account,
-                        to: contractAddress,
-                        data: modelContract.methods['acceptTask'](
-                            hexUserId,
-                            hexTaskId
-                        ).encodeABI(),
-                        gas: GAS_LIMIT,
-                    },
-                    txHash => onReportStatus('info', AcceptTask),
-                    receipt => onReportStatus('success', AcceptTask),
-                    err => {
-                        console.error(err)
-                        onReportStatus('error', AcceptTask)
-                    }
-                )
+                processTransaction(web3, acceptTaskTxParams, false)
+                setCurrentAction(AcceptTask)
             } catch (err) {
                 console.error('Could not create tx:', err)
                 onReportStatus('error', AcceptTask)
             }
         },
         [web3, account, onReportStatus]
-        // [organization, app, web3, account, onReportStatus]
-    )
-
-    const rejectTask = useCallback(
-        (userId, taskId) => {
-            const hexUserId = toBytes32(userId)
-            const hexTaskId = toBytes32(taskId)
-
-            // sendIntent(
-            //   organization,
-            //   app.address,
-            //   'rejectTask',
-            //   [hexUserId, hexTaskId],
-            //   {
-            //     web3,
-            //     from: account,
-            //   },
-            //   type => onReportStatus(type, RejectTask)
-            // )
-
-            try {
-                const modelContract = getContractInstance(web3, contractABI)
-                processTransaction(
-                    web3,
-                    {
-                        from: account,
-                        to: contractAddress,
-                        data: modelContract.methods['rejectTask'](
-                            hexUserId,
-                            hexTaskId
-                        ).encodeABI(),
-                        gas: GAS_LIMIT,
-                    },
-                    txHash => onReportStatus('info', RejectTask),
-                    receipt => onReportStatus('success', RejectTask),
-                    err => {
-                        console.error(err)
-                        onReportStatus('error', RejectTask)
-                    }
-                )
-            } catch (err) {
-                console.error('Could not create tx:', err)
-                onReportStatus('error', RejectTask)
-            }
-        },
-        [web3, account, onReportStatus]
-        // [organization, app, web3, account, onReportStatus]
     )
 
     return {
-        reallocateTask,
         acceptTask,
-        rejectTask,
     }
 }
-
-/**
- * In Aragon Connect we need to send an
- * intent which returns all transactions
- * that need to be executed to acomplish
- * current transaction.
- *
- * It might be the case that a transaction
- * needs to execute an additional transaction
- * (voting) to complete its execution
- */
-// async function sendIntent(
-//     org,
-//     appAddress,
-//     fn,
-//     params,
-//     { web3, from },
-//     onReportStatus,
-//     usePrivateKey = false
-// ) {
-//     try {
-//         // Create intent for the application appAddress of the
-//         // dao org
-//         const intent = org.appIntent(appAddress, fn, params)
-//         // Get transactions from intent
-//         const [tx] = await intent.transactions(from)
-//         // Data contains the function to be call in the contract
-//         // To contains the address of the contract
-//         const { data, to } = tx
-
-//         processTransaction(
-//             web3,
-//             { from, to, data, gas: GAS_LIMIT },
-//             txHash => onReportStatus('info'),
-//             receipt => onReportStatus('success'),
-//             err => {
-//                 console.error(err)
-//                 onReportStatus('error')
-//             },
-//             usePrivateKey
-//         )
-//     } catch (err) {
-//         console.error('Could not create tx:', err)
-//         onReportStatus('error')
-//     }
-// }
 
 export default useActions

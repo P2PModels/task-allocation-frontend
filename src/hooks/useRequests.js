@@ -1,21 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import {
-    transformConfigData,
     transformTaskData,
     transformUserData,
     generateUserId,
 } from '../helpers/data-transform-helpers'
 import { useAppState } from '../contexts/AppState'
 import { toBytes32 } from '../helpers/web3-helpers'
-import { TaskStatuses, convertToInt, convertToString } from '../types'
+import { convertToString } from '../types/taskStatuses'
 import { useQuery } from '@apollo/client'
 import {
     FCFS_TASKS,
+    FCFS_TASKS_AVAILABLE,
     FCFS_USERS,
-    USER_TASKS_BY_STATUS,
+    USER_TASKS_ACCEPTED,
     USER,
     FCFS_USER,
 } from '../queries/queries'
+import { TaskStatuses } from '../types/taskStatuses'
 
 const POLL_INTERVAL = 5000
 
@@ -86,41 +87,19 @@ export function useUserQuery(userId) {
 
 export function useTasksForUserQueryPolling(
     userId,
-    status,
     { first, skip } = { first: 50, skip: 0 }
 ) {
     // We had to change the logic from a fake subscription (aragon does this)
     // to a query that uses polling
-
-    const { contractAddress } = useAppState()
     const [userTasks, setUserTasks] = useState([])
-    const hexUserId = toBytes32(userId)
-    const convertedStatus = [convertToInt(status)]
 
-    const onTasksForUserHandler = useCallback(
-        data => {
-            // console.log("[onTaskForUserHandler] Tasks: ");
-            // console.log(tasks)
-            // Get current date and time
-            const currentDate = new Date()
-            // Adjust structure of obtained tasks
-            const transformedTasks = data.tasks.map(t => transformTaskData(t))
-            // Filter out tasks with rejected status
-            const filteredTasks = transformedTasks.filter(
-                t => t.status !== convertToString(TaskStatuses.Rejected)
-            )
-            if (status === TaskStatuses.Available) {
-                // Filter out tasks whose end data has expired
-                const availableTasks = filteredTasks.filter(
-                    t => t.endDate > currentDate
-                )
-                setUserTasks(availableTasks)
-            } else {
-                setUserTasks(filteredTasks)
-            }
-        },
-        [status]
-    )
+    const onTasksForUserHandler = useCallback(data => {
+        // console.log("[onTaskForUserHandler] Tasks: ");
+        // console.log(tasks)
+        // Adjust structure of obtained tasks
+        const transformedTasks = data.tasks.map(t => transformTaskData(t))
+        setUserTasks(transformedTasks)
+    }, [])
 
     const onTasksForUserErrorHanlder = err => {
         console.log('[onTasksForUserErrorHandler] Error: ')
@@ -128,10 +107,10 @@ export function useTasksForUserQueryPolling(
     }
 
     const tasksPolling = useRef(
-        useQuery(USER_TASKS_BY_STATUS, {
+        useQuery(USER_TASKS_ACCEPTED, {
             variables: {
-                statuses: convertedStatus,
-                userId: generateUserId(hexUserId, contractAddress),
+                // status: status,
+                userId: userId,
                 first,
                 skip,
             },
@@ -159,7 +138,10 @@ export function useTasksForUserQueryPolling(
     return userTasks
 }
 
-export function useTasksQueryPolling({ first, skip } = { first: 50, skip: 0 }) {
+export function useTasksQueryPolling(
+    getAll = false,
+    { first, skip } = { first: 50, skip: 0 }
+) {
     const [tasks, setTasks] = useState(null)
 
     const onTasksHandler = useCallback(
@@ -175,7 +157,7 @@ export function useTasksQueryPolling({ first, skip } = { first: 50, skip: 0 }) {
     }
 
     const tasksPolling = useRef(
-        useQuery(FCFS_TASKS, {
+        useQuery(getAll ? FCFS_TASKS : FCFS_TASKS_AVAILABLE, {
             variables: {
                 first,
                 skip,

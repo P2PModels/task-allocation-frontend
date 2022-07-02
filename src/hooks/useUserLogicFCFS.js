@@ -1,8 +1,13 @@
 import { useState, useEffect } from 'react'
-import { useFCFSUserQuery, useTasksQueryPolling } from './useRequests'
+import {
+    useFCFSUserQuery,
+    useTasksQueryPolling,
+    useTasksForUserQueryPolling,
+} from './useRequests'
 import { buildMapById } from '../helpers/general-helpers'
 import AmaraApi from '../amara-api'
 import { mergeTaskData } from '../helpers/data-transform-helpers'
+import { TaskStatuses } from '../types/taskStatuses'
 
 async function getTasks(tasks, user) {
     const { teams, apiKey } = user
@@ -29,9 +34,11 @@ async function getTasks(tasks, user) {
 function useUserLogicFCFS(userId) {
     const contractUser = useFCFSUserQuery(userId)
     const contractTasks = useTasksQueryPolling()
+    const contractAllocatedTasks = useTasksForUserQueryPolling(userId)
     const [user, setUser] = useState()
     const [tasks, setTasks] = useState()
-    const [videosRegistry, setVideosRegistry] = useState(null)
+    const [allocatedTasks, setAllocatedTasks] = useState()
+    const [videosRegistry, setVideosRegistry] = useState(new Map())
 
     // Fetch Amara user data
     useEffect(() => {
@@ -71,7 +78,7 @@ function useUserLogicFCFS(userId) {
         return () => {}
     }, [user])
 
-    // Fetch accepted tasks
+    // Fetch tasks
     useEffect(() => {
         if (!user || !contractTasks) {
             return
@@ -83,11 +90,24 @@ function useUserLogicFCFS(userId) {
         return () => {}
     }, [user, contractTasks])
 
-    const loadingData = !user || !videosRegistry || !tasks
+    // Fetch accepted task
+    useEffect(() => {
+        if (!user || !contractAllocatedTasks) {
+            return
+        }
+        getTasks(contractAllocatedTasks, user).then(mergedTasks => {
+            setAllocatedTasks(mergedTasks)
+        })
+
+        return () => {}
+    }, [user, contractAllocatedTasks])
+
+    const loadingData = !user || !videosRegistry || !tasks || !allocatedTasks
 
     return {
         user,
         tasks,
+        allocatedTask: allocatedTasks ? allocatedTasks[0] : null,
         videosRegistry,
         loading: loadingData,
     }
