@@ -127,7 +127,7 @@ export default function Admin() {
     const classes = useStyles()
     const theme = useTheme()
     const { modelName, modelDisplayName } = useAppState()
-    const tasks = useTasksQueryPolling()
+    const tasks = useTasksQueryPolling(true)
     const users = useUsersQuery()
     const [
         restartPrototype,

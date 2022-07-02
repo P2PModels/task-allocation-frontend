@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client'
+import { TaskStatuses } from '../types/taskStatuses'
 
 export const CONFIG = gql`
     query Config($id: String!) {
@@ -9,20 +10,31 @@ export const CONFIG = gql`
     }
 `
 
-export const USER_TASKS_BY_STATUS = gql`
-    query Tasks($statuses: [Int]!, $userId: ID!, $first: Int!, $skip: Int!) {
+export const USER_TASKS_ACCEPTED = gql`
+    query Tasks($userId: ID!, $first: Int!, $skip: Int!) {
         tasks(
-            where: { statusInt_in: $statuses, assignee: $userId }
+            where: { status: ACCEPTED, userId: $userId }
             first: $first
             skip: $skip
         ) {
             id
-            endDate
-            reallocationTime
+            # endDate
+            # reallocationTime
             status
-            assignee {
-                id
-            }
+            userId
+            # assignee {
+            #     id
+            # }
+        }
+    }
+`
+
+export const FCFS_TASKS_AVAILABLE = gql`
+    query Tasks($first: Int!, $skip: Int!) {
+        tasks(where: { status: AVAILABLE }, first: $first, skip: $skip) {
+            id
+            status
+            userId
         }
     }
 `
