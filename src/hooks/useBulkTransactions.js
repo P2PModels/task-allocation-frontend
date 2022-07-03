@@ -42,15 +42,6 @@ export default function useBulkTransactions() {
     }
 
     useEffect(() => {
-        // console.log('[useBulkTransactions] currentTxHash:')
-        // console.log(currentTxHash)
-        // console.log('[useBulkTransactions] currentReceipt:')
-        // console.log(currentReceipt)
-        // console.log('[useBulkTransactions] currentLoading:')
-        // console.log(currentLoading)
-        // console.log('[useBulkTransactions] currentError:')
-        // console.log(currentError)
-
         if (currentError) {
             console.log('[useBulkTransaction] Error: ')
             console.log(currentError)
@@ -58,18 +49,18 @@ export default function useBulkTransactions() {
             return
         }
         if (currentLoading && currentTxHash) {
-            console.log(
-                `[useBulkTransaction] Processing tx ${currentTxHash}...`
-            )
+            // console.log(
+            //     `[useBulkTransaction] Processing tx ${currentTxHash}...`
+            // )
             setTxsHash(txsHash => [...txsHash, currentTxHash])
             setPreparingNextTx(false)
             return
         }
         if (currentReceipt && !currentLoading && !preparingNextTx) {
-            console.log(
-                `[useBulkTransaction] Tx ${currentTxIndex + 1} processed: `
-            )
-            console.log(currentReceipt)
+            // console.log(
+            //     `[useBulkTransaction] Tx ${currentTxIndex + 1} processed: `
+            // )
+            // console.log(currentReceipt)
 
             // Update state
             setReceipts(receipts => [...receipts, currentReceipt])
