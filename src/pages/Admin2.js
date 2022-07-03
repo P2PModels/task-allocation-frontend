@@ -13,7 +13,6 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    Chip,
     Snackbar,
     Grid,
     Slide,
@@ -21,13 +20,8 @@ import {
 import MenuIcon from '@material-ui/icons/Menu'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import PlayArrowIcon from '@material-ui/icons/PlayArrow'
-import StopIcon from '@material-ui/icons/Stop'
 import ReplayIcon from '@material-ui/icons/Replay'
-import LowPriorityIcon from '@material-ui/icons/LowPriority'
-import CheckCircleRounded from '@material-ui/icons/CheckCircleRounded'
-import CancelRounded from '@material-ui/icons/CancelRounded'
-import MuiAlert from '@material-ui/lab/Alert'
+import { Alert } from '@material-ui/lab'
 
 import TasksTable from '../components/Tables/TasksTable'
 import UsersTable from '../components/Tables/UsersTable'
@@ -35,13 +29,8 @@ import TxsTable from '../components/Tables/TxsTable'
 import { useAppState } from '../contexts/AppState'
 import useAdminActions from '../hooks/useAdminActions'
 import { useTasksQueryPolling, useUsersQuery } from '../hooks/useRequests'
-import { getTxStatus } from '../helpers/transaction-helpers'
 
 const drawerWidth = 240
-
-function Alert(props) {
-    return <MuiAlert elevation={6} variant="filled" {...props} />
-}
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -117,11 +106,7 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const SlideLeft = React.forwardRef((props, ref) => (
-    <Slide {...props} ref={ref} direction="left">
-        {props.children}
-    </Slide>
-))
+const SlideLeft = props => <Slide {...props} direction="left" />
 
 export default function Admin() {
     const classes = useStyles()
@@ -140,31 +125,6 @@ export default function Admin() {
     const [open, setOpen] = useState(false)
     const [openSnackbar, setOpenSnackbar] = useState(false)
     const [snackbarMsg, setSnackbarMsg] = useState('')
-    const [snackbarSeverity, setSnackbarSeverity] = useState('success')
-    const [snackbarAutoHide, setSnackbarAutoHide] = useState(null)
-    const [managerStatus, setManagerStatus] = useState(false)
-    const [openTxSnackbar, setOpenTxSnackbar] = useState(false)
-    const [txSnackbar, setTxSnackbar] = useState({})
-    const [lastUpdate, setLastUpdate] = useState()
-    const newData = useRef(false)
-
-    useEffect(() => {
-        if (openSnackbar) {
-            setOpenSnackbar(false)
-        }
-        if (snackbarMsg !== '') {
-            setOpenSnackbar(true)
-        }
-    }, [snackbarMsg])
-
-    // useEffect(() => {
-    //     newData.current = false
-    // })
-
-    // useEffect(() => {
-    //     x
-    //     return
-    // }, [restartPrototypeData, restartPrototypeError, restartPrototypeLoading])
 
     const handleDrawerOpen = () => {
         setOpen(true)
@@ -181,30 +141,10 @@ export default function Admin() {
         setOpenSnackbar(false)
     }
 
-    const handleSnackbarExited = () => {
-        setSnackbarMsg('')
-        setOpenSnackbar(false)
-    }
-
-    const handleTxSnackbarClose = (event, reason) => {
-        if (reason === 'clickaway') {
-            return
-        }
-
-        setOpenTxSnackbar(false)
-    }
-
-    /**
-     * Handle that is executed every time snakbars need to be open
-     */
-    const handleExecutedTransaction = (type, action) => {
-        const snackbar = { type }
-        const txStatus = getTxStatus(type)
-
-        snackbar.message = <span>{txStatus}</span>
-
-        setTxSnackbar(snackbar)
-        setOpenTxSnackbar(true)
+    const handleRestartPrototype = () => {
+        setSnackbarMsg("Restarting prototype... Don't close the tab.")
+        setOpenSnackbar(true)
+        restartPrototype()
     }
 
     return (
@@ -261,51 +201,15 @@ export default function Admin() {
                         className={classes.listItem}
                         button
                         key="RestartPrototype"
-                        disabled={managerStatus}
                     >
-                        <ListItemIcon onClick={restartPrototype}>
+                        <ListItemIcon onClick={handleRestartPrototype}>
                             <ReplayIcon />
                         </ListItemIcon>
                         <ListItemText primary="Restart prototype" />
                     </ListItem>
-                    {/* <ListItem
-                        className={classes.listItem}
-                        button
-                        key="RegisterUsers"
-                        disabled={managerStatus}
-                    >
-                        <ListItemIcon onClick={registerUsers}>
-                            <PlayArrowIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Register users" />
-                    </ListItem>
-                    <ListItem
-                        className={classes.listItem}
-                        button
-                        key="CreateTasks"
-                        disabled={managerStatus}
-                    >
-                        <ListItemIcon onClick={createTasks}>
-                            <LowPriorityIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Create tasks" />
-                    </ListItem> */}
                 </List>
             </Drawer>
             <main className={classes.content}>
-                {managerStatus ? (
-                    <Chip
-                        icon={<CheckCircleRounded />}
-                        label="On"
-                        color="primary"
-                    />
-                ) : (
-                    <Chip
-                        icon={<CancelRounded />}
-                        label="Off"
-                        color="secondary"
-                    />
-                )}
                 <div className={classes.toolbar} />
                 <Grid container spacing={2}>
                     <Grid item lg={6}>
@@ -331,34 +235,15 @@ export default function Admin() {
                 </Grid>
             </main>
             <Snackbar
-                anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                }}
                 open={openSnackbar}
-                onClose={handleSnackbarClose}
-                onExited={handleSnackbarExited}
-                autoHideDuration={snackbarAutoHide}
-            >
-                <Alert
-                    onClose={handleSnackbarClose}
-                    severity={snackbarSeverity}
-                >
-                    {snackbarMsg}
-                </Alert>
-            </Snackbar>
-            <Snackbar
-                open={openTxSnackbar}
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                // TransitionComponent={SlideLeft}
-                // transitionDuration={500}
-                // autoHideDuration={3000}
-                onClose={handleTxSnackbarClose}
+                TransitionComponent={SlideLeft}
+                transitionDuration={500}
+                autoHideDuration={3000}
+                onClose={handleSnackbarClose}
                 key={'bottomright'}
             >
-                <Alert severity={txSnackbar.type || 'info'}>
-                    {txSnackbar.message}
-                </Alert>
+                <Alert severity={'info'}>{snackbarMsg}</Alert>
             </Snackbar>
         </div>
     )
