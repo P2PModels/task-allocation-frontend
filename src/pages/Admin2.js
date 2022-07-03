@@ -113,7 +113,7 @@ export default function Admin() {
     const theme = useTheme()
     const { modelName, modelDisplayName } = useAppState()
     const tasks = useTasksQueryPolling(true)
-    const users = useUsersQuery()
+    const { users, refetch: refecthUsers } = useUsersQuery()
     const [
         restartPrototype,
         {
@@ -125,6 +125,10 @@ export default function Admin() {
     const [open, setOpen] = useState(false)
     const [openSnackbar, setOpenSnackbar] = useState(false)
     const [snackbarMsg, setSnackbarMsg] = useState('')
+
+    useEffect(() => {
+        refecthUsers()
+    }, [restartPrototypeData])
 
     const handleDrawerOpen = () => {
         setOpen(true)

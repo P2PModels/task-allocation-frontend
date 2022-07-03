@@ -211,5 +211,5 @@ export function useUsersQuery({ first, skip } = { first: 50, skip: 0 }) {
         })
     )
 
-    return users
+    return { users, refetch: usersQuery.current.refetch }
 }
