@@ -24,13 +24,14 @@ import ReplayIcon from '@material-ui/icons/Replay'
 import { Alert } from '@material-ui/lab'
 
 import MainView from '../components/MainView'
-import ModelSelect from '../components/ModelSelect'
+import Select from '../components/Select'
 import TasksTable from '../components/Tables/TasksTable'
 import UsersTable from '../components/Tables/UsersTable'
 import TxsTable from '../components/Tables/TxsTable'
 import { useAppState } from '../contexts/AppState'
 import useAdminActions from '../hooks/useAdminActions'
 import { useTasksQueryPolling, useUsersQuery } from '../hooks/useRequests'
+import models from '../types/models'
 
 const drawerWidth = 240
 
@@ -113,7 +114,7 @@ const SlideLeft = props => <Slide {...props} direction="left" />
 const AdminFCFS = () => {
     const classes = useStyles()
     const theme = useTheme()
-    const { modelName, modelDisplayName } = useAppState()
+    const { modelName, modelDisplayName, setModel } = useAppState()
     const tasks = useTasksQueryPolling(true)
     const { users, refetch: refecthUsers } = useUsersQuery()
     const [
@@ -127,6 +128,11 @@ const AdminFCFS = () => {
     const [open, setOpen] = useState(false)
     const [openSnackbar, setOpenSnackbar] = useState(false)
     const [snackbarMsg, setSnackbarMsg] = useState('')
+
+    const modelsOptions = models.map(m => ({
+        value: m.name,
+        label: m.displayName,
+    }))
 
     useEffect(() => {
         refecthUsers()
@@ -233,7 +239,13 @@ const AdminFCFS = () => {
                                 </Typography>
                             </Grid>
                             <Grid item>
-                                <ModelSelect />
+                                <Select
+                                    name="model"
+                                    label="model"
+                                    value={modelName}
+                                    options={modelsOptions}
+                                    onChange={e => setModel(e.target.value)}
+                                />
                             </Grid>
                         </Grid>
                     </Grid>

@@ -36,7 +36,8 @@ import { useAppState } from '../contexts/AppState'
 import useAdminActions from '../hooks/useAdminActions'
 import { useTasksQueryPolling, useUsersQuery } from '../hooks/useRequests'
 
-import ModelSelect from '../components/ModelSelect'
+import Select from '../components/Select'
+import models from '../types/models'
 
 const {
     startManager: startEthManager,
@@ -128,7 +129,7 @@ const useStyles = makeStyles(theme => ({
 const AdminRR = () => {
     const classes = useStyles()
     const theme = useTheme()
-    const { modelName, modelDisplayName } = useAppState()
+    const { modelName, modelDisplayName, setModel } = useAppState()
     const tasks = useTasksQueryPolling(true)
     const { users, refetch: refecthUsers } = useUsersQuery()
     const [
@@ -148,6 +149,11 @@ const AdminRR = () => {
     const newData = useRef(false)
     const signer = useRef(undefined)
     const cronJobs = useRef(undefined)
+
+    const modelsOptions = models.map(m => ({
+        value: m.name,
+        label: m.displayName,
+    }))
 
     console.log('[Admin]')
     console.log(startEthManager)
@@ -431,7 +437,13 @@ const AdminRR = () => {
                                 </Typography>
                             </Grid>
                             <Grid item>
-                                <ModelSelect />
+                                <Select
+                                    name="model"
+                                    label="model"
+                                    value={modelName}
+                                    options={modelsOptions}
+                                    onChange={e => setModel(e.target.value)}
+                                />
                             </Grid>
                         </Grid>
                     </Grid>

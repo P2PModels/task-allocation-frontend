@@ -1,39 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useHistory } from 'react-router-dom'
-import { useLocation } from 'react-router-dom'
-import { useWeb3React } from '@web3-react/core'
-import { getEditorLink } from '../helpers/amara-helpers'
-import { getTxStatus } from '../helpers/transaction-helpers'
-import { getResourceFromPathname, generateUrl } from '../helpers/route-helpers'
-import { Actions, convertToString } from '../types/actions'
-import useUserLogic from '../hooks/useUserLogic'
-import useActions from '../hooks/useActions'
-import AmaraApi from '../amara-api'
+import { generateUrl } from '../helpers/route-helpers'
 
-import {
-    Grid,
-    Typography,
-    Box,
-    Fade,
-    Snackbar,
-    Slide,
-    Button,
-} from '@material-ui/core'
+import { Grid, Typography, Snackbar, Slide, Button } from '@material-ui/core'
 import { Alert } from '@material-ui/lab'
 
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import FileCopyIcon from '@material-ui/icons/FileCopy'
 
 import ConfigView from '../components/ConfigView'
-import ModelSelect from '../components/ModelSelect'
-import UserSelect from '../components/UserSelect'
 import { useAppState } from '../contexts/AppState'
 import Select from '../components/Select'
 import { useUsersQuery } from '../hooks/useRequests'
 import models from '../types/models'
-
-const { AcceptTask, RejectTask } = Actions
-const SNACKBAR_FIXED_TIME = 700
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -55,10 +34,8 @@ const useStyles = makeStyles(theme => ({
 const SlideLeft = props => <Slide {...props} direction="left" />
 
 const Config = () => {
-    const theme = useTheme()
     const { root, select, button } = useStyles()
     const history = useHistory()
-    const { modelName } = useAppState()
     const { users } = useUsersQuery()
     const [selectedUser, setSelectedUser] = useState('')
     const [usersOptions, setUsersOptions] = useState()
