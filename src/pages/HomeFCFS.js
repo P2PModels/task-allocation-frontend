@@ -82,8 +82,9 @@ const HomeFCFS = () => {
     const web3React = useWeb3React()
     const { account } = web3React
     const { pathname } = useLocation()
-    const { modelName } = useAppState()
-    const userId = getResourceFromPathname(pathname, 'user')
+    const { modelName, setModel } = useAppState()
+    const userId = getResourceFromPathname(pathname, 'userId')
+    const modelNameParam = getResourceFromPathname(pathname, 'model')
     const {
         user,
         tasks,
@@ -102,6 +103,12 @@ const HomeFCFS = () => {
     const [openTxSnackbar, setOpenTxSnackbar] = useState(false)
     const [txSnackbar, setTxSnackbar] = useState({})
     const [processingTx, setProcessingTx] = useState(false)
+
+    useEffect(() => {
+        console.log(userId)
+        console.log(modelNameParam)
+        setModel(modelNameParam)
+    }, [])
 
     // Wait half second before hiding loading snackbar. Only for aesthetic purposes
     useEffect(() => {

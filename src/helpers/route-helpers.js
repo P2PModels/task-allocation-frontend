@@ -1,16 +1,14 @@
-const positionToResource = {
-    user: 1,
-}
-
 export function getResourceFromPathname(pathname, resourceName) {
     const resources = pathname.split('/').filter(p => p.length)
+    const params = resources[resources.length-1].split('&').filter(p => p.length)
 
-    const pos = positionToResource[resourceName]
-    if (pos > -1 && resources && resources.length) {
-        return resources[pos]
-    }
+    let value
+    params.forEach(p => {
+        if(p.includes(resourceName))
+            value = p.split('=')[1]
+    })
 
-    return null
+    return value
 }
 
 export function generateUrl(url, params) {
