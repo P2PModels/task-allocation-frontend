@@ -13,6 +13,15 @@ export function getResourceFromPathname(pathname, resourceName) {
     return null
 }
 
-export function generateUrl(baseUrl, param) {
-    return baseUrl[-1] === '/' ? baseUrl + param : baseUrl + '/' + param
+export function generateUrl(url, params) {
+    // If the url doesn't finish with / add it
+    let generatedUrl = url[url.length - 1] === '/' ? url : url + '/'
+    // Find each parameter and add if it doesn't exist or update it
+    params.forEach(p => {
+        if (p.key && p.value)
+            if (generatedUrl[generatedUrl.length - 1] === '/')
+                generatedUrl += p.key + '=' + p.value
+            else generatedUrl += '&' + p.key + '=' + p.value
+    })
+    return generatedUrl
 }
