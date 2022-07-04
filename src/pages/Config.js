@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Redirect } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 import { useLocation } from 'react-router-dom'
 import { useWeb3React } from '@web3-react/core'
 import { getEditorLink } from '../helpers/amara-helpers'
@@ -17,27 +17,27 @@ import {
     Fade,
     Snackbar,
     Slide,
-    CircularProgress,
     Button,
 } from '@material-ui/core'
+import { Alert } from '@material-ui/lab'
+
 import { makeStyles, useTheme } from '@material-ui/core/styles'
-import ContentCopyIcon from '@material-ui/icons/ContentCopy'
+import FileCopyIcon from '@material-ui/icons/FileCopy'
 
 import ConfigView from '../components/ConfigView'
 import ModelSelect from '../components/ModelSelect'
 import UserSelect from '../components/UserSelect'
 import { useAppState } from '../contexts/AppState'
+import Select from '../components/Select'
+import { useUsersQuery } from '../hooks/useRequests'
+import models from '../types/models'
 
 const { AcceptTask, RejectTask } = Actions
 const SNACKBAR_FIXED_TIME = 700
 
 const useStyles = makeStyles(theme => ({
     root: {
-        flexGrow: 1,
-        height: 'calc(100vh - 116px)',
-        '& > div': {
-            height: '100%',
-        },
+        height: 'calc(100vh - 100px)',
         '& h2': {
             marginBottom: theme.spacing(4),
         },
@@ -52,25 +52,64 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
+const SlideLeft = props => <Slide {...props} direction="left" />
+
 const Config = () => {
     const theme = useTheme()
     const { root, select, button } = useStyles()
+    const history = useHistory()
     const { modelName } = useAppState()
-    const [generatedUrl, setGeneratedUrl] = useState('')
-    const baseUrl = 'https://task-allocation.p2pmodels.eu/'
+    const { users } = useUsersQuery()
+    const [selectedUser, setSelectedUser] = useState('')
+    const [usersOptions, setUsersOptions] = useState()
+    const [selectedModel, setSelectedModel] = useState('')
+    const [openSnackbar, setOpenSnackbar] = useState(false)
+    const snackbarMsg = 'Custom link copied to clipboard!'
+    const baseUri = '/home/'
+
+    const modelsOptions = models.map(m => ({
+        value: m.name,
+        label: m.displayName,
+    }))
 
     const handleCopyButton = () => {
+        let generatedUrl = generateUrl(window.location.origin + baseUri, [
+            { key: 'userId', value: selectedUser },
+            { key: 'model', value: selectedModel },
+        ])
         navigator.clipboard.writeText(generatedUrl)
+        setOpenSnackbar(true)
     }
 
+    const handleSnackbarClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return
+        }
+        setOpenSnackbar(false)
+    }
+
+    useEffect(() => {
+        if (users) {
+            setUsersOptions(users.map(u => ({ value: u.id, label: u.id })))
+            setSelectedUser(users[0].id)
+        }
+    }, [users])
+
+    useEffect(() => {
+        if (models) {
+            setSelectedModel(models[0].name)
+        }
+    }, [models])
+
     return (
-        <ConfigView className={root}>
+        <ConfigView>
             <Grid
                 container
                 justify="flex-start"
                 alignContent="center"
                 alignItems="center"
                 spacing={2}
+                className={root}
             >
                 <Grid item lg={12}>
                     <Typography variant="h2">
@@ -86,44 +125,52 @@ const Config = () => {
                 </Grid>
                 <Grid item lg={12}>
                     <Grid container spacing={4}>
-                        <Grid item>
-                            <Grid container alignItems="center" spacing={2}>
-                                <Grid item>
-                                    <Typography variant="h6">Model</Typography>
-                                </Grid>
-                                <Grid item>
-                                    <ModelSelect
-                                        className={select}
-                                        onChange={e => {
-                                            let url = generateUrl(
-                                                baseUrl,
-                                                e.target.value
-                                            )
-                                            setGeneratedUrl(url)
-                                        }}
-                                    />
-                                </Grid>
-                            </Grid>
-                        </Grid>
-                        <Grid item>
-                            <Grid container alignItems="center" spacing={2}>
-                                <Grid item>
-                                    <Typography variant="h6">User</Typography>
-                                </Grid>
-                                <Grid item>
-                                    <UserSelect
-                                        className={select}
-                                        onChange={e => {
-                                            let url = generateUrl(
-                                                baseUrl,
-                                                e.target.value
-                                            )
-                                            setGeneratedUrl(url)
-                                        }}
-                                    />
+                        {modelsOptions ? (
+                            <Grid item>
+                                <Grid container alignItems="center" spacing={2}>
+                                    <Grid item>
+                                        <Typography variant="h6">
+                                            Model
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Select
+                                            name="model"
+                                            label="model"
+                                            value={selectedModel}
+                                            options={modelsOptions}
+                                            className={select}
+                                            onChange={e =>
+                                                setSelectedModel(e.target.value)
+                                            }
+                                        />
+                                    </Grid>
                                 </Grid>
                             </Grid>
-                        </Grid>
+                        ) : null}
+                        {usersOptions ? (
+                            <Grid item>
+                                <Grid container alignItems="center" spacing={2}>
+                                    <Grid item>
+                                        <Typography variant="h6">
+                                            User
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Select
+                                            name="user"
+                                            label="User"
+                                            value={selectedUser}
+                                            options={usersOptions}
+                                            className={select}
+                                            onChange={e =>
+                                                setSelectedUser(e.target.value)
+                                            }
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+                        ) : null}
                     </Grid>
                 </Grid>
                 <Grid item lg={12}>
@@ -134,14 +181,27 @@ const Config = () => {
                                 className={button}
                                 onClick={handleCopyButton}
                             >
-                                Copy link <ContentCopyIcon />
+                                <FileCopyIcon /> Copy link
                             </Button>
                         </Grid>
                         <Grid item>
                             <Button
                                 variant="outlined"
                                 className={button}
-                                onClick={() => <Redirect to={generatedUrl} />}
+                                onClick={() =>
+                                    history.push(
+                                        generateUrl(baseUri, [
+                                            {
+                                                key: 'userId',
+                                                value: selectedUser,
+                                            },
+                                            {
+                                                key: 'model',
+                                                value: selectedModel,
+                                            },
+                                        ])
+                                    )
+                                }
                             >
                                 Access
                             </Button>
@@ -149,6 +209,17 @@ const Config = () => {
                     </Grid>
                 </Grid>
             </Grid>
+            <Snackbar
+                open={openSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                TransitionComponent={SlideLeft}
+                transitionDuration={500}
+                autoHideDuration={3000}
+                onClose={handleSnackbarClose}
+                key={'bottomright'}
+            >
+                <Alert severity={'info'}>{snackbarMsg}</Alert>
+            </Snackbar>
         </ConfigView>
     )
 }
