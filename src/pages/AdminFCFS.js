@@ -23,6 +23,8 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import ReplayIcon from '@material-ui/icons/Replay'
 import { Alert } from '@material-ui/lab'
 
+import MainView from '../components/MainView'
+import ModelSelect from '../components/ModelSelect'
 import TasksTable from '../components/Tables/TasksTable'
 import UsersTable from '../components/Tables/UsersTable'
 import TxsTable from '../components/Tables/TxsTable'
@@ -108,7 +110,7 @@ const useStyles = makeStyles(theme => ({
 
 const SlideLeft = props => <Slide {...props} direction="left" />
 
-export default function Admin() {
+const AdminFCFS = () => {
     const classes = useStyles()
     const theme = useTheme()
     const { modelName, modelDisplayName } = useAppState()
@@ -152,8 +154,7 @@ export default function Admin() {
     }
 
     return (
-        <div className={classes.root}>
-            <CssBaseline />
+        <MainView className={classes.root}>
             <AppBar
                 position="fixed"
                 className={clsx(classes.appBar, {
@@ -220,9 +221,21 @@ export default function Admin() {
                         <Typography variant="h3">{modelDisplayName}</Typography>
                     </Grid>
                     <Grid item lg={6}>
-                        <Typography variant="h6" align="right">
-                            Choose model
-                        </Typography>
+                        <Grid
+                            container
+                            justify="flex-end"
+                            alignItems="center"
+                            spacing={2}
+                        >
+                            <Grid item>
+                                <Typography variant="h6">
+                                    Change model:
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <ModelSelect />
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item lg={6}>
                         <Typography variant="h6">Registered users</Typography>
@@ -249,6 +262,8 @@ export default function Admin() {
             >
                 <Alert severity={'info'}>{snackbarMsg}</Alert>
             </Snackbar>
-        </div>
+        </MainView>
     )
 }
+
+export default AdminFCFS
