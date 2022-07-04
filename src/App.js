@@ -9,7 +9,6 @@ import theme from './theme'
 import { ConnectProvider as Connect } from './contexts/Connect'
 import { BackendProvider as Backend } from './contexts/BackendProvider'
 import { AppStateProvider } from './contexts/AppState'
-import MainView from './components/MainView'
 import Routes from './Routes'
 
 function getLibrary(provider) {
@@ -30,9 +29,7 @@ function App() {
                             <ThemeProvider theme={theme}>
                                 <CssBaseline />
                                 <HashRouter>
-                                    <MainView>
-                                        <Routes />
-                                    </MainView>
+                                    <Routes />
                                 </HashRouter>
                             </ThemeProvider>
                         </Backend>

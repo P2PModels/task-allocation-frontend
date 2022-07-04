@@ -23,12 +23,15 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight'
 import ReplayIcon from '@material-ui/icons/Replay'
 import { Alert } from '@material-ui/lab'
 
+import MainView from '../components/MainView'
+import Select from '../components/Select'
 import TasksTable from '../components/Tables/TasksTable'
 import UsersTable from '../components/Tables/UsersTable'
 import TxsTable from '../components/Tables/TxsTable'
 import { useAppState } from '../contexts/AppState'
 import useAdminActions from '../hooks/useAdminActions'
 import { useTasksQueryPolling, useUsersQuery } from '../hooks/useRequests'
+import models from '../types/models'
 
 const drawerWidth = 240
 
@@ -108,10 +111,10 @@ const useStyles = makeStyles(theme => ({
 
 const SlideLeft = props => <Slide {...props} direction="left" />
 
-export default function Admin() {
+const AdminFCFS = () => {
     const classes = useStyles()
     const theme = useTheme()
-    const { modelName, modelDisplayName } = useAppState()
+    const { modelName, modelDisplayName, setModel } = useAppState()
     const tasks = useTasksQueryPolling(true)
     const { users, refetch: refecthUsers } = useUsersQuery()
     const [
@@ -125,6 +128,11 @@ export default function Admin() {
     const [open, setOpen] = useState(false)
     const [openSnackbar, setOpenSnackbar] = useState(false)
     const [snackbarMsg, setSnackbarMsg] = useState('')
+
+    const modelsOptions = models.map(m => ({
+        value: m.name,
+        label: m.displayName,
+    }))
 
     useEffect(() => {
         refecthUsers()
@@ -152,8 +160,7 @@ export default function Admin() {
     }
 
     return (
-        <div className={classes.root}>
-            <CssBaseline />
+        <MainView className={classes.root}>
             <AppBar
                 position="fixed"
                 className={clsx(classes.appBar, {
@@ -220,9 +227,27 @@ export default function Admin() {
                         <Typography variant="h3">{modelDisplayName}</Typography>
                     </Grid>
                     <Grid item lg={6}>
-                        <Typography variant="h6" align="right">
-                            Choose model
-                        </Typography>
+                        <Grid
+                            container
+                            justify="flex-end"
+                            alignItems="center"
+                            spacing={2}
+                        >
+                            <Grid item>
+                                <Typography variant="h6">
+                                    Change model:
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Select
+                                    name="model"
+                                    label="model"
+                                    value={modelName}
+                                    options={modelsOptions}
+                                    onChange={e => setModel(e.target.value)}
+                                />
+                            </Grid>
+                        </Grid>
                     </Grid>
                     <Grid item lg={6}>
                         <Typography variant="h6">Registered users</Typography>
@@ -249,6 +274,8 @@ export default function Admin() {
             >
                 <Alert severity={'info'}>{snackbarMsg}</Alert>
             </Snackbar>
-        </div>
+        </MainView>
     )
 }
+
+export default AdminFCFS

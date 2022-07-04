@@ -1,20 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react'
 import clsx from 'clsx'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
-import Drawer from '@material-ui/core/Drawer'
-import AppBar from '@material-ui/core/AppBar'
-import Toolbar from '@material-ui/core/Toolbar'
-import List from '@material-ui/core/List'
-import CssBaseline from '@material-ui/core/CssBaseline'
-import Typography from '@material-ui/core/Typography'
-import Divider from '@material-ui/core/Divider'
-import IconButton from '@material-ui/core/IconButton'
+import {
+    Drawer,
+    AppBar,
+    Toolbar,
+    List,
+    CssBaseline,
+    Typography,
+    Divider,
+    IconButton,
+    ListItem,
+    ListItemIcon,
+    ListItemText,
+    Snackbar,
+    Grid,
+} from '@material-ui/core'
 import MenuIcon from '@material-ui/icons/Menu'
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft'
 import ChevronRightIcon from '@material-ui/icons/ChevronRight'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
-import ListItemText from '@material-ui/core/ListItemText'
 import PlayArrowIcon from '@material-ui/icons/PlayArrow'
 import StopIcon from '@material-ui/icons/Stop'
 import ReplayIcon from '@material-ui/icons/Replay'
@@ -23,9 +27,17 @@ import Chip from '@material-ui/core/Chip'
 import CheckCircleRounded from '@material-ui/icons/CheckCircleRounded'
 import CancelRounded from '@material-ui/icons/CancelRounded'
 import MuiAlert from '@material-ui/lab/Alert'
-import Snackbar from '@material-ui/core/Snackbar'
 
-import TasksTable from '../Tables/TasksTable'
+import MainView from '../components/MainView'
+import TasksTable from '../components/Tables/TasksTable'
+import UsersTable from '../components/Tables/UsersTable'
+import TxsTable from '../components/Tables/TxsTable'
+import { useAppState } from '../contexts/AppState'
+import useAdminActions from '../hooks/useAdminActions'
+import { useTasksQueryPolling, useUsersQuery } from '../hooks/useRequests'
+
+import Select from '../components/Select'
+import models from '../types/models'
 
 const {
     startManager: startEthManager,
@@ -114,9 +126,20 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-export default function AdminDrawer() {
+const AdminRR = () => {
     const classes = useStyles()
     const theme = useTheme()
+    const { modelName, modelDisplayName, setModel } = useAppState()
+    const tasks = useTasksQueryPolling(true)
+    const { users, refetch: refecthUsers } = useUsersQuery()
+    const [
+        restartPrototype,
+        {
+            data: restartPrototypeData,
+            loading: restartPrototypeLoading,
+            error: restartPrototypeError,
+        },
+    ] = useAdminActions()
     const [open, setOpen] = useState(false)
     const [openSnackbar, setOpenSnackbar] = useState(false)
     const [snackbarMsg, setSnackbarMsg] = useState('')
@@ -126,6 +149,11 @@ export default function AdminDrawer() {
     const newData = useRef(false)
     const signer = useRef(undefined)
     const cronJobs = useRef(undefined)
+
+    const modelsOptions = models.map(m => ({
+        value: m.name,
+        label: m.displayName,
+    }))
 
     console.log('[Admin]')
     console.log(startEthManager)
@@ -146,8 +174,6 @@ export default function AdminDrawer() {
     const handleDrawerOpen = () => {
         setOpen(true)
     }
-
-    console.log(handleDrawerOpen)
 
     const handleDrawerClose = () => {
         setOpen(false)
@@ -285,8 +311,7 @@ export default function AdminDrawer() {
     }
 
     return (
-        <div className={classes.root}>
-            <CssBaseline />
+        <MainView className={classes.root}>
             <AppBar
                 position="fixed"
                 className={clsx(classes.appBar, {
@@ -395,6 +420,46 @@ export default function AdminDrawer() {
                     />
                 )}
                 <div className={classes.toolbar} />
+                <Grid container spacing={2}>
+                    <Grid item lg={6}>
+                        <Typography variant="h3">{modelDisplayName}</Typography>
+                    </Grid>
+                    <Grid item lg={6}>
+                        <Grid
+                            container
+                            justify="flex-end"
+                            alignItems="center"
+                            spacing={2}
+                        >
+                            <Grid item>
+                                <Typography variant="h6">
+                                    Change model:
+                                </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Select
+                                    name="model"
+                                    label="model"
+                                    value={modelName}
+                                    options={modelsOptions}
+                                    onChange={e => setModel(e.target.value)}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid item lg={6}>
+                        <Typography variant="h6">Registered users</Typography>
+                        <UsersTable users={users} />
+                    </Grid>
+                    <Grid item lg={6}>
+                        <Typography variant="h6">Tasks</Typography>
+                        <TasksTable tasks={tasks} />
+                    </Grid>
+                    <Grid item lg={12}>
+                        <Typography variant="h6">Transactions</Typography>
+                        <TxsTable txs={restartPrototypeData.receipts} />
+                    </Grid>
+                </Grid>
                 <Typography variant="h6">Allocated Tasks</Typography>
                 <TasksTable refreshTable={newData.current} />
             </main>
@@ -415,6 +480,8 @@ export default function AdminDrawer() {
                     {snackbarMsg}
                 </Alert>
             </Snackbar>
-        </div>
+        </MainView>
     )
 }
+
+export default AdminRR

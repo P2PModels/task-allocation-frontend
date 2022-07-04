@@ -26,6 +26,7 @@ export function AppStateProvider({ children }) {
     const [endpoint, setEndpoint] = useState(
         models[DEFAULT_MODEL_INDEX].endpoint
     )
+    const [userId, setUserId] = useState()
 
     const setModel = name => {
         let model = models.find(m => m.name === name)
@@ -38,6 +39,10 @@ export function AppStateProvider({ children }) {
         }
     }
 
+    const setUser = userId => {
+        setUserId(userId)
+    }
+
     const value = useMemo(() => {
         return {
             appName,
@@ -47,6 +52,8 @@ export function AppStateProvider({ children }) {
             contractABI,
             endpoint,
             setModel,
+            userId,
+            setUser,
         }
     }, [contractAddress, endpoint])
 

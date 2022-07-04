@@ -81,6 +81,11 @@ const purple = {
     500: '#6E3759',
 }
 
+const green = {
+    300: '#69C96C',
+    500: '#389b3c',
+}
+
 const theme = createMuiTheme({
     palette: {
         secondary: {
@@ -100,8 +105,12 @@ const theme = createMuiTheme({
         background: {
             primary: white[100],
             secondary: white[300],
+            green: green[300],
         },
         translateButton: purple[500],
+        info: {
+            main: purple[500],
+        },
     },
     typography: {
         fontFamily: ['Roboto', 'Arial', 'serif'],

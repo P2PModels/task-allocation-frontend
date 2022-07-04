@@ -1,39 +1,45 @@
 import React from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
-import FCFSHome from './pages/FCFSHome'
+import HomeFCFS from './pages/HomeFCFS'
 // import Admin from './pages/Admin'
-import Admin from './pages/Admin2'
+import AdminFCFS from './pages/AdminFCFS'
+import AdminRR from './pages/AdminRR'
+import Config from './pages/Config'
 import { useAppState } from './contexts/AppState'
 import models from './types/models'
 
 function Routes() {
     const { modelName } = useAppState()
 
-    let homeComponent
+    let homeComponent, adminComponent
 
     switch (modelName) {
         // FCFS
         case models[0].name:
-            homeComponent = FCFSHome
+            homeComponent = HomeFCFS
+            adminComponent = AdminFCFS
             break
 
         // RR
-        // case models[0].name:
-        //     homeComponent = RRHome
-        //     break
+        case models[1].name:
+            // homeComponent = RRHome
+            homeComponent = HomeFCFS
+            adminComponent = AdminRR
+            break
 
         // Default FCFS
         default:
-            homeComponent = FCFSHome
+            homeComponent = HomeFCFS
             break
     }
 
     return (
         <Switch>
-            <Redirect exact from="/" to="/home"></Redirect>
+            <Redirect exact from="/" to="/config"></Redirect>
+            <Route path="/config" component={Config} />
             <Route path="/home" component={homeComponent} />
             {/* Add admin provider */}
-            <Route path="/admin" component={Admin} />
+            <Route path="/admin" component={adminComponent} />
         </Switch>
     )
 }

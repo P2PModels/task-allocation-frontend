@@ -23,6 +23,7 @@ import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { Alert } from '@material-ui/lab'
 import CheckIcon from '@material-ui/icons/Check'
 
+import MainView from '../components/MainView'
 import Banner from '../components/Banner'
 import TaskSection from '../components/TaskSection'
 import MessageModal from '../components/Modals/MessageModal'
@@ -68,7 +69,7 @@ const MODAL_ACTIONS = {
 const SlideUp = props => <Slide {...props} direction="up" />
 const SlideLeft = props => <Slide {...props} direction="left" />
 
-const FCFSHome = () => {
+const HomeFCFS = () => {
     const theme = useTheme()
     const {
         root,
@@ -219,7 +220,7 @@ const FCFSHome = () => {
         }
 
         return (
-            <div className={root}>
+            <MainView className={root}>
                 <Grid
                     container
                     direction="column"
@@ -338,10 +339,10 @@ const FCFSHome = () => {
                     open={openMessageModal}
                     onClose={() => setOpenMessageModal(false)}
                 />
-            </div>
+            </MainView>
         )
     }
     return null
 }
 
-export default FCFSHome
+export default HomeFCFS
