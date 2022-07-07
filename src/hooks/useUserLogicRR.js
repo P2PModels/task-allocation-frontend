@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import {
     useUserQuery,
-    useAvailableTasksQueryPolling,
+    useAssignedTasksQueryPolling,
     useTasksAcceptedByUserQueryPolling,
 } from './useRequests'
 import { buildMapById } from '../helpers/general-helpers'
@@ -31,13 +31,13 @@ async function getTasks(tasks, user) {
     return []
 }
 
-function useUserLogicFCFS(userId) {
+function useUserLogicRR(userId) {
     const contractUser = useUserQuery(userId)
-    const contractTasks = useAvailableTasksQueryPolling()
+    const contractTasks = useAssignedTasksQueryPolling(userId)
     const contractAcceptedTasks = useTasksAcceptedByUserQueryPolling(userId)
     const [user, setUser] = useState()
     const [tasks, setTasks] = useState()
-    const [allocatedTasks, setAllocatedTasks] = useState()
+    const [acceptedTask, setAcceptedTask] = useState()
     const [videosRegistry, setVideosRegistry] = useState(new Map())
 
     // Fetch Amara user data
@@ -96,21 +96,22 @@ function useUserLogicFCFS(userId) {
             return
         }
         getTasks(contractAcceptedTasks, user).then(mergedTasks => {
-            setAllocatedTasks(mergedTasks)
+            setAcceptedTask(mergedTasks[0] ? mergedTasks[0] : null)
         })
 
         return () => {}
     }, [user, contractAcceptedTasks])
 
-    const loadingData = !user || !videosRegistry || !tasks || !allocatedTasks
+    const loadingData =
+        !user || !videosRegistry || !tasks || acceptedTask === undefined
 
     return {
         user,
         tasks,
-        allocatedTask: allocatedTasks ? allocatedTasks[0] : null,
+        acceptedTask: acceptedTask ? acceptedTask : null,
         videosRegistry,
         loading: loadingData,
     }
 }
 
-export default useUserLogicFCFS
+export default useUserLogicRR

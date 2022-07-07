@@ -5,7 +5,7 @@ import { getEditorLink } from '../helpers/amara-helpers'
 import { getTxStatus, getTxAction } from '../helpers/transaction-helpers'
 import { getResourceFromPathname } from '../helpers/route-helpers'
 import { Actions, convertToString } from '../types/actions'
-import useUserLogicFCFS from '../hooks/useUserLogicFCFS'
+import useUserLogicRR from '../hooks/useUserLogicRR'
 import useActions from '../hooks/useActions'
 import AmaraApi from '../amara-api'
 
@@ -69,7 +69,7 @@ const MODAL_ACTIONS = {
 const SlideUp = props => <Slide {...props} direction="up" />
 const SlideLeft = props => <Slide {...props} direction="left" />
 
-const HomeFCFS = () => {
+const HomeRR = () => {
     const theme = useTheme()
     const {
         root,
@@ -87,10 +87,10 @@ const HomeFCFS = () => {
     const {
         user,
         tasks,
-        allocatedTask,
+        acceptedTask,
         videosRegistry,
         loading,
-    } = useUserLogicFCFS(userId)
+    } = useUserLogicRR(userId)
     /* ref to avoid updating component when setting to true.
    Need it to execute useEffect only once at some point in time */
     const loadingHandlerExecutedRef = useRef(false)
@@ -239,12 +239,12 @@ const HomeFCFS = () => {
                         img={Homepage}
                         // cta={<Button>Botón</Button>}
                     />
-                    {allocatedTask ? (
+                    {acceptedTask ? (
                         <Grid container className={taskSection}>
                             <Grid item>
                                 <Box mt={!tasks ? 0 : 2} width="100">
                                     <TaskSection
-                                        tasks={[allocatedTask]}
+                                        tasks={[acceptedTask]}
                                         videoRegistry={
                                             videosRegistry === []
                                                 ? null
@@ -278,8 +278,8 @@ const HomeFCFS = () => {
                                                 processingTx
                                                     ? 'Processing your request...'
                                                     : tasks.length == 1
-                                                    ? 'This assignement is currently free'
-                                                    : 'These assignements are currently free'
+                                                    ? 'This assignement is currently assigned to you'
+                                                    : 'These assignements are currently assigned to you'
                                             }
                                             description=""
                                             emptyText="No tasks available"
@@ -351,4 +351,4 @@ const HomeFCFS = () => {
     return null
 }
 
-export default HomeFCFS
+export default HomeRR
