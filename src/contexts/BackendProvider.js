@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     ApolloClient,
     createHttpLink,
@@ -11,14 +11,22 @@ export function BackendProvider(props) {
     const { children } = props
     const { endpoint } = useAppState()
 
-    const httpLink = createHttpLink({
-        uri: endpoint,
-    })
+    const createClient = endpoint => {
+        const httpLink = createHttpLink({
+            uri: endpoint,
+        })
 
-    const client = new ApolloClient({
-        link: httpLink,
-        cache: new InMemoryCache(),
-    })
+        const client = new ApolloClient({
+            link: httpLink,
+            cache: new InMemoryCache(),
+        })
 
-    return <ApolloProvider client={client}>{children}</ApolloProvider>
+        return client
+    }
+
+    return (
+        <ApolloProvider client={createClient(endpoint)}>
+            {children}
+        </ApolloProvider>
+    )
 }
