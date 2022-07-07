@@ -11,6 +11,7 @@ const useStyles = makeStyles(theme => ({
         border: 'none',
         marginTop: theme.mixins.toolbar.minHeight,
         marginBottom: theme.spacing(4),
+        minHeight: 'calc(100vh - 286px)',
     },
 }))
 

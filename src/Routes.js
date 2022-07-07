@@ -1,6 +1,7 @@
 import React from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import HomeFCFS from './pages/HomeFCFS'
+import HomeRR from './pages/HomeRR'
 // import Admin from './pages/Admin'
 import AdminFCFS from './pages/AdminFCFS'
 import AdminRR from './pages/AdminRR'
@@ -22,8 +23,7 @@ function Routes() {
 
         // RR
         case models[1].name:
-            // homeComponent = RRHome
-            homeComponent = HomeFCFS
+            homeComponent = HomeRR
             adminComponent = AdminRR
             break
 
