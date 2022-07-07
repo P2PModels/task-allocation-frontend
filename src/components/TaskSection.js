@@ -95,7 +95,7 @@ const TaskSection = ({
                 </React.Fragment>
             ) : (
                 <Grid item>
-                    <Typography variant="h4" color="textSecondary">
+                    <Typography variant="h3" className={classes.title}>
                         {emptyText}
                     </Typography>
                 </Grid>
