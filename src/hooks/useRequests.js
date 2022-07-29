@@ -70,10 +70,7 @@ export function useUserQuery(userId) {
     return user
 }
 
-export function useTasksQueryPolling(
-    getAll = false,
-    { first, skip } = { first: 50, skip: 0 }
-) {
+export function useTasksQueryPolling({ first, skip } = { first: 50, skip: 0 }) {
     const [tasks, setTasks] = useState(null)
     const { modelName } = useAppState()
     const model = models.find(m => m.name === modelName)
@@ -116,7 +113,7 @@ export function useTasksQueryPolling(
         return () => tasksPolling.current.stopPolling()
     }, [tasksPolling, onTasksHandler])
 
-    return tasks
+    return { tasks, refetch: tasksPolling.current.refetch }
 }
 
 export function useAvailableTasksQueryPolling(

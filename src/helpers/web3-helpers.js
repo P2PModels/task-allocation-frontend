@@ -1,5 +1,43 @@
 import { toChecksumAddress, toHex } from 'web3-utils'
 
+const PRIVATE_KEY = process.env.REACT_APP_AMARA_PRIVATE_KEY
+
+/**
+ * Creates a stateles transaction
+ *
+ * @param  {} web3
+ * @param  {} tx
+ * @param  {} handlers
+ * @param  {} usePrivateKey=false
+ */
+export async function sendTransaction(
+    web3,
+    tx,
+    handlers,
+    usePrivateKey = false
+) {
+    try {
+        console.log('[sendTransaction] Tx')
+        let txObj
+        if (usePrivateKey) {
+            const { rawTransaction } = await web3.eth.accounts.signTransaction(
+                tx,
+                PRIVATE_KEY
+            )
+            console.log('[sendTransaction] Signed tx, sending...')
+            txObj = web3.eth.sendSignedTransaction(rawTransaction)
+        } else {
+            txObj = web3.eth.sendTransaction(tx)
+        }
+        txObj.on('transactionHash', hash => handlers.onTransactionHash(hash))
+        txObj.on('receipt', receipt => handlers.onReceipt(receipt))
+        txObj.on('error', err => handlers.onError(err))
+        return txObj
+    } catch (e) {
+        console.log(e)
+    }
+}
+
 // Every byte consists of two hex values hence 32 * 2 = 64.
 // And 0x + 64 = 66 values
 export function toBytes32(text, totalLength = 66) {
@@ -50,4 +88,4 @@ export function timestampToDate(timestamp) {
     return new Date(timestamp * 1000)
 }
 
-export { toHex, hexToUtf8 } from 'web3-utils'
+export { toHex, hexToUtf8, hexToAscii } from 'web3-utils'

@@ -1,36 +1,38 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { useWeb3React } from '@web3-react/core'
-import { getWeb3ReactContext } from '@web3-react/core'
 import { useAppState } from '../contexts/AppState'
 import { Actions } from '../types/actions'
 import { toBytes32 } from '../helpers/web3-helpers'
-import { users as mockUsers, mockTasks } from '../mock-data'
-import useTransaction from './useTransaction'
+import { users as mockUsers, mockTasks, REALLOCATION_TIME } from '../mock-data'
 import useBulkTransactions from './useBulkTransactions'
+import useManager from './useManager'
 
 const PUBLIC_KEY = process.env.REACT_APP_AMARA_PUBLIC_ADDRESS
-const GAS_LIMIT = 450000
-const GAS_PRICE = 2000000000
+const GAS_LIMIT = 450000 // Reallocation spends around 150 gas
+const GAS_PRICE = 2000000000 //2 Gwei
 const { RestartContract, RegisterUser, CreateTask } = Actions
+
+const MAXIMUM_RETRIES = 5
 
 const useAdminActions = () => {
     const account = PUBLIC_KEY
     const { library: web3 } = useWeb3React()
-    const { contractAddress, contractABI } = useAppState()
-    const [
-        processBulkTransactions,
-        { data, loading, error },
-    ] = useBulkTransactions()
+    const { contractAddress, modelContractInstance } = useAppState()
+    const [processBulkTransactions, bulkTxsRecord] = useBulkTransactions()
+    const {
+        start,
+        stop,
+        running,
+        scheduledJobs,
+        txsRecord: managerTxsRecord,
+    } = useManager(web3, account, GAS_LIMIT, GAS_PRICE)
 
-    const getContractInstance = useCallback((web3, abi) => {
-        // console.log(web3)
-        if (web3) {
-            return new web3.eth.Contract(abi)
-        }
-    }, [])
+    const startManager = tasks => start(tasks)
+
+    const stopManager = () => stop()
 
     const restartPrototype = useCallback(() => {
-        const modelContractInstance = getContractInstance(web3, contractABI)
+        console.log('%cRestarting prototype...', 'color: aqua')
 
         const restartContractTxParams = {
             from: account,
@@ -57,7 +59,8 @@ const useAdminActions = () => {
                 from: account,
                 to: contractAddress,
                 data: modelContractInstance.methods['createTask'](
-                    toBytes32(task.job_id)
+                    toBytes32(task.job_id),
+                    REALLOCATION_TIME
                 ).encodeABI(),
                 gas: GAS_LIMIT,
                 gasPrice: GAS_PRICE,
@@ -73,9 +76,29 @@ const useAdminActions = () => {
             ],
             true // Use private key
         )
-    }, [web3])
+    }, [web3, modelContractInstance])
 
-    return [restartPrototype, { data, loading, error }]
+    return {
+        startManager,
+        stopManager,
+        managerRunning: running,
+        jobs: scheduledJobs,
+        txsRecord: {
+            data: {
+                txsHash: [
+                    ...managerTxsRecord.data.txsHash,
+                    ...bulkTxsRecord.data.txsHash,
+                ],
+                receipts: [
+                    ...managerTxsRecord.data.receipts,
+                    ...bulkTxsRecord.data.receipts,
+                ],
+            },
+            error: [...managerTxsRecord.error, ...bulkTxsRecord.error],
+        },
+        restartPrototype,
+        restartPrototypeLoading: bulkTxsRecord.loading,
+    }
 }
 
 export default useAdminActions

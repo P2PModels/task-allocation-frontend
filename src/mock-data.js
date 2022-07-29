@@ -275,3 +275,5 @@ export const mockTasks = [
             'https://staging.amara.org/api/teams/collab-demo-team/subtitle-requests/TNEYKA0/',
     },
 ]
+
+export const REALLOCATION_TIME = 90 // (s)

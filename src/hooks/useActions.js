@@ -11,7 +11,7 @@ const { AcceptTask } = Actions
 
 function useActions(onReportStatus) {
     const { account, library: web3 } = useWeb3React()
-    const { contractAddress, contractABI } = useAppState()
+    const { contractAddress, modelContractInstance } = useAppState()
     const [
         processTransaction,
         {
@@ -21,13 +21,6 @@ function useActions(onReportStatus) {
         },
     ] = useTransaction()
     const [currentAction, setCurrentAction] = useState()
-
-    const getContractInstance = useCallback((web3, abi) => {
-        // console.log(web3)
-        if (web3) {
-            return new web3.eth.Contract(abi)
-        }
-    }, [])
 
     useEffect(() => {
         if (txHash && !txLoading && !txReceipt && !txError) {
@@ -50,7 +43,6 @@ function useActions(onReportStatus) {
         (userId, taskId) => {
             const hexUserId = toBytes32(userId)
             const hexTaskId = toBytes32(taskId)
-            const modelContract = getContractInstance(web3, contractABI)
 
             // console.log('[AcceptTask] params:')
             // console.log(hexUserId)
@@ -59,7 +51,7 @@ function useActions(onReportStatus) {
             const acceptTaskTxParams = {
                 from: account,
                 to: contractAddress,
-                data: modelContract.methods['acceptTask'](
+                data: modelContractInstance.methods['acceptTask'](
                     hexUserId,
                     hexTaskId
                 ).encodeABI(),

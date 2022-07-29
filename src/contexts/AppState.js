@@ -1,18 +1,26 @@
 // TODO: Build up app state
-import React, { createContext, useState, useMemo, useContext } from 'react'
+import React, {
+    createContext,
+    useState,
+    useEffect,
+    useMemo,
+    useContext,
+} from 'react'
 import models from '../types/models'
+import { useWeb3React } from '@web3-react/core'
 
 // import useUser from '../hooks/useUser'
 
 const APP_NAME = process.env.REACT_APP_TASK_ALLOCATION_APP_NAME
 
 // Set Round Robin as default model
-const DEFAULT_MODEL_INDEX = 0
+const DEFAULT_MODEL_INDEX = 1
 
 const AppStateContext = createContext()
 
 export function AppStateProvider({ children }) {
     const [appName, setAppName] = useState(APP_NAME)
+    const { library: web3 } = useWeb3React()
     const [modelName, setModelName] = useState(models[DEFAULT_MODEL_INDEX].name)
     const [modelDisplayName, setModelDisplayName] = useState(
         models[DEFAULT_MODEL_INDEX].displayName
@@ -27,6 +35,22 @@ export function AppStateProvider({ children }) {
         models[DEFAULT_MODEL_INDEX].endpoint
     )
     const [userId, setUserId] = useState()
+    const [modelContractInstance, setModelContractInstance] = useState()
+
+    const getContractInstance = (web3, abi, contractAddress) => {
+        if (web3 && abi) {
+            console.log('ABI from contract')
+            console.log(abi)
+            return new web3.eth.Contract(abi, contractAddress)
+        }
+    }
+
+    useEffect(() => {
+        const instance = getContractInstance(web3, contractABI, contractAddress)
+        setModelContractInstance(instance)
+        console.log('[AppStateContext] Setting contract instance')
+        console.log(instance)
+    }, [web3, contractABI, contractAddress])
 
     const setModel = name => {
         let model = models.find(m => m.name === name)
@@ -48,6 +72,7 @@ export function AppStateProvider({ children }) {
             appName,
             modelName,
             modelDisplayName,
+            modelContractInstance,
             contractAddress,
             contractABI,
             endpoint,
@@ -55,7 +80,7 @@ export function AppStateProvider({ children }) {
             userId,
             setUser,
         }
-    }, [contractAddress, endpoint])
+    }, [modelContractInstance, contractAddress, endpoint])
 
     return (
         <AppStateContext.Provider value={value}>

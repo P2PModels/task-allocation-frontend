@@ -20,9 +20,9 @@ function getLibrary(provider) {
 function App() {
     return (
         <Suspense fallback="loading">
-            <AppStateProvider>
-                <Web3ReactProvider getLibrary={getLibrary}>
-                    <Connect>
+            <Web3ReactProvider getLibrary={getLibrary}>
+                <Connect>
+                    <AppStateProvider>
                         {/* <AdminWeb3ReactProvider getLibrary={getLibrary}>
                             <Connect networkOnlyConnector> */}
                         <Backend>
@@ -35,9 +35,9 @@ function App() {
                         </Backend>
                         {/* </Connect>
                         </AdminWeb3ReactProvider> */}
-                    </Connect>
-                </Web3ReactProvider>
-            </AppStateProvider>
+                    </AppStateProvider>
+                </Connect>
+            </Web3ReactProvider>
         </Suspense>
     )
 }
