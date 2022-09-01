@@ -21,15 +21,16 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE) => {
     const [running, setRunning] = useState(false)
     const [queueTransaction, stopQueue, txsRecord] = useQueuedTransactions()
     const scheduledJobs = useRef(new Map())
+    const handledEvents = useRef(new Map())
 
     // TODO
     function createJob(web3, txParams, taskId, timeout) {
-        console.log(
-            `%c[createJob] Creating reallocation job for task ${taskId} in ${
-                timeout / 1000
-            }s`,
-            'color: pink'
-        )
+        // console.log(
+        //     `%c[createJob] Creating reallocation job for task ${taskId} in ${
+        //         timeout / 1000
+        //     }s`,
+        //     'color: pink'
+        // )
         return {
             taskId,
             timerId: setTimeout(async () => {
@@ -39,7 +40,7 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE) => {
                     'color: pink'
                 )
             }, timeout),
-            timeout: timeout,
+            endDate: Date.now() + timeout,
             tx: {
                 data: {
                     hash: null,
@@ -78,14 +79,16 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE) => {
     // TODO
     const taskAllocatedHandler = async function (taskId, userId) {
         if (taskId && userId) {
-            // Get current task
+            // Get current task end date (s)
             const { endDate } = await modelContractInstance.methods['getTask'](
                 toBytes32(taskId)
             ).call()
 
+            const endDateMillis = endDate * 1000
+
             console.log(
                 `[taskAllocatedHandler] ${TASK_ALLOCATED} event - Task ${taskId} has been assigned to ${userId} and will be reassigned on ${new Date(
-                    endDate + REALLOCATION_TIME
+                    endDateMillis
                 ).toLocaleTimeString()}, current time is: ${new Date(
                     Date.now()
                 ).toLocaleTimeString()}`
@@ -110,7 +113,7 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE) => {
                 web3,
                 reallocateTaskTxParams,
                 taskId,
-                endDate + REALLOCATION_TIME - Date.now() // timeout
+                endDateMillis - Date.now() // timeout
             )
             scheduledJobs.current.set(scheduledJob.taskId, scheduledJob)
         } else {
@@ -178,41 +181,77 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE) => {
     }
 
     async function setUpEventListeners() {
-        modelContractInstance.events[USER_REGISTERED]({}, (error, event) =>
-            userRegisteredHandler(hexToUtf8(event.returnValues.userId))
-        )
-        modelContractInstance.events[USER_DELETED]({}, (error, event) =>
-            userDeletedHandler(hexToUtf8(event.returnValues.userId))
-        )
-        modelContractInstance.events[TASK_CREATED]({}, (error, event) =>
-            taskCreatedHandler(hexToUtf8(event.returnValues.taskId))
-        )
+        console.log('Set up event listeners!')
+
+        modelContractInstance.events[USER_REGISTERED]({}, (error, event) => {
+            if (!handledEvents.current.get(event.id)) {
+                handledEvents.current.set(event.id, true)
+                userRegisteredHandler(hexToUtf8(event.returnValues.userId))
+            }
+        })
+        modelContractInstance.events[USER_DELETED]({}, (error, event) => {
+            if (!handledEvents.current.get(event.id)) {
+                handledEvents.current.set(event.id, true)
+                userDeletedHandler(hexToUtf8(event.returnValues.userId))
+            }
+        })
+        modelContractInstance.events[TASK_CREATED]({}, (error, event) => {
+            if (!handledEvents.current.get(event.id)) {
+                handledEvents.current.set(event.id, true)
+                taskCreatedHandler(hexToUtf8(event.returnValues.taskId))
+            }
+        })
         modelContractInstance.events[TASK_ALLOCATED](
             {},
             async (error, event) => {
-                console.log('Event triggered!')
-                const { taskId, userId } = event.returnValues
-                await taskAllocatedHandler(hexToUtf8(taskId), hexToUtf8(userId))
-                console.log('Event ended')
+                // console.log(
+                //     `[eventListener] Event ${event.id} its ${(() =>
+                //         handledEvents.current.get(event.id)
+                //             ? 'been handled'
+                //             : 'pending')()}`
+                // )
+                if (!handledEvents.current.get(event.id)) {
+                    // console.log('Handling event')
+                    handledEvents.current.set(event.id, true)
+                    const { taskId, userId } = event.returnValues
+                    await taskAllocatedHandler(
+                        hexToUtf8(taskId),
+                        hexToUtf8(userId)
+                    )
+                }
             }
         )
-        modelContractInstance.events[TASK_ACCEPTED]({}, (error, event) =>
-            taskAcceptedHandler(scheduledJobs, event)
-        )
-        modelContractInstance.events[TASK_REJECTED]({}, (error, event) =>
-            taskRejectedHandler(event)
-        )
-        modelContractInstance.events[TASK_DELETED]({}, (error, event) =>
-            taskDeletedHandler(hexToUtf8(event.returnValues.taskId))
-        )
-        modelContractInstance.events[REJECTER_DELETED]({}, (error, event) =>
-            rejecterDeletedHandler(
-                hexToUtf8(event.returnValues.userId),
-                hexToUtf8(event.returnValues.taskId)
-            )
-        )
+        modelContractInstance.events[TASK_ACCEPTED]({}, (error, event) => {
+            if (!handledEvents.current.get(event.id)) {
+                handledEvents.current.set(event.id, true)
+                taskAcceptedHandler(scheduledJobs, event)
+            }
+        })
+        modelContractInstance.events[TASK_REJECTED]({}, (error, event) => {
+            if (!handledEvents.current.get(event.id)) {
+                handledEvents.current.set(event.id, true)
+                taskRejectedHandler(event)
+            }
+        })
+        modelContractInstance.events[TASK_DELETED]({}, (error, event) => {
+            if (!handledEvents.current.get(event.id)) {
+                handledEvents.current.set(event.id, true)
+                taskDeletedHandler(hexToUtf8(event.returnValues.taskId))
+            }
+        })
+        modelContractInstance.events[REJECTER_DELETED]({}, (error, event) => {
+            if (!handledEvents.current.get(event.id)) {
+                handledEvents.current.set(event.id, true)
+                rejecterDeletedHandler(
+                    hexToUtf8(event.returnValues.userId),
+                    hexToUtf8(event.returnValues.taskId)
+                )
+            }
+        })
 
         console.log('Events listeners set up')
+
+        console.log(modelContractInstance)
     }
 
     /**
@@ -225,7 +264,7 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE) => {
                 t.status === convertToString(TaskStatuses.Assigned) ||
                 t.status === convertToString(TaskStatuses.Available)
         )
-        console.log('%c[manageTasks] Tasks to manage:', 'color: green')
+        console.log('%c[manageTasks] Tasks to manage:', 'color: lightgreen')
         console.log(filteredTasks)
 
         if (filteredTasks.length)
@@ -238,7 +277,7 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE) => {
                     `%c[manageTasks] Managing task ${
                         task.id
                     }, endDate: ${timestamp.toLocaleTimeString()}`,
-                    'color: green'
+                    'color: lightgreen'
                 )
 
                 // Prepare tx params
@@ -267,7 +306,7 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE) => {
                     // Reallocate task now
                     console.log(
                         `%c[manageTasks] Reallocating task ${task.id}`,
-                        'color: green'
+                        'color: lightgreen'
                     )
                     queueTransaction(web3, reallocateTaskTxParams, true)
                 }
@@ -302,6 +341,7 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE) => {
         })
         // setScheduledJobs(new Map())
         scheduledJobs.current = new Map()
+        handledEvents.current = new Map()
 
         // Clear txs queue
         stopQueue()
