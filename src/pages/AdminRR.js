@@ -404,8 +404,11 @@ const AdminRR = () => {
                                 return {
                                     id: v.timerId,
                                     taskId: v.taskId,
-                                    timeout: v.timeout,
-                                    status: v.timeout > 0 ? 'waiting' : 'done',
+                                    endDate: v.endDate,
+                                    status:
+                                        v.endDate > Date.now()
+                                            ? 'waiting'
+                                            : 'timed out',
                                 }
                             })}
                         />
