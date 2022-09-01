@@ -54,7 +54,7 @@ const JobsTable = ({ jobs }) => {
                         </StyledTableCell>
                         <StyledTableCell align="center">Status</StyledTableCell>
                         <StyledTableCell align="center">
-                            Timer (s)
+                            Timeout
                         </StyledTableCell>
                     </TableRow>
                 </TableHead>
@@ -95,7 +95,7 @@ const JobsTable = ({ jobs }) => {
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
                                     <Timer
-                                        end={new Date(Date.now() + job.timeout)}
+                                        end={new Date(job.endDate)}
                                         className={classes.timer}
                                     />
                                 </StyledTableCell>
