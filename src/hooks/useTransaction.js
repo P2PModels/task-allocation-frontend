@@ -9,7 +9,7 @@ const useTransaction = () => {
 
     async function processTransaction(web3, tx, usePrivateKey = false) {
         console.log('Sending transaction!')
-        console.log(tx)
+        // console.log(tx)
         if (usePrivateKey) {
             const { rawTransaction } = await web3.eth.accounts.signTransaction(
                 tx,
