@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
-import ProvidersModal from '../components/Modals/ProvidersModal'
+import { useState, useEffect, useRef } from 'react'
 import useTransaction from './useTransaction'
 
 export default function useQueuedTransactions() {
@@ -25,23 +24,23 @@ export default function useQueuedTransactions() {
     ] = useTransaction()
 
     const queueTransaction = (web3, inputTx, usePrivateKey = false) => {
-        console.log(
-            `%c[queueTransaction] Tx added to queue in position ${
-                lastTxIndex.current
-            }, ${
-                usePrivateKey
-                    ? 'private key WILL be used'
-                    : 'private key WONT be used'
-            }`,
-            'color: orange'
-        )
+        // console.log(
+        //     `%c[queueTransaction] Tx added to queue in position ${
+        //         lastTxIndex.current
+        //     }, ${
+        //         usePrivateKey
+        //             ? 'private key WILL be used'
+        //             : 'private key WONT be used'
+        //     }`,
+        //     'color: orange'
+        // )
 
         // If its the first time or the queue was completed
         if (!loading.current) {
             if (currentTxIndex.current == null) {
                 currentTxIndex.current = 0
             }
-            console.log('%c[useQueueTransaction] Bootstraping', 'color: orange')
+            // console.log('%c[useQueueTransaction] Bootstraping', 'color: orange')
             loading.current = true
             setPreparingNextTx(true)
             // Bootstrap
@@ -69,7 +68,6 @@ export default function useQueuedTransactions() {
     }
 
     useEffect(() => {
-        console.log('%c[useQueuedTransactions] useEffect', 'color: orange')
         if (currentError) {
             console.log('%c[useQueueTransaction] Error: ', 'color: orange')
             console.log(currentError)
@@ -77,28 +75,28 @@ export default function useQueuedTransactions() {
             return
         }
         if (currentLoading && currentTxHash) {
-            console.log(
-                `%c[useQueuedTransactions] Processing tx ${currentTxHash.slice(
-                    0,
-                    5
-                )}...${currentTxHash.slice(
-                    currentTxHash.length - 3,
-                    currentTxHash.length
-                )}`,
-                'color: orange'
-            )
+            // console.log(
+            //     `%c[useQueuedTransactions] Processing tx ${currentTxHash.slice(
+            //         0,
+            //         5
+            //     )}...${currentTxHash.slice(
+            //         currentTxHash.length - 3,
+            //         currentTxHash.length
+            //     )}`,
+            //     'color: orange'
+            // )
             setTxsHash(txsHash => [...txsHash, currentTxHash])
             setPreparingNextTx(false)
             return
         }
         if (currentReceipt && !currentLoading && !preparingNextTx) {
-            console.log(
-                `%c[useQueuedTransactions] Tx ${
-                    currentTxIndex.current //+ 1
-                } processed: `,
-                'color: orange'
-            )
-            console.log(currentReceipt)
+            // console.log(
+            //     `%c[useQueuedTransactions] Tx ${
+            //         currentTxIndex.current //+ 1
+            //     } processed: `,
+            //     'color: orange'
+            // )
+            // console.log(currentReceipt)
 
             // Update state
             setReceipts(receipts => [...receipts, currentReceipt])
@@ -106,10 +104,10 @@ export default function useQueuedTransactions() {
 
             if (currentTxIndex.current < lastTxIndex.current) {
                 setPreparingNextTx(true)
-                console.log(
-                    '%c[useQueueTransaction] Sending next tx...',
-                    'color: orange'
-                )
+                // console.log(
+                //     '%c[useQueueTransaction] Sending next tx...',
+                //     'color: orange'
+                // )
                 processTransaction(
                     providers[currentTxIndex.current],
                     txsToProcess[currentTxIndex.current],
@@ -117,10 +115,10 @@ export default function useQueuedTransactions() {
                 )
                 currentTxIndex.current++
             } else if (currentTxIndex.current == lastTxIndex.current) {
-                console.log(
-                    '%c[useQueueTransaction] Queue finished',
-                    'color: orange'
-                )
+                // console.log(
+                //     '%c[useQueueTransaction] Queue finished',
+                //     'color: orange'
+                // )
                 loading.current = false
             }
             return
