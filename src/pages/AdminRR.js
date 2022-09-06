@@ -38,6 +38,7 @@ import { useTasksQueryPolling, useUsersQuery } from '../hooks/useRequests'
 
 import Select from '../components/Select'
 import models from '../types/models'
+import { TaskStatuses, convertToString } from '../types/taskStatuses'
 import { LocalConvenienceStoreOutlined } from '@material-ui/icons'
 
 const drawerWidth = 240
@@ -123,9 +124,28 @@ const useStyles = makeStyles(theme => ({
 const AdminRR = () => {
     const classes = useStyles()
     const theme = useTheme()
-    const { modelName, modelDisplayName, setModel } = useAppState()
+    const [open, setOpen] = useState(false)
+    const [openSnackbar, setOpenSnackbar] = useState(false)
+    const [snackbarMsg, setSnackbarMsg] = useState('')
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success')
+    const [snackbarAutoHide, setSnackbarAutoHide] = useState(null)
+    const firstRun = useRef(true)
+
+    const {
+        modelName,
+        modelDisplayName,
+        setModel,
+        modelContractInstance,
+    } = useAppState()
     const { tasks, refetch: refetchTasks } = useTasksQueryPolling()
     const { users, refetch: refetchUsers } = useUsersQuery()
+
+    function notifyWithSeverity(msg, severity, autoHide = 30000) {
+        setSnackbarSeverity(severity)
+        setSnackbarMsg(msg)
+        setSnackbarAutoHide(autoHide)
+    }
+
     const {
         startManager,
         stopManager,
@@ -134,13 +154,7 @@ const AdminRR = () => {
         txsRecord,
         restartPrototype,
         restartPrototypeLoading,
-    } = useAdminActions()
-    const [open, setOpen] = useState(false)
-    const [openSnackbar, setOpenSnackbar] = useState(false)
-    const [snackbarMsg, setSnackbarMsg] = useState('')
-    const [snackbarSeverity, setSnackbarSeverity] = useState('success')
-    const [snackbarAutoHide, setSnackbarAutoHide] = useState(null)
-    const firstRun = useRef(true)
+    } = useAdminActions(notifyWithSeverity)
 
     const modelsOptions = models.map(m => ({
         value: m.name,
@@ -168,6 +182,7 @@ const AdminRR = () => {
     }, [restartPrototypeLoading])
 
     useEffect(() => {
+        console.log('Refetching users')
         refetchUsers()
     }, [tasks])
 
@@ -189,12 +204,6 @@ const AdminRR = () => {
     const handleSnackbarExited = () => {
         setSnackbarMsg('')
         setOpenSnackbar(false)
-    }
-
-    function notifyWithSeverity(msg, severity, autoHide = 5000) {
-        setSnackbarSeverity(severity)
-        setSnackbarMsg(msg)
-        setSnackbarAutoHide(autoHide)
     }
 
     function notify(msg, autoHide = 5000) {
@@ -256,7 +265,11 @@ const AdminRR = () => {
                         className={classes.listItem}
                         button
                         key="StartManager"
-                        disabled={managerRunning}
+                        disabled={
+                            !modelContractInstance ||
+                            managerRunning ||
+                            restartPrototypeLoading
+                        }
                     >
                         <ListItemIcon
                             onClick={() => {
@@ -286,7 +299,7 @@ const AdminRR = () => {
                         className={classes.listItem}
                         button
                         key="StopManager"
-                        disabled={!managerRunning}
+                        disabled={!managerRunning || restartPrototypeLoading}
                     >
                         <ListItemIcon
                             onClick={() => {
@@ -314,7 +327,11 @@ const AdminRR = () => {
                         className={classes.listItem}
                         button
                         key="RestartContract"
-                        disabled={managerRunning}
+                        disabled={
+                            !modelContractInstance ||
+                            managerRunning ||
+                            restartPrototypeLoading
+                        }
                     >
                         <ListItemIcon
                             onClick={() => {
@@ -340,7 +357,11 @@ const AdminRR = () => {
                         className={classes.listItem}
                         button
                         key="ReallocateTasks"
-                        disabled={managerRunning}
+                        disabled={
+                            !modelContractInstance ||
+                            managerRunning ||
+                            restartPrototypeLoading
+                        }
                     >
                         <ListItemIcon onClick={() => {}}>
                             <LowPriorityIcon />
@@ -416,7 +437,30 @@ const AdminRR = () => {
                     <Grid item lg={6} />
                     <Grid item lg={6}>
                         <Typography variant="h6">Registered users</Typography>
-                        <UsersTable users={users} />
+                        <UsersTable
+                            users={
+                                users && tasks
+                                    ? users.map(u => {
+                                          let taskId = tasks.filter(
+                                              t =>
+                                                  t.assignee &&
+                                                  t.assignee.id === u.id &&
+                                                  t.status ===
+                                                      convertToString(
+                                                          TaskStatuses.Accepted
+                                                      )
+                                          )
+                                          return {
+                                              id: u.id,
+                                              hasTask: !u.available,
+                                              taskId: taskId[0]
+                                                  ? taskId[0].id
+                                                  : null,
+                                          }
+                                      })
+                                    : null
+                            }
+                        />
                     </Grid>
                     <Grid item lg={6}>
                         <Typography variant="h6">Tasks</Typography>
@@ -456,6 +500,7 @@ const AdminRR = () => {
                 onClose={handleSnackbarClose}
                 onExited={handleSnackbarExited}
                 autoHideDuration={snackbarAutoHide}
+                style={{ maxWidth: '30rem' }}
             >
                 <Alert
                     onClose={handleSnackbarClose}
