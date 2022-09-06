@@ -2,8 +2,10 @@ import React, { useState, useRef, useMemo } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import PropTypes from 'prop-types'
 
+import models from '../types/models'
 import { Grid, Typography, Box } from '@material-ui/core'
 import FCFSTasksGroup from './TasksSection/FCFSTasksGroup'
+import RRTasksGroup from './TasksSection/RRTasksGroup'
 
 const TASKS_PER_PAGE = 4
 
@@ -32,6 +34,7 @@ function computePageTasks(tasks, selectedPage) {
 }
 
 const TaskSection = ({
+    model = models[0].name,
     tasks = [],
     videoRegistry = new Map(),
     title,
@@ -82,15 +85,29 @@ const TaskSection = ({
                         </Box>
                     </Grid>
                     <Grid item>
-                        <FCFSTasksGroup
-                            tasks={currentTasks}
-                            videoRegistry={videoRegistry}
-                            actionButtons={taskActionButtons}
-                            totalPages={totalPages}
-                            totalTasks={tasks.length}
-                            tasksPerPage={TASKS_PER_PAGE}
-                            onChangePage={handleChangePage}
-                        />
+                        {model == models[0].name ? (
+                            <FCFSTasksGroup
+                                tasks={currentTasks}
+                                videoRegistry={videoRegistry}
+                                actionButtons={taskActionButtons}
+                                totalPages={totalPages}
+                                totalTasks={tasks.length}
+                                tasksPerPage={TASKS_PER_PAGE}
+                                onChangePage={handleChangePage}
+                            />
+                        ) : model == models[1].name ? (
+                            <RRTasksGroup
+                                tasks={currentTasks}
+                                videoRegistry={videoRegistry}
+                                actionButtons={taskActionButtons}
+                                totalPages={totalPages}
+                                totalTasks={tasks.length}
+                                tasksPerPage={TASKS_PER_PAGE}
+                                onChangePage={handleChangePage}
+                            />
+                        ) : (
+                            <>Hellos</>
+                        )}
                     </Grid>
                 </React.Fragment>
             ) : (
