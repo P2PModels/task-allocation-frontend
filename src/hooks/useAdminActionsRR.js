@@ -14,7 +14,7 @@ const { RestartContract, RegisterUser, CreateTask } = Actions
 
 const MAXIMUM_RETRIES = 5
 
-const useAdminActions = () => {
+const useAdminActions = log => {
     const account = PUBLIC_KEY
     const { library: web3 } = useWeb3React()
     const { contractAddress, modelContractInstance } = useAppState()
@@ -25,7 +25,7 @@ const useAdminActions = () => {
         running,
         scheduledJobs,
         txsRecord: managerTxsRecord,
-    } = useManager(web3, account, GAS_LIMIT, GAS_PRICE)
+    } = useManager(web3, account, GAS_LIMIT, GAS_PRICE, log)
 
     const startManager = tasks => start(tasks)
 
