@@ -9,10 +9,15 @@ import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
 import IconButton from '@material-ui/core/IconButton'
 import RefreshIcon from '@material-ui/icons/Refresh'
+import { getTime } from '../../helpers/date-helpers'
 
 const useStyles = makeStyles({
     table: {
         minWidth: 650,
+    },
+    lastUpdateCell: {
+        color: '#676767',
+        backgroundColor: '#fff',
     },
 })
 
@@ -46,6 +51,9 @@ const TasksTable = ({ tasks }) => {
                             Task Id
                         </StyledTableCell>
                         <StyledTableCell align="center">Status</StyledTableCell>
+                        <StyledTableCell align="center">
+                            End date
+                        </StyledTableCell>
                         <StyledTableCell align="center">
                             Assigned to
                         </StyledTableCell>
@@ -88,11 +96,25 @@ const TasksTable = ({ tasks }) => {
                                     {task.status}
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
+                                    {task.endDate
+                                        ? new Date(
+                                              task.endDate
+                                          ).toLocaleTimeString()
+                                        : '--'}
+                                </StyledTableCell>
+                                <StyledTableCell align="center">
                                     {task.userId ? task.userId : '--'}
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))
                     )}
+                    <StyledTableRow key="last-update-trow">
+                        <StyledTableCell className={classes.lastUpdateCell}>
+                            {`Last update ${new Date(
+                                Date.now()
+                            ).toLocaleTimeString()}`}
+                        </StyledTableCell>
+                    </StyledTableRow>
                 </TableBody>
             </Table>
         </TableContainer>

@@ -14,6 +14,10 @@ const useStyles = makeStyles({
     table: {
         minWidth: 650,
     },
+    lastUpdateCell: {
+        color: '#676767',
+        backgroundColor: '#fff',
+    },
 })
 
 const StyledTableCell = withStyles(theme => ({
@@ -44,7 +48,7 @@ const UsersTable = ({ users }) => {
                     <TableRow>
                         <StyledTableCell align="center">Id</StyledTableCell>
                         <StyledTableCell align="center">
-                            Has task
+                            Accepted task
                         </StyledTableCell>
                         <StyledTableCell align="center">
                             Task id
@@ -88,11 +92,18 @@ const UsersTable = ({ users }) => {
                                     {user.hasTask ? '✔️' : '❌'}
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
-                                    {user.id}
+                                    {user.taskId || '--'}
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))
                     )}
+                    <StyledTableRow key="last-update-trow">
+                        <StyledTableCell className={classes.lastUpdateCell}>
+                            {`Last update ${new Date(
+                                Date.now()
+                            ).toLocaleTimeString()}`}
+                        </StyledTableCell>
+                    </StyledTableRow>
                 </TableBody>
             </Table>
         </TableContainer>

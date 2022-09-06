@@ -5,9 +5,9 @@ import { Actions } from '../types/actions'
 import { toBytes32 } from '../helpers/web3-helpers'
 import useTransaction from './useTransaction'
 
-// const GAS_LIMIT = 450000
-const GAS_PRICE = 2000000000
-const { AcceptTask } = Actions
+const GAS_LIMIT = 450000 // Reallocation spends around 150 gas
+const GAS_PRICE = 2000000000 //2 Gwei
+const { AcceptTask, RejectTask } = Actions
 
 function useActions(onReportStatus) {
     const { account, library: web3 } = useWeb3React()
@@ -55,7 +55,7 @@ function useActions(onReportStatus) {
                     hexUserId,
                     hexTaskId
                 ).encodeABI(),
-                // gas: GAS_LIMIT,
+                gas: GAS_LIMIT,
                 gasPrice: GAS_PRICE,
             }
 
@@ -70,8 +70,44 @@ function useActions(onReportStatus) {
         [web3, account, onReportStatus]
     )
 
+    /**
+     * Function that is triggered when a user
+     * confirms a transaction to reject a task
+     */
+    const rejectTask = useCallback(
+        (userId, taskId) => {
+            const hexUserId = toBytes32(userId)
+            const hexTaskId = toBytes32(taskId)
+
+            // console.log('[RejectTask] params:')
+            // console.log(hexUserId)
+            // console.log(hexTaskId)
+
+            const rejectTaskTxParams = {
+                from: account,
+                to: contractAddress,
+                data: modelContractInstance.methods['rejectTask'](
+                    hexUserId,
+                    hexTaskId
+                ).encodeABI(),
+                gas: GAS_LIMIT,
+                gasPrice: GAS_PRICE,
+            }
+
+            try {
+                processTransaction(web3, rejectTaskTxParams, false)
+                setCurrentAction(RejectTask)
+            } catch (err) {
+                console.error('Could not create tx:', err)
+                onReportStatus('error', RejectTask)
+            }
+        },
+        [web3, account, onReportStatus]
+    )
+
     return {
         acceptTask,
+        rejectTask,
     }
 }
 

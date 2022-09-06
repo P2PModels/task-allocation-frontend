@@ -155,11 +155,7 @@ const Timer = ({
     useAnimationFrame(RENDER_EVERY, updateTime)
 
     if (totalInSeconds < 0 || Object.is(totalInSeconds, -0)) {
-        return (
-            <Typography variant="body2" color="textSecondary">
-                {end ? 'Time out' : '−'}
-            </Typography>
-        )
+        return <Typography variant="body2">{end ? 'Time out' : '−'}</Typography>
     }
 
     return (
@@ -175,7 +171,6 @@ const Timer = ({
                         <span className={clockIconWrapper}>
                             <AccessTimeIcon
                                 style={{
-                                    color: theme.palette.text.secondary,
                                     fontSize: 20,
                                 }}
                             />
@@ -183,7 +178,7 @@ const Timer = ({
                     )}
                 </Grid>
                 <Grid item className={timeTextWrapper}>
-                    <Typography variant="subtitle1" color="textSecondary">
+                    <Typography variant="subtitle1">
                         {units.map((unit, index) => {
                             const isLast = index === lastUnitIndex
                             const isSeconds = index === units.length - 1

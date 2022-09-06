@@ -6,7 +6,6 @@ import {
     AppBar,
     Toolbar,
     List,
-    CssBaseline,
     Typography,
     Divider,
     IconButton,
@@ -29,22 +28,18 @@ import CancelRounded from '@material-ui/icons/CancelRounded'
 import MuiAlert from '@material-ui/lab/Alert'
 
 import MainView from '../components/MainView'
-import TasksTable from '../components/Tables/TasksTable'
+import JobsTable from '../components/Tables/JobsTable'
+import TasksTable from '../components/Tables/TasksTableRR'
 import UsersTable from '../components/Tables/UsersTable'
 import TxsTable from '../components/Tables/TxsTable'
 import { useAppState } from '../contexts/AppState'
-import useAdminActions from '../hooks/useAdminActions'
+import useAdminActions from '../hooks/useAdminActionsRR'
 import { useTasksQueryPolling, useUsersQuery } from '../hooks/useRequests'
 
 import Select from '../components/Select'
 import models from '../types/models'
-
-const {
-    startManager: startEthManager,
-    stopManager: stopEthManager,
-    restartContract: restartRRContract,
-    reallocateTasks: reallocateContractTasks,
-} = require('@p2pmodels/eth-manager')
+import { TaskStatuses, convertToString } from '../types/taskStatuses'
+import { LocalConvenienceStoreOutlined } from '@material-ui/icons'
 
 const drawerWidth = 240
 
@@ -129,34 +124,42 @@ const useStyles = makeStyles(theme => ({
 const AdminRR = () => {
     const classes = useStyles()
     const theme = useTheme()
-    const { modelName, modelDisplayName, setModel } = useAppState()
-    const tasks = useTasksQueryPolling(true)
-    const { users, refetch: refecthUsers } = useUsersQuery()
-    const [
-        restartPrototype,
-        {
-            data: restartPrototypeData,
-            loading: restartPrototypeLoading,
-            error: restartPrototypeError,
-        },
-    ] = useAdminActions()
     const [open, setOpen] = useState(false)
     const [openSnackbar, setOpenSnackbar] = useState(false)
     const [snackbarMsg, setSnackbarMsg] = useState('')
     const [snackbarSeverity, setSnackbarSeverity] = useState('success')
     const [snackbarAutoHide, setSnackbarAutoHide] = useState(null)
-    const [managerStatus, setManagerStatus] = useState(false)
-    const newData = useRef(false)
-    const signer = useRef(undefined)
-    const cronJobs = useRef(undefined)
+    const firstRun = useRef(true)
+
+    const {
+        modelName,
+        modelDisplayName,
+        setModel,
+        modelContractInstance,
+    } = useAppState()
+    const { tasks, refetch: refetchTasks } = useTasksQueryPolling()
+    const { users, refetch: refetchUsers } = useUsersQuery()
+
+    function notifyWithSeverity(msg, severity, autoHide = 30000) {
+        setSnackbarSeverity(severity)
+        setSnackbarMsg(msg)
+        setSnackbarAutoHide(autoHide)
+    }
+
+    const {
+        startManager,
+        stopManager,
+        managerRunning,
+        jobs,
+        txsRecord,
+        restartPrototype,
+        restartPrototypeLoading,
+    } = useAdminActions(notifyWithSeverity)
 
     const modelsOptions = models.map(m => ({
         value: m.name,
         label: m.displayName,
     }))
-
-    console.log('[Admin]')
-    console.log(startEthManager)
 
     useEffect(() => {
         if (openSnackbar) {
@@ -168,8 +171,20 @@ const AdminRR = () => {
     }, [snackbarMsg])
 
     useEffect(() => {
-        newData.current = false
-    })
+        if (!restartPrototypeLoading && !firstRun.current) {
+            notifyWithSeverity(
+                'Prototype restart successfuly completed',
+                'success'
+            )
+        } else {
+            firstRun.current = false
+        }
+    }, [restartPrototypeLoading])
+
+    useEffect(() => {
+        console.log('Refetching users')
+        refetchUsers()
+    }, [tasks])
 
     const handleDrawerOpen = () => {
         setOpen(true)
@@ -191,123 +206,10 @@ const AdminRR = () => {
         setOpenSnackbar(false)
     }
 
-    function processMgrRes(
-        msg,
-        severity,
-        autoHide,
-        nData = true,
-        mgtStatus = false
-    ) {
-        setSnackbarSeverity(severity)
-        setSnackbarMsg(msg)
-        setManagerStatus(mgtStatus)
-        newData.current = nData
-        setSnackbarAutoHide(autoHide)
-    }
-
-    function initMgr(msg) {
+    function notify(msg, autoHide = 5000) {
         setSnackbarMsg(msg)
         setSnackbarSeverity('info')
-        setSnackbarAutoHide(null)
-    }
-
-    const startManager = async () => {
-        initMgr(
-            'Starting manager, this takes some minutes to complete. Please wait...'
-        )
-        try {
-            setManagerStatus(true)
-            const { mgrSigner, mgrCronJobs } = await startEthManager()
-            signer.current = mgrSigner
-            cronJobs.current = mgrCronJobs
-            processMgrRes(
-                'Manager started successfully!',
-                'success',
-                6000,
-                true,
-                true
-            )
-        } catch (err) {
-            processMgrRes(
-                `Error when starting manager: ${err.message}`,
-                'error',
-                null,
-                false,
-                false
-            )
-        }
-    }
-
-    const stopManager = () => {
-        initMgr('Stopping manager...')
-        try {
-            stopEthManager(signer.current, cronJobs.current)
-            signer.current = undefined
-            cronJobs.current = undefined
-            processMgrRes(
-                'Manager stopped successfully!',
-                'success',
-                6000,
-                false,
-                false
-            )
-        } catch (err) {
-            processMgrRes(
-                `Error when stopping manager: ${err.message}`,
-                'error',
-                null,
-                false,
-                true
-            )
-        }
-    }
-
-    const restartContract = async () => {
-        initMgr(
-            'Restarting contract, this takes several minutes to complete. Please wait...'
-        )
-        try {
-            await restartRRContract()
-            processMgrRes(
-                'Contract restarted successfully!',
-                'success',
-                6000,
-                true,
-                false
-            )
-        } catch (err) {
-            processMgrRes(
-                `Error when restarting contract: ${err.message}`,
-                'error',
-                null,
-                false,
-                false
-            )
-        }
-    }
-
-    const reallocateTasks = async () => {
-        initMgr(
-            'Reallocating tasks, this takes some minutes to complete. Please wait...'
-        )
-        try {
-            await reallocateContractTasks()
-            processMgrRes(
-                'Tasks were reallocated successfully!',
-                'success',
-                6000,
-                true,
-                false
-            )
-        } catch (err) {
-            processMgrRes(
-                `Error when reallocating tasks: ${err.message}`,
-                'error',
-                null,
-                false,
-                false
-            )
-        }
+        setSnackbarAutoHide(autoHide)
     }
 
     return (
@@ -363,9 +265,32 @@ const AdminRR = () => {
                         className={classes.listItem}
                         button
                         key="StartManager"
-                        disabled={managerStatus}
+                        disabled={
+                            !modelContractInstance ||
+                            managerRunning ||
+                            restartPrototypeLoading
+                        }
                     >
-                        <ListItemIcon onClick={startManager}>
+                        <ListItemIcon
+                            onClick={() => {
+                                notify(
+                                    'Starting manager, this takes some minutes to complete. Please wait...'
+                                )
+                                try {
+                                    startManager(tasks)
+                                    notifyWithSeverity(
+                                        'Manager started successfuly!',
+                                        'success'
+                                    )
+                                } catch (error) {
+                                    notifyWithSeverity(
+                                        'Start manager failed',
+                                        'error'
+                                    )
+                                    console.log(error)
+                                }
+                            }}
+                        >
                             <PlayArrowIcon />
                         </ListItemIcon>
                         <ListItemText primary="Start Manager" />
@@ -374,9 +299,26 @@ const AdminRR = () => {
                         className={classes.listItem}
                         button
                         key="StopManager"
-                        disabled={!managerStatus}
+                        disabled={!managerRunning || restartPrototypeLoading}
                     >
-                        <ListItemIcon onClick={stopManager}>
+                        <ListItemIcon
+                            onClick={() => {
+                                notify('Stopping manager. Please wait...')
+                                try {
+                                    stopManager()
+                                    notifyWithSeverity(
+                                        'Manager stopped successfuly!',
+                                        'success'
+                                    )
+                                } catch (error) {
+                                    notifyWithSeverity(
+                                        'Stop manager failed',
+                                        'error'
+                                    )
+                                    console.log(error)
+                                }
+                            }}
+                        >
                             <StopIcon />
                         </ListItemIcon>
                         <ListItemText primary="Stop Manager" />
@@ -385,9 +327,28 @@ const AdminRR = () => {
                         className={classes.listItem}
                         button
                         key="RestartContract"
-                        disabled={managerStatus}
+                        disabled={
+                            !modelContractInstance ||
+                            managerRunning ||
+                            restartPrototypeLoading
+                        }
                     >
-                        <ListItemIcon onClick={restartContract}>
+                        <ListItemIcon
+                            onClick={() => {
+                                notify(
+                                    'Restarting prototype, this takes some minutes to complete. You can check the state of transactions in the table. Please wait...'
+                                )
+                                try {
+                                    restartPrototype()
+                                } catch (error) {
+                                    notifyWithSeverity(
+                                        'Restart prototype failed',
+                                        'error'
+                                    )
+                                    console.log(error)
+                                }
+                            }}
+                        >
                             <ReplayIcon />
                         </ListItemIcon>
                         <ListItemText primary="Restart Contract" />
@@ -396,9 +357,13 @@ const AdminRR = () => {
                         className={classes.listItem}
                         button
                         key="ReallocateTasks"
-                        disabled={managerStatus}
+                        disabled={
+                            !modelContractInstance ||
+                            managerRunning ||
+                            restartPrototypeLoading
+                        }
                     >
-                        <ListItemIcon onClick={reallocateTasks}>
+                        <ListItemIcon onClick={() => {}}>
                             <LowPriorityIcon />
                         </ListItemIcon>
                         <ListItemText primary="Reallocate Tasks" />
@@ -406,20 +371,6 @@ const AdminRR = () => {
                 </List>
             </Drawer>
             <main className={classes.content}>
-                {managerStatus ? (
-                    <Chip
-                        icon={<CheckCircleRounded />}
-                        label="On"
-                        color="primary"
-                    />
-                ) : (
-                    <Chip
-                        icon={<CancelRounded />}
-                        label="Off"
-                        color="secondary"
-                    />
-                )}
-                <div className={classes.toolbar} />
                 <Grid container spacing={2}>
                     <Grid item lg={6}>
                         <Typography variant="h3">{modelDisplayName}</Typography>
@@ -448,20 +399,97 @@ const AdminRR = () => {
                         </Grid>
                     </Grid>
                     <Grid item lg={6}>
+                        <Grid container justify="space-between" spacing={2}>
+                            <Grid item>
+                                <Typography variant="h6">Manager </Typography>
+                            </Grid>
+                            <Grid item>
+                                <Chip
+                                    icon={
+                                        managerRunning ? (
+                                            <CheckCircleRounded />
+                                        ) : (
+                                            <CancelRounded />
+                                        )
+                                    }
+                                    label={managerRunning ? 'On' : 'Off'}
+                                    color={
+                                        managerRunning ? 'primary' : 'secondary'
+                                    }
+                                    style={{ marginBottom: '1rem' }}
+                                />
+                            </Grid>
+                        </Grid>
+                        <JobsTable
+                            jobs={[...jobs].map(([k, v]) => {
+                                return {
+                                    id: v.timerId,
+                                    taskId: v.taskId,
+                                    endDate: v.endDate,
+                                    status:
+                                        v.endDate > Date.now()
+                                            ? 'waiting'
+                                            : 'timed out',
+                                }
+                            })}
+                        />
+                    </Grid>
+                    <Grid item lg={6} />
+                    <Grid item lg={6}>
                         <Typography variant="h6">Registered users</Typography>
-                        <UsersTable users={users} />
+                        <UsersTable
+                            users={
+                                users && tasks
+                                    ? users.map(u => {
+                                          let taskId = tasks.filter(
+                                              t =>
+                                                  t.assignee &&
+                                                  t.assignee.id === u.id &&
+                                                  t.status ===
+                                                      convertToString(
+                                                          TaskStatuses.Accepted
+                                                      )
+                                          )
+                                          return {
+                                              id: u.id,
+                                              hasTask: !u.available,
+                                              taskId: taskId[0]
+                                                  ? taskId[0].id
+                                                  : null,
+                                          }
+                                      })
+                                    : null
+                            }
+                        />
                     </Grid>
                     <Grid item lg={6}>
                         <Typography variant="h6">Tasks</Typography>
-                        <TasksTable tasks={tasks} />
+                        <TasksTable
+                            tasks={
+                                tasks
+                                    ? tasks.map(t => {
+                                          return {
+                                              id: t.id,
+                                              status: t.status,
+                                              userId: t.assignee
+                                                  ? t.assignee.id
+                                                  : null,
+                                              endDate: t.endDate * 1000,
+                                          }
+                                      })
+                                    : null
+                            }
+                        />
                     </Grid>
                     <Grid item lg={12}>
                         <Typography variant="h6">Transactions</Typography>
-                        <TxsTable txs={restartPrototypeData.receipts} />
+                        <TxsTable
+                            txs={txsRecord.data ? txsRecord.data.receipts : {}}
+                        />
                     </Grid>
                 </Grid>
-                <Typography variant="h6">Allocated Tasks</Typography>
-                <TasksTable refreshTable={newData.current} />
+                {/* <Typography variant="h6">Allocated Tasks</Typography>
+                <TasksTable refreshTable={newData.current} /> */}
             </main>
             <Snackbar
                 anchorOrigin={{
@@ -472,6 +500,7 @@ const AdminRR = () => {
                 onClose={handleSnackbarClose}
                 onExited={handleSnackbarExited}
                 autoHideDuration={snackbarAutoHide}
+                style={{ maxWidth: '30rem' }}
             >
                 <Alert
                     onClose={handleSnackbarClose}

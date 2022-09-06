@@ -6,7 +6,7 @@ import { getTxStatus, getTxAction } from '../helpers/transaction-helpers'
 import { getResourceFromPathname } from '../helpers/route-helpers'
 import { Actions, convertToString } from '../types/actions'
 import useUserLogicRR from '../hooks/useUserLogicRR'
-import useActions from '../hooks/useActions'
+import useActions from '../hooks/useActionsRR'
 import AmaraApi from '../amara-api'
 
 import {
@@ -33,7 +33,7 @@ import { useAppState } from '../contexts/AppState'
 import Homepage from '../assets/Homepage.svg'
 import models from '../types/models'
 
-const { AcceptTask } = Actions
+const { AcceptTask, RejectTask } = Actions
 const SNACKBAR_FIXED_TIME = 700
 
 const useStyles = makeStyles(theme => ({
@@ -63,6 +63,11 @@ const MODAL_ACTIONS = {
         title: 'Accept Assignment',
         message:
             'You need to create and confirm a transaction in order to accept this assignment.',
+    },
+    rejectTask: {
+        title: 'Reject Assignment',
+        message:
+            'You need to create and confirm a transaction in order to reject this assignment.',
     },
 }
 
@@ -106,16 +111,20 @@ const HomeRR = () => {
 
     useEffect(() => {
         setModel(modelNameParam)
-        return () => {}
     }, [])
 
     // Wait half second before hiding loading snackbar. Only for aesthetic purposes
     useEffect(() => {
         if (!loadingHandlerExecutedRef.current && !loading) {
-            setTimeout(() => setOpenLoadingSnackbar(false), SNACKBAR_FIXED_TIME)
+            let timerId = setTimeout(
+                () => setOpenLoadingSnackbar(false),
+                SNACKBAR_FIXED_TIME
+            )
             loadingHandlerExecutedRef.current = true
         }
-        return () => {}
+        return (timerId = 0) => {
+            clearTimeout(timerId)
+        }
     }, [loading])
 
     /**
@@ -179,6 +188,24 @@ const HomeRR = () => {
         }
     }
 
+    /**
+     * Handle that manages task rejection
+     */
+    const handleRejectTask = task => {
+        // If the user is not connected with metamask, a modal is displayed
+        // asking the user to check her metamask installation
+        if (!account) setOpenMessageModal(true)
+        else {
+            // If the user is connected to metamask, a modal is displayed
+            // to notify that a transaction is going to be created
+            const content = { ...MODAL_ACTIONS.rejectTask }
+            content.createTransactionHandler = () =>
+                handleCreateTransaction(task, RejectTask)
+            setModal(content)
+            setOpenTxModal(true)
+        }
+    }
+
     const handleTranslateTask = task => {
         console.log('Translating task...')
         AmaraApi.teams
@@ -202,6 +229,12 @@ const HomeRR = () => {
             actionHandler: handleAcceptTask,
         },
     ]
+    if (modelName == models[1].name || modelName == models[2].name)
+        availableTaskActionButtons.push({
+            label: 'Reject',
+            color: theme.palette.error.main,
+            actionHandler: handleRejectTask,
+        })
 
     const disabledTaskActionButtons = availableTaskActionButtons.map(
         taskButton => {
@@ -224,7 +257,6 @@ const HomeRR = () => {
         if (!Object.keys(user).length) {
             return <NoValidUserEntered />
         }
-
         return (
             <MainView className={root}>
                 <Grid
@@ -266,6 +298,7 @@ const HomeRR = () => {
                                 <Grid item>
                                     <Box mt={!tasks ? 0 : 2} width="100">
                                         <TaskSection
+                                            model={modelName}
                                             tasks={
                                                 tasks.length == 0 ? [] : tasks
                                             }

@@ -9,12 +9,16 @@ import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
 import IconButton from '@material-ui/core/IconButton'
 import RefreshIcon from '@material-ui/icons/Refresh'
+import Timer from '../Cards/TaskCard/Timer'
 
-const useStyles = makeStyles({
+const useStyles = makeStyles(theme => ({
     table: {
         minWidth: 650,
     },
-})
+    timer: {
+        color: theme.palette.primary.main,
+    },
+}))
 
 const StyledTableCell = withStyles(theme => ({
     head: {
@@ -34,25 +38,28 @@ const StyledTableRow = withStyles(theme => ({
     },
 }))(TableRow)
 
-const TasksTable = ({ tasks }) => {
+const JobsTable = ({ jobs }) => {
     const classes = useStyles()
 
-    return tasks ? (
+    return jobs ? (
         <TableContainer component={Paper}>
-            <Table stickyHeader aria-label="Tasks Table">
+            <Table stickyHeader aria-label="Jobs Table">
                 <TableHead>
                     <TableRow>
                         <StyledTableCell align="center">
-                            Task Id
+                            Timer id
+                        </StyledTableCell>
+                        <StyledTableCell align="center">
+                            Task id
                         </StyledTableCell>
                         <StyledTableCell align="center">Status</StyledTableCell>
                         <StyledTableCell align="center">
-                            Assigned to
+                            Timeout
                         </StyledTableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {tasks == null ? (
+                    {jobs == null ? (
                         <StyledTableRow>
                             <StyledTableCell
                                 componenet="th"
@@ -63,7 +70,7 @@ const TasksTable = ({ tasks }) => {
                                 Loading data...
                             </StyledTableCell>
                         </StyledTableRow>
-                    ) : !tasks.length ? (
+                    ) : !jobs.length ? (
                         <StyledTableRow>
                             <StyledTableCell
                                 componenet="th"
@@ -71,24 +78,26 @@ const TasksTable = ({ tasks }) => {
                                 colSpan="4"
                                 align="center"
                             >
-                                No tasks
+                                No jobs
                             </StyledTableCell>
                         </StyledTableRow>
                     ) : (
-                        tasks.map(task => (
-                            <StyledTableRow key={task.id}>
-                                <StyledTableCell
-                                    component="th"
-                                    scope="row"
-                                    align="center"
-                                >
-                                    {task.id}
+                        jobs.map(job => (
+                            <StyledTableRow key={job.id}>
+                                <StyledTableCell align="center">
+                                    {job.id}
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
-                                    {task.status}
+                                    {job.taskId}
                                 </StyledTableCell>
                                 <StyledTableCell align="center">
-                                    {task.userId ? task.userId : '--'}
+                                    {job.status}
+                                </StyledTableCell>
+                                <StyledTableCell align="center">
+                                    <Timer
+                                        end={new Date(job.endDate)}
+                                        className={classes.timer}
+                                    />
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))
@@ -101,4 +110,4 @@ const TasksTable = ({ tasks }) => {
     )
 }
 
-export default TasksTable
+export default JobsTable

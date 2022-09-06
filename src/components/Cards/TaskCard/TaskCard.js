@@ -39,7 +39,7 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
         !(
             actionButtons.length === 1 &&
             actionButtons[0].label.toLowerCase() === 'translate'
-        ) && task.endDate
+        ) && task.contractData.endDate
 
     return (
         <Card className={root} elevation={0}>
@@ -53,7 +53,7 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
                     {!showTimer ? null : (
                         <Grid item>
                             <Timer
-                                end={endDate}
+                                end={new Date(endDate * 1000)}
                                 onTimeOut={() => setDisabled(true)}
                             />
                         </Grid>
