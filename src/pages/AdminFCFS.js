@@ -114,8 +114,13 @@ const SlideLeft = props => <Slide {...props} direction="left" />
 const AdminFCFS = () => {
     const classes = useStyles()
     const theme = useTheme()
-    const { modelName, modelDisplayName, setModel } = useAppState()
-    const tasks = useTasksQueryPolling(true)
+    const {
+        modelName,
+        modelDisplayName,
+        setModel,
+        modelContractInstance,
+    } = useAppState()
+    const { tasks } = useTasksQueryPolling()
     const { users, refetch: refecthUsers } = useUsersQuery()
     const [
         restartPrototype,
@@ -251,7 +256,22 @@ const AdminFCFS = () => {
                     </Grid>
                     <Grid item lg={6}>
                         <Typography variant="h6">Registered users</Typography>
-                        <UsersTable users={users} />
+                        <UsersTable
+                            users={
+                                users && tasks
+                                    ? users.map(u => {
+                                          let task = tasks.filter(
+                                              t => t.userId === u.id
+                                          )[0]
+                                          return {
+                                              id: u.id,
+                                              hasTask: u.hasTask,
+                                              taskId: task ? task.id : null,
+                                          }
+                                      })
+                                    : null
+                            }
+                        />
                     </Grid>
                     <Grid item lg={6}>
                         <Typography variant="h6">Tasks</Typography>
