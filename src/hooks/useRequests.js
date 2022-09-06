@@ -15,15 +15,13 @@ export function useUsersQuery({ first, skip } = { first: 50, skip: 0 }) {
     const { modelName } = useAppState()
     const model = models.find(m => m.name === modelName)
 
-    const onUserssHandler = useCallback(
-        data => {
-            setUsers(data.users)
-        },
-        [users]
-    )
+    const onUsersHandler = data => {
+        setUsers(data.users)
+        console.log('%cUsers loaded', 'color:violet')
+    }
 
-    const onUserssErrorHanlder = err => {
-        console.log('[onUserssErrorHanlder] Error: ')
+    const onUsersErrorHanlder = err => {
+        console.log('[onUsersErrorHanlder] Error: ')
         console.log(err)
     }
 
@@ -33,12 +31,20 @@ export function useUsersQuery({ first, skip } = { first: 50, skip: 0 }) {
                 first,
                 skip,
             },
-            onCompleted: onUserssHandler,
-            onError: onUserssErrorHanlder,
+            onCompleted: onUsersHandler,
+            onError: onUsersErrorHanlder,
         })
     )
 
-    return { users, refetch: usersQuery.current.refetch }
+    const refetch = () => {
+        usersQuery.current.refetch({
+            first,
+            skip,
+        })
+    }
+
+    return { users, refetch }
+    // return { users, refetch: usersQuery.current.refetch }
 }
 
 export function useUserQuery(userId) {
