@@ -39,17 +39,21 @@ export function AppStateProvider({ children }) {
 
     const getContractInstance = (web3, abi, contractAddress) => {
         if (web3 && abi) {
-            console.log('ABI from contract')
-            console.log(abi)
             return new web3.eth.Contract(abi, contractAddress)
         }
     }
 
     useEffect(() => {
-        const instance = getContractInstance(web3, contractABI, contractAddress)
-        setModelContractInstance(instance)
-        console.log('[AppStateContext] Setting contract instance')
-        console.log(instance)
+        if (web3 && contractABI && contractAddress) {
+            const instance = getContractInstance(
+                web3,
+                contractABI,
+                contractAddress
+            )
+            setModelContractInstance(instance)
+            console.log('[AppStateContext] Setting contract instance')
+            console.log(instance)
+        }
     }, [web3, contractABI, contractAddress])
 
     const setModel = name => {
@@ -58,7 +62,7 @@ export function AppStateProvider({ children }) {
             setModelName(model.name)
             setModelDisplayName(model.displayName)
             setContractAddress(model.contractAddress)
-            setContractABI(model.contractABI)
+            setContractABI(model.contractAbi)
             setEndpoint(model.endpoint)
         }
     }
