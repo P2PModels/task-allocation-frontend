@@ -194,12 +194,6 @@ const Calendar = ({ open, onClose, ...props }) => {
                             aspectRatio={2} //the smaller, the bigger the cells of the calendar
                             selectable={true} //Allows a user to highlight multiple days or timeslots by clicking and drag
                             editable={true}
-                            selectConstraint={{
-                                startTime: new Date(Date.now()).getTime(),
-                            }}
-                            eventConstraint={{
-                                startTime: new Date(Date.now()).getTime(),
-                            }}
                             selectMirror={true} //A value of true will draw a “placeholder” event while the user is dragging (similar to what Google Calendar does )
                             businessHours={{
                                 startTime: '8:00', //moment().format('HH:mm'), /* Current Hour/Minute 24H format */
