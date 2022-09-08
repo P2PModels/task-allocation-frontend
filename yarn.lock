@@ -1987,6 +1987,46 @@
     "@ethersproject/properties" "^5.6.0"
     "@ethersproject/strings" "^5.6.1"
 
+"@fullcalendar/common@~5.11.2", "@fullcalendar/common@~5.11.3":
+  "integrity" "sha512-welVwyfQOXQQGfDwBMSfYEPbiO1cPfUD+C7jd3ZoweJR+dSO11ddFugxIQ7dGfABAGZ63oq/+LW9FsmAJezVNg=="
+  "resolved" "https://registry.npmjs.org/@fullcalendar/common/-/common-5.11.3.tgz"
+  "version" "5.11.3"
+  dependencies:
+    "tslib" "^2.1.0"
+
+"@fullcalendar/daygrid@^5.11.3", "@fullcalendar/daygrid@~5.11.3":
+  "integrity" "sha512-PCK0y80DRNCzWuC5lGpIWqCgKDvql1ah7rXql5lu+Gn2EeFj15ZQ8diMFjtNIQucEmFaNOXnR05Pgcry1n6Shg=="
+  "resolved" "https://registry.npmjs.org/@fullcalendar/daygrid/-/daygrid-5.11.3.tgz"
+  "version" "5.11.3"
+  dependencies:
+    "@fullcalendar/common" "~5.11.3"
+    "tslib" "^2.1.0"
+
+"@fullcalendar/interaction@^5.11.3":
+  "integrity" "sha512-L955wkDjza62K96ndstvYs2Fd4V0kayTDpqW8W7huFG3Ox8MutpLqKAa2SCaTvcNIlWS4oexGQRiQAaJG7u47A=="
+  "resolved" "https://registry.npmjs.org/@fullcalendar/interaction/-/interaction-5.11.3.tgz"
+  "version" "5.11.3"
+  dependencies:
+    "@fullcalendar/common" "~5.11.3"
+    "tslib" "^2.1.0"
+
+"@fullcalendar/react@^5.11.2":
+  "integrity" "sha512-OnLvfV406VEQcK4QGN8xR4ro6Manp9dKE7/n9dhs19J1kKpqS1w1sIEYg1dT11njbk0Ob+TdF3cXLDFq73jUlA=="
+  "resolved" "https://registry.npmjs.org/@fullcalendar/react/-/react-5.11.2.tgz"
+  "version" "5.11.2"
+  dependencies:
+    "@fullcalendar/common" "~5.11.2"
+    "tslib" "^2.1.0"
+
+"@fullcalendar/timegrid@^5.11.3":
+  "integrity" "sha512-SjIj2ZQ7nTyL1RxZkCPvNbuUQ0xHT+gfYJdUL3FT4bPjPJCxWtQ2CL8hxaeNmVozYYuy0yrGTW5Oup2+9IplbA=="
+  "resolved" "https://registry.npmjs.org/@fullcalendar/timegrid/-/timegrid-5.11.3.tgz"
+  "version" "5.11.3"
+  dependencies:
+    "@fullcalendar/common" "~5.11.3"
+    "@fullcalendar/daygrid" "~5.11.3"
+    "tslib" "^2.1.0"
+
 "@graphql-typed-document-node/core@^3.0.0":
   "integrity" "sha512-NQ17ii0rK1b34VZonlmT2QMJFI70m0TRwbknO/ihlbatXyaktDhN/98vBiUU6kNBPljqGqyIrl2T4nY2RpFANg=="
   "resolved" "https://registry.npmjs.org/@graphql-typed-document-node/core/-/core-3.1.1.tgz"
@@ -7744,6 +7784,11 @@
   "resolved" "https://registry.npmjs.org/fs.realpath/-/fs.realpath-1.0.0.tgz"
   "version" "1.0.0"
 
+"fullcalendar@^5.11.3":
+  "integrity" "sha512-SgqiMEA+lWLyEd2jEwtIxdfx41j2CZr4KK00D2Gepj1MnGOjaEi13athnU6xvqMQXXjgJNj+vmlUP69QiuGncQ=="
+  "resolved" "https://registry.npmjs.org/fullcalendar/-/fullcalendar-5.11.3.tgz"
+  "version" "5.11.3"
+
 "function-bind@^1.1.1", "function-bind@~1.1.1":
   "integrity" "sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A=="
   "resolved" "https://registry.npmjs.org/function-bind/-/function-bind-1.1.1.tgz"
@@ -12731,7 +12776,7 @@
     "strip-ansi" "6.0.0"
     "text-table" "0.2.0"
 
-"react-dom@*", "react-dom@^16.13.1", "react-dom@^16.8", "react-dom@^16.8.0", "react-dom@^16.8.0 || ^17.0.0", "react-dom@>=16.6.0":
+"react-dom@*", "react-dom@^16.13.1", "react-dom@^16.7.0 || ^17 || ^18", "react-dom@^16.8", "react-dom@^16.8.0", "react-dom@^16.8.0 || ^17.0.0", "react-dom@>=16.6.0":
   "integrity" "sha512-81PIMmVLnCNLO/fFOQxdQkvEq/+Hfpv24XNJfpyZhTRfO0QcmQIF/PgCa1zCOj2w1hrn12MFLyaJ/G0+Mxtfag=="
   "resolved" "https://registry.npmjs.org/react-dom/-/react-dom-16.13.1.tgz"
   "version" "16.13.1"
@@ -12850,7 +12895,7 @@
     "loose-envify" "^1.4.0"
     "prop-types" "^15.6.2"
 
-"react@*", "react@^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0", "react@^16.13.1", "react@^16.8", "react@^16.8.0", "react@^16.8.0 || ^17.0.0", "react@>=15", "react@>=15.0.0", "react@>=16.6.0", "react@>=16.8":
+"react@*", "react@^0.14.0 || ^15.0.0 || ^16.0.0 || ^17.0.0", "react@^16.13.1", "react@^16.7.0 || ^17 || ^18", "react@^16.8", "react@^16.8.0", "react@^16.8.0 || ^17.0.0", "react@>=15", "react@>=15.0.0", "react@>=16.6.0", "react@>=16.8":
   "integrity" "sha512-YMZQQq32xHLX0bz5Mnibv1/LHb3Sqzngu7xstSM+vrkE5Kzr9xE0yMByK5kMoTK30YVJE61WfbxIFFvfeDKT1w=="
   "resolved" "https://registry.npmjs.org/react/-/react-16.13.1.tgz"
   "version" "16.13.1"
@@ -14802,9 +14847,9 @@
   "version" "1.13.0"
 
 "tslib@^2.1.0":
-  "integrity" "sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw=="
-  "resolved" "https://registry.npmjs.org/tslib/-/tslib-2.3.1.tgz"
-  "version" "2.3.1"
+  "integrity" "sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ=="
+  "resolved" "https://registry.npmjs.org/tslib/-/tslib-2.4.0.tgz"
+  "version" "2.4.0"
 
 "tslib@^2.3.0":
   "integrity" "sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw=="
