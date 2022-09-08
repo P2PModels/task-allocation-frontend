@@ -2,7 +2,7 @@ import React from 'react'
 import { Redirect, Route, Switch } from 'react-router-dom'
 import HomeFCFS from './pages/HomeFCFS'
 import HomeRR from './pages/HomeRR'
-// import Admin from './pages/Admin'
+import HomeRRCal from './pages/HomeRRCal'
 import AdminFCFS from './pages/AdminFCFS'
 import AdminRR from './pages/AdminRR'
 import Config from './pages/Config'
@@ -24,6 +24,12 @@ function Routes() {
         // RR
         case models[1].name:
             homeComponent = HomeRR
+            adminComponent = AdminRR
+            break
+
+        // RR + cal
+        case models[2].name:
+            homeComponent = HomeRRCal
             adminComponent = AdminRR
             break
 

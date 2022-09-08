@@ -13,6 +13,7 @@ import {
     RR_USER_TASKS_ASSIGNED,
     RR_USER_TASKS_ACCEPTED,
 } from '../queries/queries'
+
 const models = [
     {
         name: 'fcfs',
@@ -49,10 +50,18 @@ const models = [
     {
         name: 'rr-cal',
         displayName: 'Round robin with calendar',
-        description: 'This model allocates...',
+        description:
+            'We are currently piloting a new way of distributing the tasks and therefore the value within our platform. Thank you for your collaboration! This model gets each incoming task and assigns it to the first user in a list based in the users availability. The user then is moved to the end of the list. The user can accept or reject the task. Then they will need to wait until a new task is assigned to they.',
         contractAddress: process.env.REACT_APP_RINKEBY_RR_CAL_CONTRACT_ADDRESS,
         contractAbi: RR_CAL_CONTRACT_ABI,
         endpoint: process.env.REACT_APP_RR_CAL_SUBGRAPH_ENDPOINT,
+        requests: {
+            users: RR_USERS,
+            user: RR_USER,
+            tasks: RR_TASKS,
+            tasksAssigned: RR_USER_TASKS_ASSIGNED,
+            tasksAccepted: RR_USER_TASKS_ACCEPTED,
+        },
     },
 ]
 
