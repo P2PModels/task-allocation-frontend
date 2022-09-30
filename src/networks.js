@@ -2,6 +2,7 @@
 const RPC_URLS = {
     mainnet: 'INFURA_MAINNET_URL',
     rinkeby: process.env.REACT_APP_INFURA_ENDPOINT,
+    goerli: process.env.REACT_APP_INFURA_ENDPOINT,
 }
 
 const INSTANCE = process.env.REACT_APP_TASK_ALLOCATION_INSTANCE
@@ -52,6 +53,19 @@ const networks = {
             registry: '0xe7410170f87102df0055eb195163a03b7f2bff4a',
         },
         // org: getRinkebyOrgData(INSTANCE),
+    },
+    5: {
+        name: 'Goerli',
+        network: 'goerli',
+        rpc: [RPC_URLS.goerli],
+        faucets: ['https://faucet.goerli.io'],
+        nativeCurrency: {
+            name: 'Goerli Ether',
+            decimals: 18,
+        },
+        infoURL: 'https://goerli.net/',
+        chainId: 5,
+        networkId: 5,
     },
 }
 

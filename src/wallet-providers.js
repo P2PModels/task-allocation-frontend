@@ -7,7 +7,7 @@ import {
 import MetamaskLogo from './assets/MetamaskLogo.png'
 
 export const injected = new InjectedConnector({
-    supportedChainIds: [1, 3, 4, 42],
+    supportedChainIds: [1, 4, 5],
 })
 
 export const connectorsByName = {
