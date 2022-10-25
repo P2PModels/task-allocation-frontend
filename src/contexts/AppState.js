@@ -59,6 +59,8 @@ export function AppStateProvider({ children }) {
     const setModel = name => {
         let model = models.find(m => m.name === name)
         if (model) {
+            console.log('Setting model')
+            console.log(model.contractAddress)
             setModelName(model.name)
             setModelDisplayName(model.displayName)
             setContractAddress(model.contractAddress)
@@ -84,7 +86,7 @@ export function AppStateProvider({ children }) {
             userId,
             setUser,
         }
-    }, [modelContractInstance, contractAddress, endpoint])
+    }, [modelContractInstance, contractAddress, endpoint, modelName])
 
     return (
         <AppStateContext.Provider value={value}>

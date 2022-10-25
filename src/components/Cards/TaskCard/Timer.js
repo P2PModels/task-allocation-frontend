@@ -135,13 +135,6 @@ const Timer = ({
         0
     )
 
-    useEffect(() => {
-        isMountedRef.current = true
-        return () => {
-            isMountedRef.current = false
-        }
-    }, [])
-
     const updateTime = useCallback(() => {
         const t = getTime(start, end, computedFormat, showEmpty, maxUnits)
         if (t.totalInSeconds === 0) {
@@ -152,7 +145,15 @@ const Timer = ({
         }
     }, [start, end, computedFormat, showEmpty, maxUnits, onTimeOut])
 
-    useAnimationFrame(RENDER_EVERY, updateTime)
+    const cancelAnimation = useAnimationFrame(RENDER_EVERY, updateTime)
+    
+    useEffect(() => {
+        isMountedRef.current = true
+        return () => {
+            isMountedRef.current = false
+            cancelAnimation()
+        }
+    }, [])
 
     if (totalInSeconds < 0 || Object.is(totalInSeconds, -0)) {
         return <Typography variant="body2">{end ? 'Time out' : '−'}</Typography>

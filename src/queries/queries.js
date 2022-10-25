@@ -106,7 +106,7 @@ export const RR_USERS = gql`
  */
 export const RR_USER = gql`
     query RRUser($id: String!) {
-        users(id: $id) {
+        user(id: $id) {
             id
             benefits
             available
@@ -116,6 +116,24 @@ export const RR_USER = gql`
         }
     }
 `
+
+/**
+ * Get user calendar ranges
+ *
+ * @param  {String!} $id
+ */
+export const RR_CAL_USER = gql`
+    query RRCalUser($id: String!) {
+        user(id: $id) {
+            id
+            benefits
+            available
+            calendarRangesStart
+            calendarRangesEnd
+        }
+    }
+`
+
 /**
  * Get all tasks
  *

@@ -69,7 +69,6 @@ export default function useQueuedTransactions() {
 
     useEffect(() => {
         if (currentError) {
-            console.log('%c[useQueueTransaction] Error: ', 'color: orange')
             console.log(currentError)
             setError(error => [...error, currentError])
             return

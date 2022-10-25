@@ -7,7 +7,6 @@ import {
 import { buildMapById } from '../helpers/general-helpers'
 import AmaraApi from '../amara-api'
 import { mergeTaskData } from '../helpers/data-transform-helpers'
-import { TaskStatuses } from '../types/taskStatuses'
 
 async function getTasks(tasks, user) {
     const { teams, apiKey } = user
@@ -33,30 +32,34 @@ async function getTasks(tasks, user) {
 
 function useUserLogicFCFS(userId) {
     const contractUser = useUserQuery(userId)
-    const contractTasks = useAvailableTasksQueryPolling()
+    const {
+        contractTasks,
+        stopPolling: stopTasksPolling,
+    } = useAvailableTasksQueryPolling()
     const contractAcceptedTasks = useTasksAcceptedByUserQueryPolling(userId)
     const [user, setUser] = useState()
     const [tasks, setTasks] = useState()
-    const [allocatedTasks, setAllocatedTasks] = useState()
+    const [acceptedTask, setAcceptedTask] = useState()
     const [videosRegistry, setVideosRegistry] = useState(new Map())
 
     // Fetch Amara user data
     useEffect(() => {
+        let isMounted = true
         async function buildUser(userId) {
             try {
                 const amaraUserRes = await AmaraApi.users.getOne(userId)
                 const amaraUser = { ...amaraUserRes.data }
-
                 const user = { ...contractUser, ...amaraUser }
-
-                setUser(user)
+                if (isMounted) setUser(user)
             } catch (err) {
                 console.log(err)
             }
         }
         buildUser(userId)
-        return () => {}
-    }, [userId])
+        return () => {
+            isMounted = false
+        }
+    }, [userId, contractUser])
 
     // Fetch team videos
     useEffect(() => {
@@ -95,19 +98,26 @@ function useUserLogicFCFS(userId) {
         if (!user || !contractAcceptedTasks) {
             return
         }
-        getTasks(contractAcceptedTasks, user).then(mergedTasks => {
-            setAllocatedTasks(mergedTasks)
-        })
+        if (
+            !acceptedTask ||
+            acceptedTask.contractData.id !== contractAcceptedTasks[0].id
+        ) {
+            getTasks(contractAcceptedTasks, user).then(mergedTasks => {
+                setAcceptedTask(mergedTasks[0] ? mergedTasks[0] : null)
+            })
+            stopTasksPolling()
+        }
 
         return () => {}
     }, [user, contractAcceptedTasks])
 
-    const loadingData = !user || !videosRegistry || !tasks || !allocatedTasks
+    const loadingData =
+        !user || !videosRegistry || !tasks || acceptedTask === undefined
 
     return {
         user,
         tasks,
-        allocatedTask: allocatedTasks ? allocatedTasks[0] : null,
+        acceptedTask: acceptedTask ? acceptedTask : null,
         videosRegistry,
         loading: loadingData,
     }

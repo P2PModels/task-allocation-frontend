@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { makeStyles, useTheme } from '@material-ui/core/styles'
+import { makeStyles } from '@material-ui/core/styles'
 
 import {
     Grid,
@@ -76,7 +76,7 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const Calendar = ({ open, onClose, ...props }) => {
+const Calendar = ({ open, calendarRanges, onClose, onSubmit, ...props }) => {
     const {
         modalBox,
         closeButton,
@@ -86,47 +86,80 @@ const Calendar = ({ open, onClose, ...props }) => {
         note,
         submitButton,
     } = useStyles()
-
-    const [availability, setAvailability] = useState({})
+    const [events, setEvents] = useState([])
 
     useEffect(() => {
-        console.log(availability)
-    }, [availability])
+        let currentEvents = []
+        if (
+            calendarRanges.length === 2 &&
+            calendarRanges[0] &&
+            calendarRanges[1]
+        ) {
+            calendarRanges[0].map((startRange, i) => {
+                let startRangeDate = new Date(startRange * 1000).toISOString()
+                // Timestamps are stored in s in the blockchain and also in GMT+0, they get converted to client GMT time
+                let endRangeDate = new Date(
+                    calendarRanges[1][i] * 1000
+                ).toISOString()
+                // Timestamps are stored in s in the blockchain
+                let newEventId = `event-${startRangeDate}-${endRangeDate}`
+                currentEvents = [
+                    ...currentEvents,
+                    {
+                        id: newEventId,
+                        title: 'Working hours',
+                        start: startRangeDate,
+                        end: endRangeDate,
+                    },
+                ]
+            })
+            setEvents(currentEvents)
+        }
+    }, [calendarRanges])
 
-    const updateAvailability = (eventStart, eventEnd, id = null) => {
+    const updateEvents = (eventStart, eventEnd, id = null) => {
         let newEventId = `event-${eventStart}-${eventEnd}`
-        setAvailability(availability => {
+        setEvents(events => {
             // If event exists, delete it and create new with the current data
-            if (availability[id]) {
-                delete availability[id]
+            if (id) {
+                if (events.find(e => e.id === id)) {
+                    let index = events.findIndex(e => e.id === id)
+                    events.splice(index, 1)
+                }
             }
-            return {
-                ...availability,
-                [newEventId]: [
-                    new Date(eventStart).getTime() / 1000,
-                    new Date(eventEnd).getTime() / 1000,
-                ],
-            }
+            return [
+                ...events,
+                {
+                    id: newEventId,
+                    start: eventStart,
+                    end: eventEnd,
+                    title: 'Working hours',
+                },
+            ]
         })
     }
 
     const hanldeSelectClick = e => {
-        updateAvailability(e.startStr, e.endStr)
+        updateEvents(
+            new Date(e.startStr).toISOString(),
+            new Date(e.endStr).toISOString()
+        )
         let calendarApi = e.view.calendar
         calendarApi.unselect() // clear date selection
-        calendarApi.addEvent({
-            id: `event-${e.startStr}-${e.endStr}`,
-            title: 'Working hours',
-            start: e.startStr,
-            end: e.endStr,
-            allDay: e.allDay,
-        })
     }
 
     const handleDragEvent = e => {
-        updateAvailability(
-            e.event._instance.range.start.toISOString(),
-            e.event._instance.range.end.toISOString(),
+        // Time zone offset has to be extracted due to the fact that fullcalendar is working with local GMT time while blockchain stores GMT+0
+        // Time zone offset is in minutes, offset can be negative
+        updateEvents(
+            new Date(
+                e.event._instance.range.start.getTime() +
+                    e.event._instance.range.start.getTimezoneOffset() * 60000
+            ).toISOString(),
+            new Date(
+                e.event._instance.range.end.getTime() +
+                    e.event._instance.range.end.getTimezoneOffset() * 60000
+            ).toISOString(),
             e.oldEvent._def.publicId
         )
         let calendarApi = e.view.calendar
@@ -166,7 +199,9 @@ const Calendar = ({ open, onClose, ...props }) => {
                             <IconButton
                                 aria-label="close"
                                 className={closeButton}
-                                onClick={onClose}
+                                onClick={() => {
+                                    onClose()
+                                }}
                             >
                                 <CloseIcon />
                             </IconButton>
@@ -174,13 +209,13 @@ const Calendar = ({ open, onClose, ...props }) => {
                     </Grid>
                     <Grid item sm={12}>
                         <FullCalendar
+                            events={events}
                             plugins={[
                                 dayGridPlugin,
                                 timeGridPlugin,
                                 interactionPlugin,
                             ]}
                             initialView="timeGridWeek" //first view = week with hours
-                            timeZone="Europe/Paris"
                             headerToolbar={{
                                 start: 'prev',
                                 end: 'today next',
@@ -211,9 +246,28 @@ const Calendar = ({ open, onClose, ...props }) => {
                                 variant="contained"
                                 className={submitButton}
                                 onClick={() => {
-                                    console.log('Availability set:')
-                                    console.log(availability)
                                     onClose()
+
+                                    let calendarRanges = events.map(e => [
+                                        new Date(e.start).getTime() / 1000,
+                                        new Date(e.end).getTime() / 1000,
+                                    ])
+
+                                    calendarRanges.sort(
+                                        (r1, r2) => r1[0] - r2[0]
+                                    )
+
+                                    let calendarRangesStart = []
+                                    let calendarRangesEnd = []
+                                    calendarRanges.map(range => {
+                                        calendarRangesStart.push(range[0])
+                                        calendarRangesEnd.push(range[1])
+                                    })
+
+                                    onSubmit(
+                                        calendarRangesStart,
+                                        calendarRangesEnd
+                                    )
                                 }}
                             >
                                 Submit week availability

@@ -29,7 +29,7 @@ const useStyles = makeStyles(theme => ({
         transition: 'transform 0.2s',
         transform: 'translate(-50%, -50%)',
         '&:hover': {
-            transform: 'scale(1.3)',
+            transform: 'scale(1.1) translate(-50%, -50%)',
         },
     },
 }))

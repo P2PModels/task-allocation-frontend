@@ -6,14 +6,12 @@ import { getTxStatus, getTxAction } from '../helpers/transaction-helpers'
 import { getResourceFromPathname } from '../helpers/route-helpers'
 import { Actions, convertToString } from '../types/actions'
 import useUserLogicRR from '../hooks/useUserLogicRR'
-import useActions from '../hooks/useActionsRR'
+import useActions from '../hooks/useActionsRRCal'
 import AmaraApi from '../amara-api'
 
 import {
     Grid,
-    Typography,
     Box,
-    Fade,
     Snackbar,
     Slide,
     CircularProgress,
@@ -34,7 +32,7 @@ import Homepage from '../assets/Homepage.svg'
 import models from '../types/models'
 import Calendar from '../components/Calendar'
 
-const { AcceptTask, RejectTask } = Actions
+const { AcceptTask, RejectTask, SetUserCalendarRanges } = Actions
 const SNACKBAR_FIXED_TIME = 700
 
 const useStyles = makeStyles(theme => ({
@@ -57,6 +55,10 @@ const useStyles = makeStyles(theme => ({
     disabledModal: {
         opacity: 0.4,
     },
+    rejectButton: {
+        color: theme.palette.error.main,
+        textDecoration: 'underline',
+    },
 }))
 
 const MODAL_ACTIONS = {
@@ -69,6 +71,11 @@ const MODAL_ACTIONS = {
         title: 'Reject Assignment',
         message:
             'You need to create and confirm a transaction in order to reject this assignment.',
+    },
+    setCalendarRanges: {
+        title: 'Set availability schedule',
+        message:
+            'You need to create and confirm a transaction in order to set your schedule.',
     },
 }
 
@@ -83,6 +90,7 @@ const HomeRRCal = () => {
         toastMessage,
         iconLoadingState,
         disabledModal,
+        rejectButton,
     } = useStyles()
     const web3React = useWeb3React()
     const { account } = web3React
@@ -108,6 +116,7 @@ const HomeRRCal = () => {
     const [openTxSnackbar, setOpenTxSnackbar] = useState(false)
     const [txSnackbar, setTxSnackbar] = useState({})
     const [processingTx, setProcessingTx] = useState(false)
+    const [nTasksToDisplay, setNTasksToDisplay] = useState(0)
     const [showCalendar, setShowCalendar] = useState(false)
     const model = models.find(m => m.name == modelName)
 
@@ -115,7 +124,21 @@ const HomeRRCal = () => {
         setModel(modelNameParam)
     }, [])
 
-    // Wait half second before hiding loading snackbar. Only for aesthetic purposes
+    useEffect(() => {
+    }, [nTasksToDisplay])
+
+    // Set current number of tasks to display
+    useEffect(() => {
+        if (tasks) {
+            let n = tasks.length
+            tasks.map(t => {
+                if (t.contractData.endDate * 1000 < Date.now()) n--
+            })
+            setNTasksToDisplay(n)
+        }
+    }, [tasks])
+
+    // Wait before hiding loading snackbar. Only for aesthetic purposes
     useEffect(() => {
         if (!loadingHandlerExecutedRef.current && !loading) {
             let timerId = setTimeout(
@@ -147,6 +170,10 @@ const HomeRRCal = () => {
 
         setTxSnackbar(snackbar)
         setOpenTxSnackbar(true)
+        // If action is accept task, hide tasks while the graph is syncing
+        if (action === actions.AcceptTask) {
+            setNTasksToDisplay(0)
+        }
     }
 
     const actions = useActions(handleExecutedTransaction)
@@ -170,6 +197,35 @@ const HomeRRCal = () => {
         setProcessingTx(true)
         actions[actionStr](userId, task.contractData.id)
         setActivatingTxModal(true)
+    }
+
+    /**
+     * Handle that manages calendar ranges set
+     */
+    const handleSubmitCalendarRanges = (
+        calendarRangesStart,
+        calendarRangesEnd
+    ) => {
+        // If the user is not connected with metamask, a modal is displayed
+        // asking the user to check her metamask installation
+        if (!account) setOpenMessageModal(true)
+        else {
+            // If the user is connected to metamask, a modal is displayed
+            // to notify that a transaction is going to be created
+            const content = { ...MODAL_ACTIONS.setCalendarRanges }
+            content.createTransactionHandler = () => {
+                const actionStr = convertToString(SetUserCalendarRanges)
+                setProcessingTx(true)
+                actions[actionStr](
+                    userId,
+                    calendarRangesStart,
+                    calendarRangesEnd
+                )
+                setActivatingTxModal(true)
+            }
+            setModal(content)
+            setOpenTxModal(true)
+        }
     }
 
     /**
@@ -209,7 +265,6 @@ const HomeRRCal = () => {
     }
 
     const handleTranslateTask = task => {
-        console.log('Translating task...')
         AmaraApi.teams
             .updateSubtitleRequest(user.teams[0].name, task.job_id, userId)
             .then(
@@ -228,14 +283,17 @@ const HomeRRCal = () => {
         {
             label: 'Accept',
             color: theme.palette.success.main,
+            variant: 'contained',
             actionHandler: handleAcceptTask,
         },
     ]
     if (modelName == models[1].name || modelName == models[2].name)
-        availableTaskActionButtons.push({
+        availableTaskActionButtons.unshift({
             label: 'Reject',
             color: theme.palette.error.main,
+            variant: 'text',
             actionHandler: handleRejectTask,
+            className: rejectButton,
         })
 
     const disabledTaskActionButtons = availableTaskActionButtons.map(
@@ -251,6 +309,7 @@ const HomeRRCal = () => {
         {
             label: 'Translate',
             color: theme.palette.translateButton,
+            variant: 'contained',
             actionHandler: handleTranslateTask,
         },
     ]
@@ -316,17 +375,25 @@ const HomeRRCal = () => {
                                             title={
                                                 processingTx
                                                     ? 'Processing your request...'
-                                                    : tasks.length == 1
-                                                    ? 'This assignement is currently assigned to you'
-                                                    : 'These assignements are currently assigned to you'
+                                                    : nTasksToDisplay <= 0
+                                                    ? 'No tasks available'
+                                                    : nTasksToDisplay === 1
+                                                    ? 'This task is currently assigned to you'
+                                                    : 'These tasks are currently assigned to you'
                                             }
                                             description=""
-                                            emptyText="No tasks available"
                                             taskActionButtons={
                                                 processingTx
                                                     ? disabledTaskActionButtons
                                                     : availableTaskActionButtons
                                             }
+                                            onTaskTimeout={() => {
+                                                console.log("    Substract one to number of task from onTaskTimeout")
+                                                setNTasksToDisplay(_n => {
+                                                    let n = _n - 1
+                                                    return n
+                                                })
+                                            }}
                                         />
                                     </Box>
                                 </Grid>
@@ -337,6 +404,12 @@ const HomeRRCal = () => {
 
                 <Calendar
                     open={showCalendar}
+                    calendarRanges={
+                        user
+                            ? [user.calendarRangesStart, user.calendarRangesEnd]
+                            : null
+                    }
+                    onSubmit={handleSubmitCalendarRanges}
                     onClose={() => {
                         setShowCalendar(false)
                     }}

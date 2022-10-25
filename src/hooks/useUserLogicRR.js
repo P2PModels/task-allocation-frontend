@@ -9,6 +9,7 @@ import AmaraApi from '../amara-api'
 import { mergeTaskData } from '../helpers/data-transform-helpers'
 import { TaskStatuses } from '../types/taskStatuses'
 
+// Puts contract task data inside contractData field
 async function getTasks(tasks, user) {
     const { teams, apiKey } = user
 
@@ -42,21 +43,22 @@ function useUserLogicRR(userId) {
 
     // Fetch Amara user data
     useEffect(() => {
+        let isMounted = true
         async function buildUser(userId) {
             try {
                 const amaraUserRes = await AmaraApi.users.getOne(userId)
                 const amaraUser = { ...amaraUserRes.data }
-
                 const user = { ...contractUser, ...amaraUser }
-
-                setUser(user)
+                if (isMounted) setUser(user)
             } catch (err) {
                 console.log(err)
             }
         }
         buildUser(userId)
-        return () => {}
-    }, [userId])
+        return () => {
+            isMounted = false
+        }
+    }, [userId, contractUser])
 
     // Fetch team videos
     useEffect(() => {
