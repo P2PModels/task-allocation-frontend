@@ -111,6 +111,10 @@ const theme = createMuiTheme({
         info: {
             main: purple[500],
         },
+        success: {
+            main: green[300],
+            dark: green[500],
+        },
     },
     typography: {
         fontFamily: ['Roboto', 'Arial', 'serif'],

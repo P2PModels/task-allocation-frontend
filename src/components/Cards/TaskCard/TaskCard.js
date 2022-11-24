@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
 import { Box, Card, Grid, Chip, CardContent } from '@material-ui/core'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
@@ -13,7 +13,6 @@ import { useAppState } from '../../../contexts/AppState'
 const useStyles = makeStyles(theme => ({
     root: {
         minWidth: 280,
-        // padding: theme.spacing(2),
     },
     chip: {
         backgroundColor: ({ priorityColor }) => priorityColor,
@@ -24,8 +23,12 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
-const TaskCard = ({ task, video, actionButtons = [] }) => {
-    const [disabled, setDisabled] = useState(false)
+const TaskCard = ({
+    task,
+    video,
+    actionButtons = [],
+    onTaskTimeout = () => {},
+}) => {
     // TODO: Need to set a priority field on contract task struct
     const { endDate, reallocationTime } = task.contractData
     const priority = getPriority(reallocationTime)
@@ -41,6 +44,12 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
             actionButtons[0].label.toLowerCase() === 'translate'
         ) && task.contractData.endDate
 
+    let nowString = new Date(Date.now() + 1999).toLocaleTimeString()
+    let endTimeString = new Date(task.contractData.endDate * 1000 ).toLocaleTimeString()
+
+    // If timed out dont render, substract 1s to make sure,timer is not reliable
+    if(task.contractData.endDate * 1000 <= Date.now() + 1999) return null
+    
     return (
         <Card className={root} elevation={0}>
             <Box mb={0.5} pt={1}>
@@ -54,7 +63,10 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
                         <Grid item>
                             <Timer
                                 end={new Date(endDate * 1000)}
-                                onTimeOut={() => setDisabled(true)}
+                                onTimeOut={() => {
+                                    console.log(`        ${task.contractData.id} I'm substractiing!`)
+                                    onTaskTimeout()
+                                }}
                             />
                         </Grid>
                     )}
@@ -79,7 +91,14 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
                 >
                     {actionButtons.map(
                         (
-                            { label, color, actionHandler, disabled },
+                            {
+                                label,
+                                color,
+                                variant,
+                                actionHandler,
+                                disabled,
+                                ...buttonProps
+                            },
                             index,
                             arr
                         ) => (
@@ -87,9 +106,11 @@ const TaskCard = ({ task, video, actionButtons = [] }) => {
                                 key={label}
                                 label={label}
                                 color={color}
+                                variant={variant}
                                 fullWidth={arr.length === 1}
                                 disabled={disabled}
                                 onClick={() => actionHandler(task)}
+                                {...buttonProps}
                             />
                         )
                     )}
@@ -105,6 +126,7 @@ TaskCard.propTypes = {
         PropTypes.shape({
             label: PropTypes.string,
             color: PropTypes.string,
+            variant: PropTypes.string,
             actionHandler: PropTypes.func,
         })
     ),

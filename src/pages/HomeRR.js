@@ -9,16 +9,7 @@ import useUserLogicRR from '../hooks/useUserLogicRR'
 import useActions from '../hooks/useActionsRR'
 import AmaraApi from '../amara-api'
 
-import {
-    Grid,
-    Typography,
-    Box,
-    Fade,
-    Snackbar,
-    Slide,
-    CircularProgress,
-    Button,
-} from '@material-ui/core'
+import { Grid, Box, Snackbar, Slide, CircularProgress } from '@material-ui/core'
 import { makeStyles, useTheme } from '@material-ui/core/styles'
 import { Alert } from '@material-ui/lab'
 import CheckIcon from '@material-ui/icons/Check'
@@ -56,6 +47,10 @@ const useStyles = makeStyles(theme => ({
     disabledModal: {
         opacity: 0.4,
     },
+    rejectButton: {
+        color: theme.palette.error.main,
+        textDecoration: 'underline',
+    },
 }))
 
 const MODAL_ACTIONS = {
@@ -82,6 +77,7 @@ const HomeRR = () => {
         toastMessage,
         iconLoadingState,
         disabledModal,
+        rejectButton,
     } = useStyles()
     const web3React = useWeb3React()
     const { account } = web3React
@@ -107,13 +103,25 @@ const HomeRR = () => {
     const [openTxSnackbar, setOpenTxSnackbar] = useState(false)
     const [txSnackbar, setTxSnackbar] = useState({})
     const [processingTx, setProcessingTx] = useState(false)
+    const [nTasksToDisplay, setNTasksToDisplay] = useState(0)
     const model = models.find(m => m.name == modelName)
 
     useEffect(() => {
         setModel(modelNameParam)
     }, [])
 
-    // Wait half second before hiding loading snackbar. Only for aesthetic purposes
+    // Set current number of tasks to display
+    useEffect(() => {
+        if (tasks) {
+            let n = tasks.length
+            tasks.map(t => {
+                if (t.contractData.endDate * 1000 < Date.now()) n--
+            })
+            setNTasksToDisplay(n)
+        }
+    }, [tasks])
+
+    // Wait before hiding loading snackbar. Only for aesthetic purposes
     useEffect(() => {
         if (!loadingHandlerExecutedRef.current && !loading) {
             let timerId = setTimeout(
@@ -145,6 +153,10 @@ const HomeRR = () => {
 
         setTxSnackbar(snackbar)
         setOpenTxSnackbar(true)
+        // If action is accept task, hide tasks while the graph is syncing
+        if (action === actions.AcceptTask) {
+            setNTasksToDisplay(0)
+        }
     }
 
     const actions = useActions(handleExecutedTransaction)
@@ -207,7 +219,6 @@ const HomeRR = () => {
     }
 
     const handleTranslateTask = task => {
-        console.log('Translating task...')
         AmaraApi.teams
             .updateSubtitleRequest(user.teams[0].name, task.job_id, userId)
             .then(
@@ -226,14 +237,17 @@ const HomeRR = () => {
         {
             label: 'Accept',
             color: theme.palette.success.main,
+            variant: 'contained',
             actionHandler: handleAcceptTask,
         },
     ]
     if (modelName == models[1].name || modelName == models[2].name)
-        availableTaskActionButtons.push({
+        availableTaskActionButtons.unshift({
             label: 'Reject',
             color: theme.palette.error.main,
+            variant: 'text',
             actionHandler: handleRejectTask,
+            className: rejectButton,
         })
 
     const disabledTaskActionButtons = availableTaskActionButtons.map(
@@ -249,6 +263,7 @@ const HomeRR = () => {
         {
             label: 'Translate',
             color: theme.palette.translateButton,
+            variant: 'contained',
             actionHandler: handleTranslateTask,
         },
     ]
@@ -269,7 +284,6 @@ const HomeRR = () => {
                         title={model.displayName}
                         description={model.description}
                         img={Homepage}
-                        // cta={<Button>Botón</Button>}
                     />
                     {acceptedTask ? (
                         <Grid container className={taskSection}>
@@ -310,17 +324,24 @@ const HomeRR = () => {
                                             title={
                                                 processingTx
                                                     ? 'Processing your request...'
-                                                    : tasks.length == 1
-                                                    ? 'This assignement is currently assigned to you'
-                                                    : 'These assignements are currently assigned to you'
+                                                    : nTasksToDisplay <= 0
+                                                    ? 'No tasks available'
+                                                    : nTasksToDisplay === 1
+                                                    ? 'This task is currently assigned to you'
+                                                    : 'These tasks are currently assigned to you'
                                             }
                                             description=""
-                                            emptyText="No tasks available"
                                             taskActionButtons={
                                                 processingTx
                                                     ? disabledTaskActionButtons
                                                     : availableTaskActionButtons
                                             }
+                                            onTaskTimeout={() => {
+                                                setNTasksToDisplay(_n => {
+                                                    let n = _n - 1
+                                                    return n
+                                                })
+                                            }}
                                         />
                                     </Box>
                                 </Grid>

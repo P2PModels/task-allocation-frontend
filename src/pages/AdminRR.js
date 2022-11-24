@@ -353,21 +353,6 @@ const AdminRR = () => {
                         </ListItemIcon>
                         <ListItemText primary="Restart Contract" />
                     </ListItem>
-                    <ListItem
-                        className={classes.listItem}
-                        button
-                        key="ReallocateTasks"
-                        disabled={
-                            !modelContractInstance ||
-                            managerRunning ||
-                            restartPrototypeLoading
-                        }
-                    >
-                        <ListItemIcon onClick={() => {}}>
-                            <LowPriorityIcon />
-                        </ListItemIcon>
-                        <ListItemText primary="Reallocate Tasks" />
-                    </ListItem>
                 </List>
             </Drawer>
             <main className={classes.content}>

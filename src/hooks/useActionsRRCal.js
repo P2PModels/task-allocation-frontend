@@ -6,8 +6,8 @@ import { toBytes32 } from '../helpers/web3-helpers'
 import useTransaction from './useTransaction'
 
 const GAS_LIMIT = 450000 // Reallocation spends around 150 gas
-const GAS_PRICE = 50000000000 //15 Gwei
-const { AcceptTask, RejectTask } = Actions
+const GAS_PRICE = 75000000000 //15 Gwei
+const { AcceptTask, RejectTask, SetUserCalendarRanges } = Actions
 
 function useActions(onReportStatus) {
     const { account, library: web3 } = useWeb3React()
@@ -105,9 +105,46 @@ function useActions(onReportStatus) {
         [web3, account, onReportStatus]
     )
 
+    /**
+     * Function that is triggered when a user
+     * confirms a transaction to reject a task
+     */
+    const setUserCalendarRanges = useCallback(
+        (userId, calendarRangesStart, calendarRangesEnd) => {
+            const hexUserId = toBytes32(userId)
+
+            // console.log('[SetUserCalendarRanges] params:')
+            // console.log(hexUserId)
+            // console.log(calendarRangesStart)
+            // console.log(calendarRangesEnd)
+
+            const setCalendarRangesTxParams = {
+                from: account,
+                to: contractAddress,
+                data: modelContractInstance.methods['setUserCalendarRanges'](
+                    hexUserId,
+                    calendarRangesStart,
+                    calendarRangesEnd
+                ).encodeABI(),
+                gas: GAS_LIMIT,
+                gasPrice: GAS_PRICE,
+            }
+
+            try {
+                processTransaction(web3, setCalendarRangesTxParams, false)
+                setCurrentAction(SetUserCalendarRanges)
+            } catch (err) {
+                console.error('Could not create tx:', err)
+                onReportStatus('error', SetUserCalendarRanges)
+            }
+        },
+        [web3, account, onReportStatus]
+    )
+
     return {
         acceptTask,
         rejectTask,
+        setUserCalendarRanges,
     }
 }
 

@@ -9,7 +9,7 @@ import useManager from './useManager'
 
 const PUBLIC_KEY = process.env.REACT_APP_AMARA_PUBLIC_ADDRESS
 const GAS_LIMIT = 450000 // Reallocation spends around 150 gas
-const GAS_PRICE = 2000000000 //2 Gwei
+const GAS_PRICE = 8000000000 //1 Gwei
 const { RestartContract, RegisterUser, CreateTask } = Actions
 
 const MAXIMUM_RETRIES = 5
@@ -17,7 +17,7 @@ const MAXIMUM_RETRIES = 5
 const useAdminActions = log => {
     const account = PUBLIC_KEY
     const { library: web3 } = useWeb3React()
-    const { contractAddress, modelContractInstance } = useAppState()
+    const { contractAddress, modelContractInstance, modelName } = useAppState()
     const [processBulkTransactions, bulkTxsRecord] = useBulkTransactions()
     const {
         start,
@@ -32,7 +32,9 @@ const useAdminActions = log => {
     const stopManager = () => stop()
 
     const restartPrototype = useCallback(() => {
-        console.log('%cRestarting prototype...', 'color: aqua')
+        // console.log('%cRestarting prototype...', 'color: aqua')
+        // console.log(modelName)
+        // console.log(contractAddress)
 
         const restartContractTxParams = {
             from: account,
@@ -76,7 +78,7 @@ const useAdminActions = log => {
             ],
             true // Use private key
         )
-    }, [web3, modelContractInstance])
+    }, [web3, modelContractInstance, modelName])
 
     return {
         startManager,

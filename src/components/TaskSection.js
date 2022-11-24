@@ -39,8 +39,8 @@ const TaskSection = ({
     videoRegistry = new Map(),
     title,
     description = '',
-    emptyText,
     taskActionButtons = [],
+    onTaskTimeout = () => {},
 }) => {
     const classes = useStyles()
     const anchorRef = useRef(null)
@@ -67,56 +67,44 @@ const TaskSection = ({
 
     return (
         <Grid container direction="column">
-            {tasks && tasks.length ? (
-                <React.Fragment>
-                    <Grid item>
-                        <Box mb={1} ref={anchorRef}>
-                            <Typography variant="h3" className={classes.title}>
-                                {title}
-                            </Typography>
-                        </Box>
-                        <Box>
-                            <Typography
-                                variant="h5"
-                                className={classes.description}
-                            >
-                                {description}
-                            </Typography>
-                        </Box>
-                    </Grid>
-                    <Grid item>
-                        {model == models[0].name ? (
-                            <FCFSTasksGroup
-                                tasks={currentTasks}
-                                videoRegistry={videoRegistry}
-                                actionButtons={taskActionButtons}
-                                totalPages={totalPages}
-                                totalTasks={tasks.length}
-                                tasksPerPage={TASKS_PER_PAGE}
-                                onChangePage={handleChangePage}
-                            />
-                        ) : model == models[1].name ? (
-                            <RRTasksGroup
-                                tasks={currentTasks}
-                                videoRegistry={videoRegistry}
-                                actionButtons={taskActionButtons}
-                                totalPages={totalPages}
-                                totalTasks={tasks.length}
-                                tasksPerPage={TASKS_PER_PAGE}
-                                onChangePage={handleChangePage}
-                            />
-                        ) : (
-                            <>Hellos</>
-                        )}
-                    </Grid>
-                </React.Fragment>
-            ) : (
-                <Grid item>
+            <Grid item>
+                <Box mb={1} ref={anchorRef}>
                     <Typography variant="h3" className={classes.title}>
-                        {emptyText}
+                        {title}
                     </Typography>
+                </Box>
+                <Box>
+                    <Typography variant="h5" className={classes.description}>
+                        {description}
+                    </Typography>
+                </Box>
+            </Grid>
+            {tasks ? (
+                <Grid item>
+                    {model == models[0].name ? (
+                        <FCFSTasksGroup
+                            tasks={currentTasks}
+                            videoRegistry={videoRegistry}
+                            actionButtons={taskActionButtons}
+                            totalPages={totalPages}
+                            totalTasks={tasks.length}
+                            tasksPerPage={TASKS_PER_PAGE}
+                            onChangePage={handleChangePage}
+                        />
+                    ) : (
+                        <RRTasksGroup
+                            tasks={currentTasks}
+                            videoRegistry={videoRegistry}
+                            actionButtons={taskActionButtons}
+                            totalPages={totalPages}
+                            totalTasks={tasks.length}
+                            tasksPerPage={TASKS_PER_PAGE}
+                            onChangePage={handleChangePage}
+                            onTaskTimeout={onTaskTimeout}
+                        />
+                    )}
                 </Grid>
-            )}
+            ) : null}
         </Grid>
     )
 }

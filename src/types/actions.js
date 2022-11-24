@@ -4,6 +4,7 @@ export const Actions = {
     CreateTask: Symbol('CREATE_TASK_ACTION'),
     AcceptTask: Symbol('ACCEPT_TASK_ACTION'),
     RejectTask: Symbol('REJECT_TASK_ACTION'),
+    SetUserCalendarRanges: Symbol('SET_USER_CALENDAR_RANGES_ACTION'),
 }
 
 const symbolMapping = {
@@ -12,6 +13,7 @@ const symbolMapping = {
     CreateTask: Actions.CreateTask,
     Accept: Actions.AcceptTask,
     Reject: Actions.RejectTask,
+    SetCalendarRanges: Actions.SetUserCalendarRanges,
 }
 
 const stringMapping = {
@@ -20,6 +22,7 @@ const stringMapping = {
     [Actions.CreateTask]: 'createTask',
     [Actions.AcceptTask]: 'acceptTask',
     [Actions.RejectTask]: 'rejectTask',
+    [Actions.SetUserCalendarRanges]: 'setUserCalendarRanges',
 }
 
 export function convertFromString(str) {

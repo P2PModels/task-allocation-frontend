@@ -23,7 +23,6 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
     const scheduledJobs = useRef(new Map())
     const handledEvents = useRef(new Map())
 
-    // TODO
     function createJob(web3, txParams, taskId, timeout) {
         // console.log(
         //     `%c[createJob] Creating reallocation job for task ${taskId} in ${
@@ -35,10 +34,10 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
             taskId,
             timerId: setTimeout(async () => {
                 queueTransaction(web3, txParams, true)
-                console.log(
-                    `%c[createJob] Scheduled job for ${taskId} executed.`,
-                    'color: pink'
-                )
+                // console.log(
+                //     `%c[createJob] Scheduled job for ${taskId} executed.`,
+                //     'color: pink'
+                // )
             }, timeout),
             endDate: Date.now() + timeout,
             tx: {
@@ -53,30 +52,29 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
     }
 
     function userRegisteredHandler(userId) {
-        if (userId) {
-            console.log(`${USER_REGISTERED} event - User ${userId} created`)
-        } else {
-            console.log(`${USER_REGISTERED} event - No params received`)
-        }
+        // if (userId) {
+        //     console.log(`${USER_REGISTERED} event - User ${userId} created`)
+        // } else {
+        //     console.log(`${USER_REGISTERED} event - No params received`)
+        // }
     }
 
     function userDeletedHandler(userId) {
-        if (userId) {
-            console.log(`${USER_DELETED} event - User ${userId} deleted`)
-        } else {
-            console.log(`${USER_DELETED} event - No params received`)
-        }
+        // if (userId) {
+        //     console.log(`${USER_DELETED} event - User ${userId} deleted`)
+        // } else {
+        //     console.log(`${USER_DELETED} event - No params received`)
+        // }
     }
 
     function taskCreatedHandler(taskId) {
-        if (taskId) {
-            console.log(`${TASK_CREATED} event - Task ${taskId} created`)
-        } else {
-            console.log(`${TASK_CREATED} event - No params received`)
-        }
+        // if (taskId) {
+        //     console.log(`${TASK_CREATED} event - Task ${taskId} created`)
+        // } else {
+        //     console.log(`${TASK_CREATED} event - No params received`)
+        // }
     }
 
-    // TODO
     const taskAllocatedHandler = async function (taskId, userId) {
         if (taskId && userId) {
             // Get current task end date (s)
@@ -86,13 +84,13 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
 
             const endDateMillis = endDate * 1000
 
-            console.log(
-                `${TASK_ALLOCATED} event - Task ${taskId} has been assigned to ${userId} and will be reassigned on ${new Date(
-                    endDateMillis
-                ).toLocaleTimeString()}, current time is: ${new Date(
-                    Date.now()
-                ).toLocaleTimeString()}`
-            )
+            // console.log(
+            //     `${TASK_ALLOCATED} event - Task ${taskId} has been assigned to ${userId} and will be reassigned on ${new Date(
+            //         endDateMillis
+            //     ).toLocaleTimeString()}, current time is: ${new Date(
+            //         Date.now()
+            //     ).toLocaleTimeString()}`
+            // )
 
             log(
                 `${TASK_ALLOCATED} event - Task ${taskId} has been assigned to ${userId} and will be reassigned on ${new Date(
@@ -106,7 +104,6 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
             let scheduledJob
             // Check if there is already a scheduled job for the taskId
             if (scheduledJobs.current.has(taskId)) {
-                console.log('Job already exists, deleting to update')
                 scheduledJobs.current.delete(taskId)
             }
             const reallocateTaskTxParams = {
@@ -126,19 +123,17 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
             )
             scheduledJobs.current.set(scheduledJob.taskId, scheduledJob)
         } else {
-            console.log(
-                `${TASK_ALLOCATED} event - No params received. Task id: ${taskId}, User id: ${userId}`
-            )
-            console.log(taskId)
+            // console.log(
+            //     `${TASK_ALLOCATED} event - No params received. Task id: ${taskId}, User id: ${userId}`
+            // )
         }
     }
 
-    // TODO
     function taskAcceptedHandler(userId, taskId) {
         if (taskId && userId) {
-            console.log(
-                `${TASK_ACCEPTED} event - Task ${taskId} accepted by user ${userId}`
-            )
+            // console.log(
+            //     `${TASK_ACCEPTED} event - Task ${taskId} accepted by user ${userId}`
+            // )
             log(
                 `${TASK_ACCEPTED} event - Task ${taskId} accepted by user ${userId}`,
                 'info'
@@ -150,16 +145,15 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
                 scheduledJobs.current.delete(taskId)
             }
         } else {
-            console.log(`${TASK_ACCEPTED} event - No params received`)
+            // console.log(`${TASK_ACCEPTED} event - No params received`)
         }
     }
 
-    // TODO
     function taskRejectedHandler(userId, taskId) {
         if (taskId && userId) {
-            console.log(
-                `${TASK_REJECTED} event - Task ${taskId} rejected by ${userId}`
-            )
+            // console.log(
+            //     `${TASK_REJECTED} event - Task ${taskId} rejected by ${userId}`
+            // )
             if (scheduledJobs.current.has(taskId)) {
                 // Whenever a rejected task event is received the cronjob is stopped
                 clearTimeout(scheduledJobs.current.get(taskId).timerId)
@@ -180,37 +174,37 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
             }
 
             // Reallocate task now
-            console.log(
-                `%c[manageTasks] Reallocating task ${taskId}`,
-                'color: lightgreen'
-            )
+            // console.log(
+            //     `%c[manageTasks] Reallocating task ${taskId}`,
+            //     'color: lightgreen'
+            // )
             queueTransaction(web3, reallocateTaskTxParams, true)
         } else {
-            console.log(`${TASK_REJECTED} event - No params received`)
+            // console.log(`${TASK_REJECTED} event - No params received`)
         }
     }
 
     function taskDeletedHandler({ taskId }) {
         if (taskId) {
-            console.log(`${TASK_DELETED} event - Task ${taskId} deleted`)
+            // console.log(`${TASK_DELETED} event - Task ${taskId} deleted`)
             if (scheduledJobs.current.has(taskId)) {
                 // Whenever a deleted task event is received the corresponding cronjob
                 // is stopped
                 scheduledJobs.current.delete(taskId)
             }
         } else {
-            console.log(`${TASK_DELETED} event - No params received`)
+            // console.log(`${TASK_DELETED} event - No params received`)
         }
     }
 
     function rejecterDeletedHandler(userId, taskId) {
-        console.log(
-            `${REJECTER_DELETED} event - Task ${taskId} rejecter ${userId} deleted`
-        )
+        // console.log(
+        //     `${REJECTER_DELETED} event - Task ${taskId} rejecter ${userId} deleted`
+        // )
     }
 
     async function setUpEventListeners() {
-        console.log('Set up event listeners!')
+        // console.log('Set up event listeners!')
 
         modelContractInstance.events[USER_REGISTERED]({}, (error, event) => {
             if (!handledEvents.current.get(event.id)) {
@@ -277,7 +271,7 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
             }
         })
 
-        console.log('Events listeners set up')
+        // console.log('Events listeners set up')
 
         // console.log(modelContractInstance)
     }
@@ -293,8 +287,8 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
                 t.status === convertToString(TaskStatuses.Rejected) ||
                 t.status === convertToString(TaskStatuses.Available)
         )
-        console.log('%c[manageTasks] Tasks to manage:', 'color: lightgreen')
-        console.log(filteredTasks)
+        // console.log('%c[manageTasks] Tasks to manage:', 'color: lightgreen')
+        // console.log(filteredTasks)
 
         if (filteredTasks.length)
             // Create jobs or reallocate for each one
@@ -302,12 +296,12 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
                 const now = new Date()
                 const timestamp = new Date(task.endDate * 1000)
 
-                console.log(
-                    `%c[manageTasks] Managing task ${
-                        task.id
-                    }, endDate: ${timestamp.toLocaleTimeString()}`,
-                    'color: lightgreen'
-                )
+                // console.log(
+                //     `%c[manageTasks] Managing task ${
+                //         task.id
+                //     }, endDate: ${timestamp.toLocaleTimeString()}`,
+                //     'color: lightgreen'
+                // )
 
                 // Prepare tx params
                 const reallocateTaskTxParams = {
@@ -333,32 +327,31 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
                     scheduledJobs.current.set(scheduledJob.taskId, scheduledJob)
                 } else {
                     // Reallocate task now
-                    console.log(
-                        `%c[manageTasks] Reallocating task ${task.id}`,
-                        'color: lightgreen'
-                    )
+                    // console.log(
+                    //     `%c[manageTasks] Reallocating task ${task.id}`,
+                    //     'color: lightgreen'
+                    // )
                     queueTransaction(web3, reallocateTaskTxParams, true)
                 }
             })
     }
 
     const start = async tasks => {
-        console.log('Starting manager...')
+        // console.log('Starting manager...')
         setRunning(true)
 
-        console.log('Executing events listener script...')
+        // console.log('Executing events listener script...')
         setUpEventListeners()
 
-        console.log('Managing tasks...')
+        // console.log('Managing tasks...')
         await manageTasks(tasks)
 
         // console.log('[useManager] modelContractInstnce after manager start:')
         // console.log(modelContractInstance)
     }
 
-    // TODO
     const stop = () => {
-        console.log('Stopping manager...')
+        // console.log('Stopping manager...')
         // Update state
         setRunning(false)
 
@@ -378,7 +371,7 @@ const useManager = (web3, account, GAS_LIMIT, GAS_PRICE, log) => {
         // Disconnect from contract events
         // modelContractInstance.clearSubscriptions()
         web3.eth.clearSubscriptions()
-        console.log('Stopped')
+        // console.log('Stopped')
     }
 
     return {

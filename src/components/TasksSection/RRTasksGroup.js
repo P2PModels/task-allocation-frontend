@@ -1,17 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Grid, Box } from '@material-ui/core'
 import { Pagination } from '@material-ui/lab'
 
 import TaskCard from '../Cards/TaskCard/TaskCard'
 
-// TODO: https://blog.logrocket.com/the-material-ui-grid-system/
 const RRTasksGroup = ({
     tasks,
     videoRegistry,
     totalPages = 1,
     actionButtons,
     onChangePage,
+    onTaskTimeout,
 }) => {
     return (
         <Grid container direction="column" justify="center" alignItems="center">
@@ -29,6 +29,7 @@ const RRTasksGroup = ({
                                 task={t}
                                 video={videoRegistry.get(t.video)}
                                 actionButtons={actionButtons}
+                                onTaskTimeout={onTaskTimeout}
                             />
                         </Grid>
                     ))}

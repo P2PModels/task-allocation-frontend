@@ -87,7 +87,7 @@ const HomeFCFS = () => {
     const {
         user,
         tasks,
-        allocatedTask,
+        acceptedTask,
         videosRegistry,
         loading,
     } = useUserLogicFCFS(userId)
@@ -199,6 +199,7 @@ const HomeFCFS = () => {
         {
             label: 'Accept',
             color: theme.palette.success.main,
+            variant: 'contained',
             actionHandler: handleAcceptTask,
         },
     ]
@@ -216,6 +217,7 @@ const HomeFCFS = () => {
         {
             label: 'Translate',
             color: theme.palette.translateButton,
+            variant: 'contained',
             actionHandler: handleTranslateTask,
         },
     ]
@@ -239,12 +241,12 @@ const HomeFCFS = () => {
                         img={Homepage}
                         // cta={<Button>Botón</Button>}
                     />
-                    {allocatedTask ? (
+                    {acceptedTask ? (
                         <Grid container className={taskSection}>
                             <Grid item>
                                 <Box mt={!tasks ? 0 : 2} width="100">
                                     <TaskSection
-                                        tasks={[allocatedTask]}
+                                        tasks={[acceptedTask]}
                                         videoRegistry={
                                             videosRegistry === []
                                                 ? null
@@ -252,7 +254,6 @@ const HomeFCFS = () => {
                                         }
                                         title="You have this task selected"
                                         description=""
-                                        emptyText="No tasks available"
                                         taskActionButtons={
                                             assignedTaskActionButtons
                                         }
@@ -277,12 +278,13 @@ const HomeFCFS = () => {
                                             title={
                                                 processingTx
                                                     ? 'Processing your request...'
-                                                    : tasks.length == 1
-                                                    ? 'This assignement is currently free'
-                                                    : 'These assignements are currently free'
+                                                    : tasks.length <= 0
+                                                    ? 'No tasks available'
+                                                    : tasks.length === 1
+                                                    ? 'This task is currently assigned to you'
+                                                    : 'These tasks are currently assigned to you'
                                             }
                                             description=""
-                                            emptyText="No tasks available"
                                             taskActionButtons={
                                                 processingTx
                                                     ? disabledTaskActionButtons

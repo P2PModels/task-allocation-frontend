@@ -6,17 +6,19 @@ const useAnimationFrame = (interval = 1000, callback) => {
   const requestRef = useRef()
   const previousTimeRef = useRef()
   const accumulatedTime = useRef()
+  const stopSignalRef = useRef(false)
 
   const animate = useCallback(
     time => {
+      if(stopSignalRef.current) return
       if (previousTimeRef.current !== undefined) {
         const deltaTime = time - previousTimeRef.current
 
         accumulatedTime.current += deltaTime
         if (accumulatedTime.current > interval) {
-          // console.log('[useAnimationFrame] calling callback...')
           callback(accumulatedTime.current)
           accumulatedTime.current = 0
+          
         }
       } else accumulatedTime.current = 0
       previousTimeRef.current = time
@@ -27,8 +29,13 @@ const useAnimationFrame = (interval = 1000, callback) => {
 
   useEffect(() => {
     requestRef.current = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(requestRef.current)
   }, [animate]) // Make sure the effect runs only once
+
+  const cancelAnimation = () => {
+    cancelAnimationFrame(requestRef.current)
+    stopSignalRef.current = true
+  }
+  return cancelAnimation
 }
 
 export default useAnimationFrame
