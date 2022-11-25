@@ -6,7 +6,7 @@ import { toBytes32 } from '../helpers/web3-helpers'
 import useTransaction from './useTransaction'
 
 const GAS_LIMIT = 450000 // Reallocation spends around 150 gas
-const GAS_PRICE = 50000000000 //15 Gwei
+const GAS_PRICE = 2000000000 //2 Gwei
 const { AcceptTask, RejectTask } = Actions
 
 function useActions(onReportStatus) {

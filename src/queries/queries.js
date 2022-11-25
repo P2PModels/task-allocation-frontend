@@ -203,28 +203,28 @@ export const RR_USER_TASKS_ACCEPTED = gql`
     }
 `
 
-// Legacy
-export const USER = gql`
-    query User($id: String!) {
-        user(id: $id) {
-            id
-            benefits
-            available
-        }
-    }
-`
-// Legacy
-export const USER_REJECTED_TASKS = gql`
-    query User($id: String!) {
-        user(id: $id) {
-            rejectedTasks {
-                task {
-                    id
-                    endDate
-                    reallocationTime
-                    status
-                }
-            }
-        }
-    }
-`
+// // Legacy
+// export const USER = gql`
+//     query User($id: String!) {
+//         user(id: $id) {
+//             id
+//             benefits
+//             available
+//         }
+//     }
+// `
+// // Legacy
+// export const USER_REJECTED_TASKS = gql`
+//     query User($id: String!) {
+//         user(id: $id) {
+//             rejectedTasks {
+//                 task {
+//                     id
+//                     endDate
+//                     reallocationTime
+//                     status
+//                 }
+//             }
+//         }
+//     }
+// `

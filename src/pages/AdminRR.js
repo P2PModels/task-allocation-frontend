@@ -121,6 +121,7 @@ const useStyles = makeStyles(theme => ({
     },
 }))
 
+// RR and RR+cal share this component
 const AdminRR = () => {
     const classes = useStyles()
     const theme = useTheme()

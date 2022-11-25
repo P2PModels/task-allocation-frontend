@@ -6,7 +6,7 @@ import { toBytes32 } from '../helpers/web3-helpers'
 import useTransaction from './useTransaction'
 
 // const GAS_LIMIT = 450000
-const GAS_PRICE = 2000000000
+const GAS_PRICE = 2000000000 // 2Gwei
 const { AcceptTask } = Actions
 
 function useActions(onReportStatus) {
